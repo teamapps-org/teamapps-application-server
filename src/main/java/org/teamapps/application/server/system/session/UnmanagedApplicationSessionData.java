@@ -1,0 +1,160 @@
+package org.teamapps.application.server.system.session;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.teamapps.application.api.application.ApplicationInstanceData;
+import org.teamapps.application.api.desktop.ApplicationDesktop;
+import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
+import org.teamapps.application.api.organization.OrgField;
+import org.teamapps.application.api.organization.OrgUnit;
+import org.teamapps.application.api.privilege.*;
+import org.teamapps.application.api.user.SessionUser;
+import org.teamapps.model.controlcenter.ManagedApplication;
+import org.teamapps.application.server.system.bootstrap.LoadedApplication;
+import org.teamapps.icons.Icon;
+import org.teamapps.reporting.convert.DocumentConverter;
+import org.teamapps.model.controlcenter.Application;
+import org.teamapps.model.controlcenter.ApplicationActivity;
+import org.teamapps.ux.application.ResponsiveApplication;
+import org.teamapps.ux.application.perspective.Perspective;
+import org.teamapps.ux.component.progress.MultiProgressDisplay;
+
+import java.util.List;
+import java.util.function.Supplier;
+
+public class UnmanagedApplicationSessionData implements ApplicationInstanceData {
+
+	private final UserSessionData userSessionData;
+	private final ManagedApplication managedApplication;
+	private final Application application;
+	private final LoadedApplication mainApplication;
+	private final ResponsiveApplication responsiveApplication;
+	private final ApplicationPrivilegeProvider privilegeProvider;
+	private final ApplicationLocalizationProvider localizationProvider;
+	private final Supplier<DocumentConverter> documentConverterSupplier;
+
+	public UnmanagedApplicationSessionData(UserSessionData userSessionData, ManagedApplication managedApplication, LoadedApplication mainApplication, ResponsiveApplication responsiveApplication, ApplicationPrivilegeProvider privilegeProvider, ApplicationLocalizationProvider localizationProvider, Supplier<DocumentConverter> documentConverterSupplier) {
+		this.userSessionData = userSessionData;
+		this.managedApplication = managedApplication;
+		this.application = managedApplication.getMainApplication();
+		this.mainApplication = mainApplication;
+		this.responsiveApplication = responsiveApplication;
+		this.privilegeProvider = privilegeProvider;
+		this.localizationProvider = localizationProvider;
+		this.documentConverterSupplier = documentConverterSupplier;
+	}
+
+	@Override
+	public SessionUser getUser() {
+		return userSessionData.getSessionUser();
+	}
+
+	@Override
+	public OrgField getOrganizationField() {
+		return null;
+	}
+
+	@Override
+	public int getManagedApplicationId() {
+		return managedApplication.getId();
+	}
+
+	@Override
+	public DocumentConverter getDocumentConverter() {
+		if (documentConverterSupplier == null) {
+			return null;
+		} else {
+			return documentConverterSupplier.get();
+		}
+	}
+
+	@Override
+	public MultiProgressDisplay getMultiProgressDisplay() {
+		return responsiveApplication.getMultiProgressDisplay();
+	}
+
+	@Override
+	public void showPerspective(Perspective perspective) {
+		responsiveApplication.showPerspective(perspective);
+	}
+
+	@Override
+	public ApplicationDesktop createApplicationDesktop(Icon icon, String title, boolean select, boolean closable) {
+		//todo ...
+		return null;
+	}
+
+	@Override
+	public void writeActivityLog(String title, String data) {
+		ApplicationActivity.create()
+				.setApplication(application)
+				.setError(true)
+				.setActivity(title)
+				.setDetails(data)
+				.save();
+	}
+
+	@Override
+	public void writeExceptionLog(String title, Throwable throwable) {
+		ApplicationActivity.create()
+				.setApplication(application)
+				.setError(true)
+				.setActivity(title)
+				.setDetails(ExceptionUtils.getStackTrace(throwable))
+				.save();
+	}
+
+	@Override
+	public String getLocalized(String s, Object... objects) {
+		return localizationProvider.getLocalized(s, objects);
+	}
+
+	@Override
+	public boolean isAllowed(SimplePrivilege simplePrivilege) {
+		return privilegeProvider.isAllowed(simplePrivilege);
+	}
+
+	@Override
+	public boolean isAllowed(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege, OrgUnit orgUnit) {
+		return privilegeProvider.isAllowed(simpleOrganizationalPrivilege, orgUnit);
+	}
+
+	@Override
+	public boolean isAllowed(SimpleCustomObjectPrivilege simpleCustomObjectPrivilege, PrivilegeObject privilegeObject) {
+		return privilegeProvider.isAllowed(simpleCustomObjectPrivilege, privilegeObject);
+	}
+
+	@Override
+	public boolean isAllowed(StandardPrivilegeGroup standardPrivilegeGroup, Privilege privilege) {
+		return privilegeProvider.isAllowed(standardPrivilegeGroup, privilege);
+	}
+
+	@Override
+	public boolean isAllowed(OrganizationalPrivilegeGroup organizationalPrivilegeGroup, Privilege privilege, OrgUnit orgUnit) {
+		return privilegeProvider.isAllowed(organizationalPrivilegeGroup, privilege, orgUnit);
+	}
+
+	@Override
+	public boolean isAllowed(CustomObjectPrivilegeGroup customObjectPrivilegeGroup, Privilege privilege, PrivilegeObject privilegeObject) {
+		return privilegeProvider.isAllowed(customObjectPrivilegeGroup, privilege, privilegeObject);
+	}
+
+	@Override
+	public List<OrgUnit> getAllowedUnits(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege) {
+		return privilegeProvider.getAllowedUnits(simpleOrganizationalPrivilege);
+	}
+
+	@Override
+	public List<OrgUnit> getAllowedUnits(OrganizationalPrivilegeGroup organizationalPrivilegeGroup, Privilege privilege) {
+		return privilegeProvider.getAllowedUnits(organizationalPrivilegeGroup, privilege);
+	}
+
+	@Override
+	public List<PrivilegeObject> getAllowedPrivilegeObjects(SimpleCustomObjectPrivilege simpleCustomObjectPrivilege) {
+		return privilegeProvider.getAllowedPrivilegeObjects(simpleCustomObjectPrivilege);
+	}
+
+	@Override
+	public List<PrivilegeObject> getAllowedPrivilegeObjects(CustomObjectPrivilegeGroup customObjectPrivilegeGroup, Privilege privilege) {
+		return privilegeProvider.getAllowedPrivilegeObjects(customObjectPrivilegeGroup, privilege);
+	}
+}
