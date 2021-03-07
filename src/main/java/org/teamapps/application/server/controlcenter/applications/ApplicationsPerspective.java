@@ -11,6 +11,7 @@ import org.teamapps.application.api.privilege.Privilege;
 import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
+import org.teamapps.application.server.system.application.PerspectiveMenuPanel;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
@@ -54,20 +55,28 @@ import java.util.stream.Collectors;
 
 public class ApplicationsPerspective extends AbstractManagedApplicationPerspective {
 
-	private PerspectiveSessionData perspectiveSessionData;
-	private UserSessionData userSessionData;
-	private TwoWayBindableValue<Application> selectedApplication = TwoWayBindableValue.create();
+	private final PerspectiveSessionData perspectiveSessionData;
+	private final UserSessionData userSessionData;
+	private final TwoWayBindableValue<Application> selectedApplication = TwoWayBindableValue.create();
 
 	public ApplicationsPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
 		super(applicationInstanceData, perspectiveInfoBadgeValue);
+		perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
+		userSessionData = perspectiveSessionData.getManagedApplicationSessionData().getUserSessionData();
 		createUI();
+		createMenu();
+	}
+
+	private void createMenu() {
+		setPerspectiveMenuPanel(PerspectiveMenuPanel.createMenuPanel(getApplicationInstanceData(),
+				new ApplicationsPerspectiveBuilder(),
+				new ApplicationUpdatesPerspectiveBuilder(),
+				new ApplicationProvisioningPerspectiveBuilder()
+		));
 	}
 
 
-
 	public void createUI() {
-		perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
-		userSessionData = perspectiveSessionData.getManagedApplicationSessionData().getUserSessionData();
 		View applicationsView = View.createView(StandardLayout.CENTER, ApplicationIcons.BOX_SOFTWARE, getLocalized(Dictionary.APPLICATIONS), null);
 		View applicationVersionsView = View.createView(StandardLayout.CENTER_BOTTOM, ApplicationIcons.BOX_SOFTWARE, getLocalized("applications.versions"), null);
 		View applicationDetailsView = View.createView(StandardLayout.RIGHT, ApplicationIcons.BOX_SOFTWARE, getLocalized("applications.application"), null);
@@ -75,7 +84,6 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 
 		EntityModelBuilder<Application> applicationModelBuilder = new EntityModelBuilder<>(Application::filter, getApplicationInstanceData());
 		Table<Application> applicationsTable = applicationModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES, PropertyProviders.createApplicationPropertyProvider(userSessionData), 60);
-		applicationsTable.setSelectionColor(Color.MATERIAL_RED_700);
 		applicationsTable.setStripedRows(false);
 		applicationsView.setComponent(applicationsTable);
 		applicationModelBuilder.onDataChanged.fire();
@@ -276,7 +284,7 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 			dataModelButton.setVisible(false);
 			if (loadedApplication != null) {
 				ApplicationBuilder applicationBuilder = loadedApplication.getApplicationBuilder();
-				applicationRolesButton.setVisible(applicationBuilder.getApplicationRoles() !=null && !applicationBuilder.getApplicationRoles().isEmpty());
+				applicationRolesButton.setVisible(applicationBuilder.getApplicationRoles() != null && !applicationBuilder.getApplicationRoles().isEmpty());
 				dataModelButton.setVisible(applicationBuilder.getDatabaseModel() != null);
 			}
 		});

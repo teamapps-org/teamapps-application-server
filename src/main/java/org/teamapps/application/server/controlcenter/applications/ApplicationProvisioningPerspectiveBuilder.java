@@ -7,10 +7,10 @@ import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.databinding.MutableValue;
 
-public class ApplicationUpdatesPerspectiveBuilder extends AbstractPerspectiveBuilder {
+public class ApplicationProvisioningPerspectiveBuilder extends AbstractPerspectiveBuilder {
 
-	public ApplicationUpdatesPerspectiveBuilder() {
-		super("applicationUpdates", ApplicationIcons.BOX_SOFTWARE, "applicationUpdates.title", "applicationUpdates.desc");
+	public ApplicationProvisioningPerspectiveBuilder() {
+		super("applicationProvisioning", ApplicationIcons.INSTALL, "applicationProvisioning.title", "applicationProvisioning.desc");
 	}
 
 	@Override
@@ -20,6 +20,6 @@ public class ApplicationUpdatesPerspectiveBuilder extends AbstractPerspectiveBui
 
 	@Override
 	public ApplicationPerspective build(ApplicationInstanceData applicationInstanceData, MutableValue<String> mutableValue) {
-		return new ApplicationUpdatesPerspective(applicationInstanceData, mutableValue);
+		return new ApplicationProvisioningPerspective(applicationInstanceData, mutableValue);
 	}
 }
