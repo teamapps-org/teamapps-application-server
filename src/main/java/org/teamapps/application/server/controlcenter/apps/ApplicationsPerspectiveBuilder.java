@@ -11,7 +11,7 @@ import org.teamapps.icons.Icon;
 public class ApplicationsPerspectiveBuilder extends AbstractPerspectiveBuilder {
 
 	public ApplicationsPerspectiveBuilder() {
-		super("applications", ApplicationIcons.WINDOW, "applications.title", "applications.desc");
+		super("applications", ApplicationIcons.BOX_SOFTWARE, "applications.title", "applications.desc");
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package org.teamapps.application.server.controlcenter;
 
+import org.apache.cxf.service.model.SchemaInfo;
 import org.teamapps.application.api.application.ApplicationPerspectiveBuilder;
 import org.teamapps.application.api.application.PerspectiveBuilder;
 import org.teamapps.application.api.config.ApplicationConfig;
@@ -13,6 +14,7 @@ import org.teamapps.application.server.controlcenter.apps.ApplicationUpdatesPers
 import org.teamapps.application.server.controlcenter.apps.ApplicationsPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.localization.LocalizationPerspectiveBuilder;
 import org.teamapps.icons.Icon;
+import org.teamapps.model.ControlCenterSchema;
 import org.teamapps.universaldb.schema.SchemaInfoProvider;
 
 import java.util.Arrays;
@@ -32,12 +34,12 @@ public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 
 	@Override
 	public ApplicationVersion getApplicationVersion() {
-		return ApplicationVersion.create(0, 3);
+		return ApplicationVersion.create(0, 8);
 	}
 
 	@Override
 	public Icon getApplicationIcon() {
-		return ApplicationIcons.CONTROL_PANEL;
+		return ApplicationIcons.WINDOW_KEY;
 	}
 
 	@Override
@@ -72,8 +74,8 @@ public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 
 	@Override
 	public SchemaInfoProvider getDatabaseModel() {
-		//return new SchemaInfo();
-		return null;
+		return new ControlCenterSchema();
+		//return null;
 	}
 
 	@Override

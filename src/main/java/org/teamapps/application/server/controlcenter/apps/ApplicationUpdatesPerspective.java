@@ -8,10 +8,11 @@ public class ApplicationUpdatesPerspective extends AbstractManagedApplicationPer
 
 	public ApplicationUpdatesPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
 		super(applicationInstanceData, perspectiveInfoBadgeValue);
+		createUi();
 	}
 
-	@Override
-	public void createPerspectiveUI() {
+	private void createUi() {
 
 	}
+
 }

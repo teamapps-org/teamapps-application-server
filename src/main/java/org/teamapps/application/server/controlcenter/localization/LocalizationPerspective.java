@@ -10,8 +10,4 @@ public class LocalizationPerspective extends AbstractManagedApplicationPerspecti
 		super(applicationInstanceData, perspectiveInfoBadgeValue);
 	}
 
-	@Override
-	public void createPerspectiveUI() {
-
-	}
 }
