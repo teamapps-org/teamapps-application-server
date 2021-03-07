@@ -5,7 +5,6 @@ import static org.teamapps.universaldb.schema.TableOption.*;
 public class Model implements SchemaInfoProvider {
 
 
-
 	@Override
 	public Schema getSchema() {
 		Schema schema = Schema.create("org.teamapps.model");
@@ -54,7 +53,6 @@ public class Model implements SchemaInfoProvider {
 		Table appointmentSeries = db.addTable("appointmentSeries", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 
 
-
 		systemSettings
 				.addText("allowedBaseLanguages")
 		;
@@ -68,6 +66,7 @@ public class Model implements SchemaInfoProvider {
 				.addReference("privilegeGroups", applicationPrivilegeGroup, true, "application")
 				.addReference("versions", applicationVersion, true, "application")
 				.addReference("installedVersion", applicationVersion, false)
+				.addReference("installedAsMainApplication", managedApplication, true, "mainApplication")
 		;
 
 		applicationPerspective
@@ -127,7 +126,7 @@ public class Model implements SchemaInfoProvider {
 		;
 
 		managedApplication
-				.addReference("mainApplication", application, false)
+				.addReference("mainApplication", application, false, "installedAsMainApplication")
 				.addReference("organizationField", organizationField, false)
 				.addText("icon")
 				.addText("titleKey")
