@@ -62,7 +62,7 @@ public class Model implements SchemaInfoProvider {
 				.addText("titleKey")
 				.addText("descriptionKey")
 				.addBoolean("unmanagedApplication")
-				.addReference("perspectives", applicationPerspective, true, "application")
+				.addReference("perspectives", applicationPerspective, true, "application", true)
 				.addReference("privilegeGroups", applicationPrivilegeGroup, true, "application")
 				.addReference("versions", applicationVersion, true, "application")
 				.addReference("installedVersion", applicationVersion, false)
@@ -75,7 +75,7 @@ public class Model implements SchemaInfoProvider {
 				.addText("icon")
 				.addText("titleKey")
 				.addText("descriptionKey")
-				.addReference("managedPerspectives", managedApplicationPerspective, true, "applicationPerspective")
+				.addReference("managedPerspectives", managedApplicationPerspective, true, "applicationPerspective", true)
 		;
 
 		applicationPrivilegeGroup
@@ -132,7 +132,7 @@ public class Model implements SchemaInfoProvider {
 				.addText("titleKey")
 				.addText("descriptionKey")
 				.addBoolean("singleApplication")
-				.addReference("perspectives", managedApplicationPerspective, true, "managedApplication")
+				.addReference("perspectives", managedApplicationPerspective, true, "managedApplication", true)
 				.addInteger("listingPosition")
 				.addReference("applicationGroup", managedApplicationGroup, false, "applications")
 				.addBoolean("hidden")

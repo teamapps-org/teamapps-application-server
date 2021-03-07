@@ -1,4 +1,4 @@
-package org.teamapps.application.server.controlcenter.apps;
+package org.teamapps.application.server.controlcenter.applications;
 
 import org.teamapps.application.api.application.ApplicationBuilder;
 import org.teamapps.application.api.application.ApplicationInstanceData;
@@ -40,7 +40,6 @@ import org.teamapps.ux.component.format.Spacing;
 import org.teamapps.ux.component.infiniteitemview.InfiniteItemView2;
 import org.teamapps.ux.component.table.Table;
 import org.teamapps.ux.component.template.BaseTemplate;
-import org.teamapps.ux.component.toolbar.Toolbar;
 import org.teamapps.ux.component.toolbar.ToolbarButton;
 import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
 import org.teamapps.ux.component.window.Window;

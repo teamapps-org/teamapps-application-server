@@ -1,18 +1,16 @@
-package org.teamapps.application.server.controlcenter.localization;
+package org.teamapps.application.server.controlcenter.users;
 
 import org.teamapps.application.api.application.AbstractPerspectiveBuilder;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.application.ApplicationPerspective;
 import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.api.theme.ApplicationIcons;
-import org.teamapps.application.server.controlcenter.apps.ApplicationUpdatesPerspective;
 import org.teamapps.databinding.MutableValue;
-import org.teamapps.icons.Icon;
 
-public class LocalizationPerspectiveBuilder extends AbstractPerspectiveBuilder {
+public class UsersPerspectiveBuilder extends AbstractPerspectiveBuilder {
 
-	public LocalizationPerspectiveBuilder() {
-		super("localizationPerspective", ApplicationIcons.SPEECH_BALLOON, "applications.title", "applications.desc");
+	public UsersPerspectiveBuilder() {
+		super("usersPerspective", ApplicationIcons.USERS_CROWD, "users.title", "users.desc");
 	}
 
 	@Override
@@ -22,6 +20,7 @@ public class LocalizationPerspectiveBuilder extends AbstractPerspectiveBuilder {
 
 	@Override
 	public ApplicationPerspective build(ApplicationInstanceData applicationInstanceData, MutableValue<String> mutableValue) {
-		return new LocalizationPerspective(applicationInstanceData, mutableValue);
+		return new UsersPerspective(applicationInstanceData, mutableValue);
 	}
 }
+

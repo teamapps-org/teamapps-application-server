@@ -1,4 +1,4 @@
-package org.teamapps.application.server.controlcenter.apps;
+package org.teamapps.application.server.controlcenter.applications;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;

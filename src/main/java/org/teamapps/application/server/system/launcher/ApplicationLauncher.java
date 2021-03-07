@@ -239,9 +239,11 @@ public class ApplicationLauncher {
 				.sorted(Comparator.comparingInt(ManagedApplicationPerspective::getListingPosition))
 				.collect(Collectors.toList());
 		for (ManagedApplicationPerspective managedApplicationPerspective : managedApplicationPerspectives) {
-			PerspectiveSessionData perspectiveSessionData = applicationSessionData.createPerspectiveSessionData(managedApplicationPerspective);
-			if (perspectiveSessionData.getPerspectiveBuilder().isPerspectiveAccessible(perspectiveSessionData)) {
-				sortedPerspectives.add(perspectiveSessionData);
+			if (managedApplicationPerspective.getApplicationPerspective() != null) {
+				PerspectiveSessionData perspectiveSessionData = applicationSessionData.createPerspectiveSessionData(managedApplicationPerspective);
+				if (perspectiveSessionData.getPerspectiveBuilder().isPerspectiveAccessible(perspectiveSessionData)) {
+					sortedPerspectives.add(perspectiveSessionData);
+				}
 			}
 		}
 
