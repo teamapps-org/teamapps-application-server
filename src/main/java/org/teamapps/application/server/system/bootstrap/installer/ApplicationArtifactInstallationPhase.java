@@ -19,11 +19,7 @@ public class ApplicationArtifactInstallationPhase implements ApplicationInstalla
 			}
 			if (applicationInfo.getApplicationJar() != null) {
 				String binaryHash = applicationInfo.getBinaryHash();
-				ApplicationVersion applicationVersion = ApplicationVersion.filter().binaryHash(TextFilter.textEqualsFilter(binaryHash)).executeExpectSingleton();
-				if (applicationVersion != null) {
-					applicationInfo.addError("This jar is already installed: " + applicationVersion.getApplication().getName() + ": " + applicationVersion.getVersion());
-					return;
-				}
+				applicationInfo.setBinaryHash(binaryHash);
 			}
 			ApplicationBuilder applicationBuilder = applicationInfo.getApplicationBuilder();
 			String applicationName = applicationBuilder.getApplicationName();

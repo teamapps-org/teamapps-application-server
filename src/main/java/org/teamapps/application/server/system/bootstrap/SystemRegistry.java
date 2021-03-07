@@ -13,6 +13,7 @@ import org.teamapps.model.controlcenter.*;
 import org.teamapps.reporting.convert.DocumentConverter;
 import org.teamapps.universaldb.UniversalDB;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -46,8 +47,16 @@ public class SystemRegistry {
 		}
 	}
 
-	public void installAndLoadApplication(ApplicationBuilder applicationBuilder) {
+	public ApplicationInstaller createJarInstaller(File jarFile) {
+		return ApplicationInstaller.createJarInstaller(jarFile, universalDB, translationService, systemConfig.getLocalizationConfig());
+	}
+
+	public boolean installAndLoadApplication(ApplicationBuilder applicationBuilder) {
 		ApplicationInstaller applicationInstaller = ApplicationInstaller.createClassInstaller(applicationBuilder, universalDB, translationService, systemConfig.getLocalizationConfig());
+		return installAndLoadApplication(applicationInstaller);
+	}
+
+	public boolean installAndLoadApplication(ApplicationInstaller applicationInstaller) {
 		if (!applicationInstaller.isInstalled()) {
 			if (applicationInstaller.installApplication()) {
 				ApplicationInfo applicationInfo = applicationInstaller.getApplicationInfo();
@@ -65,9 +74,14 @@ public class SystemRegistry {
 			} else {
 				System.out.println("Error installing " + applicationInstaller.getApplicationInfo().getName() + ": " + applicationInstaller.getApplicationInfo().getErrorMessage());
 				System.out.println("\tWarnings:" + applicationInstaller.getApplicationInfo().getWarningMessage());
-				return;
+				return false;
 			}
 		}
+		loadApplication(applicationInstaller);
+		return true;
+	}
+
+	public void loadApplication(ApplicationInstaller applicationInstaller) {
 		LoadedApplication loadedApplication = applicationInstaller.loadApplication();
 		System.out.println("Loaded app:" + applicationInstaller.getApplicationInfo().getName());
 		addLoadedApplication(loadedApplication);

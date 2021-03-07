@@ -9,6 +9,19 @@ public class ApplicationInfoDataElement {
 	private List<String> dataAdded = new ArrayList<>();
 	private List<String> dataRemoved = new ArrayList<>();
 
+	public String getChangeString() {
+		return "+ " + dataAdded.size() + " | - " + dataRemoved.size();
+	}
+
+	public String getMultiLineChangeHtml(String addedTitle, String removedTitle) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<b>").append(addedTitle).append("</b>:<br>");
+		dataAdded.forEach(v -> sb.append(v).append("<br>"));
+		sb.append("<br><b>").append(removedTitle).append("</b>:<br>");
+		dataRemoved.forEach(v -> sb.append(v).append("<br>"));
+		return sb.toString();
+	}
+
 	public void added(String element) {
 		dataAdded.add(element);
 	}

@@ -59,6 +59,7 @@ public class PrivilegeDataInstallationPhase implements ApplicationInstallationPh
 					//privilege diff
 				}
 			}
+			applicationInfo.setPrivilegeData(dataInfo);
 		} catch (Exception e) {
 			e.printStackTrace();
 			applicationInfo.addError("Error checking privileges:" + e.getMessage());

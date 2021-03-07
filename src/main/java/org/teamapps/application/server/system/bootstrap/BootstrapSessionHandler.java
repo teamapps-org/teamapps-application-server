@@ -9,6 +9,7 @@ import org.teamapps.application.api.server.SessionHandler;
 import org.teamapps.application.api.server.SessionManager;
 import org.teamapps.application.server.controlcenter.ControlCenterAppBuilder;
 import org.teamapps.application.server.controlcenter.dbexplorer.DatabaseExplorerAppBuilder;
+import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
 import org.teamapps.model.ControlCenterSchema;
 import org.teamapps.application.server.system.application.TestApp;
 import org.teamapps.application.server.system.application.TestApp2;
@@ -16,11 +17,14 @@ import org.teamapps.application.server.system.config.SystemConfig;
 import org.teamapps.application.server.system.login.LoginHandler;
 import org.teamapps.application.server.system.machinetranslation.MachineTranslation;
 import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
+import org.teamapps.model.controlcenter.Application;
+import org.teamapps.model.controlcenter.ApplicationVersion;
 import org.teamapps.model.controlcenter.User;
 import org.teamapps.model.controlcenter.UserAccountStatus;
 import org.teamapps.icon.standard.StandardIcon;
 import org.teamapps.icon.standard.StandardIconStyles;
 import org.teamapps.universaldb.UniversalDB;
+import org.teamapps.universaldb.index.file.FileValue;
 import org.teamapps.ux.session.SessionContext;
 
 import java.io.File;
@@ -86,6 +90,19 @@ public class BootstrapSessionHandler implements SessionHandler {
 		systemRegistry.installAndLoadApplication(new TestApp2());
 		systemRegistry.installAndLoadApplication(new ControlCenterAppBuilder());
 		systemRegistry.installAndLoadApplication(new DatabaseExplorerAppBuilder(universalDB));
+
+		for (Application application : Application.getAll()) {
+			ApplicationVersion installedVersion = application.getInstalledVersion();
+			FileValue binary = installedVersion.getBinary();
+			if (binary != null) {
+				File jarFile = binary.getFileSupplier().get();
+				ApplicationInstaller jarInstaller = ApplicationInstaller.createJarInstaller(jarFile, universalDB, systemRegistry.getTranslationService(), systemRegistry.getSystemConfig().getLocalizationConfig());
+				if (jarInstaller.isInstalled()) {
+					systemRegistry.loadApplication(jarInstaller);
+				}
+			}
+		}
+
 	}
 
 

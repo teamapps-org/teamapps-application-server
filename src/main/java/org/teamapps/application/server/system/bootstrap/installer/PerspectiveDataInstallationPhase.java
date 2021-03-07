@@ -28,6 +28,7 @@ public class PerspectiveDataInstallationPhase implements ApplicationInstallation
 			}
 			ApplicationBuilder applicationBuilder = applicationInfo.getApplicationBuilder();
 			if (!(applicationBuilder instanceof ApplicationPerspectiveBuilder)) {
+				applicationInfo.setPerspectiveData(new ApplicationInfoDataElement());
 				return;
 			}
 			ApplicationPerspectiveBuilder applicationPerspectiveBuilder = (ApplicationPerspectiveBuilder) applicationBuilder;
@@ -54,7 +55,7 @@ public class PerspectiveDataInstallationPhase implements ApplicationInstallation
 			dataInfo.setDataAdded(newPerspectives.stream().map(PerspectiveBuilder::getName).collect(Collectors.toList()));
 			List<ApplicationPerspective> removedPerspectives = keyCompare.getNotInA();
 			dataInfo.setDataRemoved(removedPerspectives.stream().map(ApplicationPerspective::getName).collect(Collectors.toList()));
-
+			applicationInfo.setPerspectiveData(dataInfo);
 		} catch (Exception e) {
 			e.printStackTrace();
 			applicationInfo.addError("Error checking perspectives:" + e.getMessage());

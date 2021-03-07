@@ -81,6 +81,7 @@ public class LocalizationDataInstallationPhase implements ApplicationInstallatio
 					//todo changed originals
 				}
 			}
+			applicationInfo.setLocalizationData(dataInfo);
 		} catch (Exception e) {
 			e.printStackTrace();
 			applicationInfo.addError("Error checking localization data:" + e.getMessage());
