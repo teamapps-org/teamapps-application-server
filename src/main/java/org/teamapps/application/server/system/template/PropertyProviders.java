@@ -6,6 +6,7 @@ import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.utils.IconUtils;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.ux.component.template.BaseTemplate;
+import org.teamapps.ux.session.SessionContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,13 +56,24 @@ public class PropertyProviders {
 		};
 	}
 
+	public static PropertyProvider<ApplicationVersion> createSimpleApplicationVersionPropertyProvider() {
+		return (version, propertyNames) -> {
+			SessionContext context = SessionContext.current();
+			Map<String, Object> map = new HashMap<>();
+			map.put(BaseTemplate.PROPERTY_ICON, context.getIconProvider().decodeIcon(version.getApplication().getIcon()));
+			map.put(BaseTemplate.PROPERTY_CAPTION, version.getVersion());
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, version.getReleaseNotes());
+			return map;
+		};
+	}
+
 	public static PropertyProvider<ApplicationVersion> createApplicationVersionPropertyProvider(UserSessionData userSessionData) {
 		return (version, propertyNames) -> {
 			ApplicationLocalizationProvider localizationProvider = userSessionData.getApplicationLocalizationProvider(version.getApplication());
 			Map<String, Object> map = new HashMap<>();
 			map.put(BaseTemplate.PROPERTY_ICON, userSessionData.decodeIcon(version.getApplication().getIcon()));
-			map.put(BaseTemplate.PROPERTY_CAPTION, localizationProvider.getLocalized(version.getApplication().getTitleKey()) + ": " + localizationProvider.getLocalized(version.getVersion()));
-			map.put(BaseTemplate.PROPERTY_DESCRIPTION, localizationProvider.getLocalized(version.getReleaseNotes()));
+			map.put(BaseTemplate.PROPERTY_CAPTION, localizationProvider.getLocalized(version.getApplication().getTitleKey()) + ": " + version.getVersion());
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, version.getReleaseNotes());
 			return map;
 		};
 	}

@@ -181,7 +181,7 @@ public class ApplicationLauncher {
 		}
 
 		View applicationMenu = View.createView(StandardLayout.LEFT, StandardIcon.RADIO_BUTTON_GROUP, getLocalized(Dictionary.APPLICATION_MENU), null);
-		applicationMenu.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.94f));
+		applicationMenu.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.84f));
 		responsiveApplication.addApplicationView(applicationMenu);
 		MobileLayout mobileLayout = new MobileLayout();
 		applicationMenu.setComponent(mobileLayout);
@@ -247,7 +247,7 @@ public class ApplicationLauncher {
 
 		View applicationMenu = View.createView(StandardLayout.LEFT, StandardIcon.RADIO_BUTTON_GROUP, getLocalized(Dictionary.APPLICATION_MENU), null);
 		responsiveApplication.addApplicationView(applicationMenu);
-		applicationMenu.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.94f));
+		applicationMenu.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.84f));
 		VerticalLayout verticalLayout = new VerticalLayout();
 		applicationMenu.setComponent(verticalLayout);
 

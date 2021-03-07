@@ -23,13 +23,7 @@ public abstract class AbstractManagedApplicationPerspective extends AbstractAppl
 		managedApplication = ManagedApplication.getById(getApplicationInstanceData().getManagedApplicationId());
 		mainApplication = managedApplication.getMainApplication();
 		organizationField = OrganizationUtils.convert(getApplicationInstanceData().getOrganizationField());
-		createPerspectiveUI();
 	}
-
-	public abstract void createPerspectiveUI();
-
-	@Override
-	public void createUi() {}
 
 	public boolean isOrgFieldFilterApplied() {
 		return organizationField != null;
