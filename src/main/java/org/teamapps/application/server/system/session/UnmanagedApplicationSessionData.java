@@ -14,6 +14,7 @@ import org.teamapps.icons.Icon;
 import org.teamapps.reporting.convert.DocumentConverter;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ApplicationActivity;
+import org.teamapps.universaldb.index.translation.TranslatableText;
 import org.teamapps.ux.application.ResponsiveApplication;
 import org.teamapps.ux.application.perspective.Perspective;
 import org.teamapps.ux.component.progress.MultiProgressDisplay;
@@ -106,6 +107,11 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 	@Override
 	public String getLocalized(String s, Object... objects) {
 		return localizationProvider.getLocalized(s, objects);
+	}
+
+	@Override
+	public String getLocalized(TranslatableText translatableText) {
+		return localizationProvider.getLocalized(translatableText);
 	}
 
 	@Override

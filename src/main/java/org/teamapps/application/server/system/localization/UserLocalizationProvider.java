@@ -2,10 +2,12 @@ package org.teamapps.application.server.system.localization;
 
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.localization.LocalizationData;
+import org.teamapps.universaldb.index.translation.TranslatableText;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class UserLocalizationProvider implements ApplicationLocalizationProvider, LocalizationProvider {
 
@@ -55,6 +57,22 @@ public class UserLocalizationProvider implements ApplicationLocalizationProvider
 			}
 		} else {
 			return localizationValue;
+		}
+	}
+
+	@Override
+	public String getLocalized(TranslatableText translatableText) {
+		if (translatableText == null) {
+			return null;
+		} else {
+			Map<String, String> translationMap = translatableText.getTranslationMap();
+			for (String language : rankedLanguages) {
+				String value = translationMap.get(language);
+				if (value != null) {
+					return value;
+				}
+			}
+			return translatableText.getText();
 		}
 	}
 }

@@ -14,6 +14,7 @@ import org.teamapps.model.controlcenter.ApplicationActivity;
 import org.teamapps.model.controlcenter.ManagedApplication;
 import org.teamapps.model.controlcenter.ManagedApplicationPerspective;
 import org.teamapps.reporting.convert.DocumentConverter;
+import org.teamapps.universaldb.index.translation.TranslatableText;
 import org.teamapps.ux.application.perspective.Perspective;
 import org.teamapps.ux.component.progress.MultiProgressDisplay;
 
@@ -141,6 +142,11 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	@Override
 	public String getLocalized(String s, Object... objects) {
 		return localizationProvider.getLocalized(s, objects);
+	}
+
+	@Override
+	public String getLocalized(TranslatableText translatableText) {
+		return localizationProvider.getLocalized(translatableText);
 	}
 
 	@Override
