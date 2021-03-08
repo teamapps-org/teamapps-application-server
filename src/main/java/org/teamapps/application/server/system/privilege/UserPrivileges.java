@@ -135,9 +135,9 @@ public class UserPrivileges {
 			OrganizationUnit fixedOrganizationRoot = privilegeAssignment.getFixedOrganizationRoot();
 			List<OrganizationUnitType> organizationUnitTypeFilter = privilegeAssignment.getOrganizationUnitTypeFilter();
 			PrivilegeGroup privilegeGroup = privilegeProvider.getPrivilegeGroup(privilegeAssignment.getPrivilegeGroup());
-			List<Privilege> privileges = privilegeProvider.getPrivilegesByNameList(ValueConverterUtils.getNameList(privilegeAssignment.getPrivileges()));
+			List<Privilege> privileges = privilegeProvider.getPrivilegesByNameList(ValueConverterUtils.decompressToStringList(privilegeAssignment.getPrivileges()));
 			boolean privilegeObjectInheritance = privilegeAssignment.getPrivilegeObjectInheritance();
-			List<Integer> privilegeObjectIdList = ValueConverterUtils.getIdList(privilegeAssignment.getPrivilegeObjects());
+			List<Integer> privilegeObjectIdList = ValueConverterUtils.decompressIds(privilegeAssignment.getPrivilegeObjects());
 			List<PrivilegeObject> privilegeObjects = privilegeProvider.getPrivilegeObjects(privilegeGroup, privilegeObjectIdList, privilegeObjectInheritance);
 			Set<OrganizationUnit> allUnits = OrganizationUtils.getAllUnits(fixedOrganizationRoot != null ? fixedOrganizationRoot : organizationUnit, organizationUnitTypeFilter);
 			List<OrgUnit> orgUnits = OrganizationUtils.convertList(allUnits);

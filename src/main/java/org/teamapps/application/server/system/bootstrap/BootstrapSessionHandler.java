@@ -10,6 +10,7 @@ import org.teamapps.application.api.server.SessionManager;
 import org.teamapps.application.server.controlcenter.ControlCenterAppBuilder;
 import org.teamapps.application.server.controlcenter.dbexplorer.DatabaseExplorerAppBuilder;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
+import org.teamapps.application.server.system.utils.ValueConverterUtils;
 import org.teamapps.model.ControlCenterSchema;
 import org.teamapps.application.server.system.application.TestApp;
 import org.teamapps.application.server.system.application.TestApp2;
@@ -29,6 +30,7 @@ import org.teamapps.ux.session.SessionContext;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
 
 public class BootstrapSessionHandler implements SessionHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -126,7 +128,14 @@ public class BootstrapSessionHandler implements SessionHandler {
 		applicationServer.setSessionHandler(new BootstrapSessionHandler());
 		applicationServer.start();
 		if (User.getCount() == 0) {
-			User.create().setFirstName("Super").setLastName("Admin").setLogin("admin").setPassword(SecurePasswordHash.createDefault().createSecureHash("teamapps!")).setUserAccountStatus(UserAccountStatus.SUPER_ADMIN).save();
+			User.create()
+					.setFirstName("Super")
+					.setLastName("Admin")
+					.setLogin("admin")
+					.setPassword(SecurePasswordHash.createDefault().createSecureHash("teamapps!"))
+					.setUserAccountStatus(UserAccountStatus.SUPER_ADMIN)
+					.setLanguages(ValueConverterUtils.compressStringList(Arrays.asList("de", "en", "fr")))
+					.save();
 		}
 	}
 }

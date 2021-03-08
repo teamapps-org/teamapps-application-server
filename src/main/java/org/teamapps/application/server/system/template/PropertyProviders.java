@@ -1,5 +1,6 @@
 package org.teamapps.application.server.system.template;
 
+import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.application.server.system.session.UserSessionData;
@@ -109,6 +110,13 @@ public class PropertyProviders {
 			return map;
 		};
 	}
-	
 
+	public static PropertyProvider<OrganizationField> createOrganizationFieldPropertyProvider(ApplicationInstanceData applicationInstanceData) {
+		return (orgField, propertyNames) -> {
+			Map<String, Object> map = new HashMap<>();
+			map.put(BaseTemplate.PROPERTY_ICON, orgField.getIcon() != null ? SessionContext.current().getIconProvider().decodeIcon(orgField.getIcon()) : null);
+			map.put(BaseTemplate.PROPERTY_CAPTION, applicationInstanceData.getLocalized(orgField.getTitle()));
+			return map;
+		};
+	}
 }

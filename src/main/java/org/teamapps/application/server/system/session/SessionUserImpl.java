@@ -24,7 +24,7 @@ public class SessionUserImpl implements SessionUser {
 	}
 
 	private void init() {
-		List<String> languages = ValueConverterUtils.getNameList(user.getLanguages());
+		List<String> languages = ValueConverterUtils.decompressToStringList(user.getLanguages());
 		if (languages == null || languages.isEmpty()) {
 			languages = new ArrayList<>();
 			languages.add(context.getLocale().getLanguage());

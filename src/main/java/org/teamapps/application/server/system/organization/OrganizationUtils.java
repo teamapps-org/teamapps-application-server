@@ -1,8 +1,13 @@
 package org.teamapps.application.server.system.organization;
 
+import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.organization.OrgField;
 import org.teamapps.application.api.organization.OrgUnit;
+import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.model.controlcenter.*;
+import org.teamapps.ux.component.field.combobox.ComboBox;
+import org.teamapps.ux.component.template.BaseTemplate;
+import org.teamapps.ux.model.ListTreeModel;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -82,4 +87,10 @@ public class OrganizationUtils {
 		return result;
 	}
 
+	public static ComboBox<OrganizationField> createOrganizationFieldCombo(ApplicationInstanceData applicationInstanceData) {
+		ComboBox<OrganizationField> comboBox = new ComboBox<>(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
+		comboBox.setModel(new ListTreeModel<>(OrganizationField.getAll()));
+		comboBox.setPropertyProvider(PropertyProviders.createOrganizationFieldPropertyProvider(applicationInstanceData));
+		return comboBox;
+	}
 }

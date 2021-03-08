@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class ValueConverterUtils {
 
 
-	public static String getNameList(List<Privilege> privileges) {
+	public static String compressPrivilegeNames(List<Privilege> privileges) {
 		if (privileges == null || privileges.isEmpty()) {
 			return null;
 		} else {
@@ -19,17 +19,7 @@ public class ValueConverterUtils {
 
 	}
 
-	public static List<String> getNameList(String names) {
-		if (names == null || names.isBlank()) {
-			return null;
-		} else {
-			return Arrays.stream(names.split("\n"))
-					.filter(n -> n != null && !n.isBlank())
-					.collect(Collectors.toList());
-		}
-	}
-
-	public static String getIdList(List<PrivilegeObject> privilegeObjects) {
+	public static String compressPrivilegeObjectIds(List<PrivilegeObject> privilegeObjects) {
 		if (privilegeObjects == null || privilegeObjects.isEmpty()) {
 			return null;
 		} else {
@@ -40,7 +30,25 @@ public class ValueConverterUtils {
 		}
 	}
 
-	public static List<Integer> getIdList(String ids) {
+	public static String compressStringList(List<String> list) {
+		if (list == null || list.isEmpty()) {
+			return null;
+		} else {
+			return String.join("\n", list);
+		}
+	}
+
+	public static List<String> decompressToStringList(String value) {
+		if (value == null || value.isBlank()) {
+			return null;
+		} else {
+			return Arrays.stream(value.split("\n"))
+					.filter(n -> n != null && !n.isBlank())
+					.collect(Collectors.toList());
+		}
+	}
+
+	public static List<Integer> decompressIds(String ids) {
 		if (ids == null || ids.isBlank()) {
 			return null;
 		} else {
