@@ -4,7 +4,6 @@ import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.application.server.system.session.UserSessionData;
-import org.teamapps.application.server.system.utils.IconUtils;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.session.SessionContext;

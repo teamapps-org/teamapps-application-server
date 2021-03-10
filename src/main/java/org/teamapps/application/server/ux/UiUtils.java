@@ -1,8 +1,9 @@
-package org.teamapps.application.server.system.utils;
+package org.teamapps.application.server.ux;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.ux.translatable.TranslatableField;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.icons.Icon;
 import org.teamapps.ux.component.field.DisplayField;
@@ -22,6 +23,10 @@ import org.teamapps.ux.session.SessionContext;
 import java.util.List;
 
 public class UiUtils {
+
+	public static TranslatableField createTranslatableField(ApplicationInstanceData applicationInstanceData) {
+		return new TranslatableField(applicationInstanceData);
+	}
 
 	public static <TYPE> TemplateField<TYPE> createTemplateField(Template template, PropertyProvider<TYPE> propertyProvider) {
 		TemplateField<TYPE> templateField = new TemplateField<>(template);

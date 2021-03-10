@@ -72,7 +72,7 @@ public class ApplicationLauncher {
 			for (ManagedApplication managedApplication : applicationGroup.getApplications()) {
 				Application application = managedApplication.getMainApplication();
 				LoadedApplication loadedApplication = registry.getLoadedApplication(application);
-				if (loadedApplication.getApplicationBuilder().isApplicationAccessible(userSessionData.getApplicationPrivilegeProvider(managedApplication))) {
+				if (loadedApplication != null && loadedApplication.getApplicationBuilder().isApplicationAccessible(userSessionData.getApplicationPrivilegeProvider(managedApplication))) {
 					ManagedApplicationSessionData applicationSessionData = userSessionData.createManageApplicationSessionData(managedApplication, new MobileApplicationNavigation());
 					ApplicationData applicationData = new ApplicationData(managedApplication, loadedApplication, applicationSessionData);
 					applicationGroupData.addApplicationData(applicationData);

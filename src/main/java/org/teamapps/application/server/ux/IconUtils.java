@@ -1,4 +1,4 @@
-package org.teamapps.application.server.system.utils;
+package org.teamapps.application.server.ux;
 
 import org.teamapps.icons.Icon;
 import org.teamapps.icons.IconLibraryRegistry;

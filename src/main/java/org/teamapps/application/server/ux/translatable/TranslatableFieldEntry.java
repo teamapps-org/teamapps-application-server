@@ -1,4 +1,4 @@
-package org.teamapps.application.server.system.localization.translatable;
+package org.teamapps.application.server.ux.translatable;
 
 import org.teamapps.application.api.localization.Language;
 import org.teamapps.universaldb.index.translation.TranslatableText;

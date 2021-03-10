@@ -8,7 +8,7 @@ import org.teamapps.application.server.system.config.SystemConfig;
 import org.teamapps.application.server.system.localization.DictionaryLocalizationProvider;
 import org.teamapps.application.server.system.localization.SystemLocalizationProvider;
 import org.teamapps.application.server.system.machinetranslation.TranslationService;
-import org.teamapps.application.server.system.utils.IconUtils;
+import org.teamapps.application.server.ux.IconUtils;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.reporting.convert.DocumentConverter;
 import org.teamapps.universaldb.UniversalDB;

@@ -1,6 +1,5 @@
 package org.teamapps.application.server.system.bootstrap;
 
-import org.apache.cxf.service.model.SchemaInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.config.ApplicationConfigXml;
@@ -10,20 +9,18 @@ import org.teamapps.application.api.server.SessionManager;
 import org.teamapps.application.server.controlcenter.ControlCenterAppBuilder;
 import org.teamapps.application.server.controlcenter.dbexplorer.DatabaseExplorerAppBuilder;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
-import org.teamapps.application.server.system.utils.ValueConverterUtils;
-import org.teamapps.model.ControlCenterSchema;
-import org.teamapps.application.server.system.application.TestApp;
-import org.teamapps.application.server.system.application.TestApp2;
 import org.teamapps.application.server.system.config.SystemConfig;
 import org.teamapps.application.server.system.login.LoginHandler;
 import org.teamapps.application.server.system.machinetranslation.MachineTranslation;
 import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
+import org.teamapps.application.server.system.utils.ValueConverterUtils;
+import org.teamapps.icon.standard.StandardIcon;
+import org.teamapps.icon.standard.StandardIconStyles;
+import org.teamapps.model.ControlCenterSchema;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ApplicationVersion;
 import org.teamapps.model.controlcenter.User;
 import org.teamapps.model.controlcenter.UserAccountStatus;
-import org.teamapps.icon.standard.StandardIcon;
-import org.teamapps.icon.standard.StandardIconStyles;
 import org.teamapps.universaldb.UniversalDB;
 import org.teamapps.universaldb.index.file.FileValue;
 import org.teamapps.ux.session.SessionContext;
@@ -88,8 +85,6 @@ public class BootstrapSessionHandler implements SessionHandler {
 		}
 		systemRegistry = new SystemRegistry(systemConfig, this, universalDB, machineTranslation);
 
-		systemRegistry.installAndLoadApplication(new TestApp());
-		systemRegistry.installAndLoadApplication(new TestApp2());
 		systemRegistry.installAndLoadApplication(new ControlCenterAppBuilder());
 		systemRegistry.installAndLoadApplication(new DatabaseExplorerAppBuilder(universalDB));
 
