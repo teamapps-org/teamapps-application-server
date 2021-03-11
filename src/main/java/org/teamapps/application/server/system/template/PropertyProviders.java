@@ -2,6 +2,7 @@ package org.teamapps.application.server.system.template;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
+import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.data.extract.PropertyProvider;
@@ -85,6 +86,7 @@ public class PropertyProviders {
 			map.put(BaseTemplate.PROPERTY_ICON, managedApplication.getIcon() != null ? userSessionData.decodeIcon(managedApplication.getIcon()) : userSessionData.decodeIcon(managedApplication.getMainApplication().getIcon()));
 			map.put(BaseTemplate.PROPERTY_CAPTION, managedApplication.getTitleKey() != null ? localizationProvider.getLocalized(managedApplication.getTitleKey()) : localizationProvider.getLocalized(managedApplication.getMainApplication().getTitleKey()));
 			map.put(BaseTemplate.PROPERTY_DESCRIPTION, managedApplication.getDescriptionKey() != null ? localizationProvider.getLocalized(managedApplication.getDescriptionKey()) : localizationProvider.getLocalized(managedApplication.getMainApplication().getDescriptionKey()));
+			map.put(BaseTemplate.PROPERTY_BADGE, managedApplication.getHidden() ? localizationProvider.getLocalized(Dictionary.HIDDEN) : null);
 			return map;
 		};
 	}

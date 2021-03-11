@@ -1,5 +1,6 @@
 package org.teamapps.application.server.system.launcher;
 
+import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.session.ManagedApplicationSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
@@ -23,8 +24,9 @@ public class ApplicationData {
 		this.applicationSessionData = applicationSessionData;
 		UserSessionData userSessionData = applicationSessionData.getUserSessionData();
 		this.icon = managedApplication.getIcon() != null ? userSessionData.getIconProvider().decodeIcon(managedApplication.getIcon()) : loadedApplication.getApplicationBuilder().getApplicationIcon();
-		this.title = managedApplication.getTitleKey() != null ? userSessionData.getDictionary().getLocalized(managedApplication.getTitleKey()) : applicationSessionData.getMainApplicationLocalizationProvider().getLocalized(loadedApplication.getApplicationBuilder().getApplicationTitleKey());
-		this.description = managedApplication.getDescriptionKey() != null ? userSessionData.getDictionary().getLocalized(managedApplication.getDescriptionKey()) : applicationSessionData.getMainApplicationLocalizationProvider().getLocalized(loadedApplication.getApplicationBuilder().getApplicationDescriptionKey());
+		ApplicationLocalizationProvider localizationProvider = applicationSessionData.getMainApplicationLocalizationProvider();
+		this.title = managedApplication.getTitleKey() != null ? localizationProvider.getLocalized(managedApplication.getTitleKey()) : localizationProvider.getLocalized(loadedApplication.getApplicationBuilder().getApplicationTitleKey());
+		this.description = managedApplication.getDescriptionKey() != null ? localizationProvider.getLocalized(managedApplication.getDescriptionKey()) : localizationProvider.getLocalized(loadedApplication.getApplicationBuilder().getApplicationDescriptionKey());
 		this.applicationPosition = managedApplication.getListingPosition();
 	}
 

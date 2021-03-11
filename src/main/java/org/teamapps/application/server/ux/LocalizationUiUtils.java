@@ -18,6 +18,9 @@ import java.util.stream.Collectors;
 
 public class LocalizationUiUtils {
 
+	public static ComboBox<String> createLocalizationKeyCombo(Template template, ApplicationLocalizationProvider localizationProvider) {
+		return createLocalizationKeyCombo(template, localizationProvider, null);
+	}
 
 	public static ComboBox<String> createLocalizationKeyCombo(Template template, ApplicationLocalizationProvider localizationProvider, Application application) {
 		ComboBox<String> comboBox = new ComboBox<>(template);

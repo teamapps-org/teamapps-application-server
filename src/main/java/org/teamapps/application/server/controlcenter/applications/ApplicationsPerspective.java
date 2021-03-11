@@ -19,6 +19,7 @@ import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.server.ux.UiUtils;
+import org.teamapps.application.server.ux.window.WindowUtils;
 import org.teamapps.application.tools.EntityListModelBuilder;
 import org.teamapps.application.tools.EntityModelBuilder;
 import org.teamapps.common.format.Color;
@@ -70,8 +71,8 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 	private void createMenu() {
 		setPerspectiveMenuPanel(PerspectiveMenuPanel.createMenuPanel(getApplicationInstanceData(),
 				new ApplicationsPerspectiveBuilder(),
-				new ApplicationUpdatesPerspectiveBuilder(),
-				new ApplicationProvisioningPerspectiveBuilder()
+				new ApplicationProvisioningPerspectiveBuilder(),
+				new ApplicationGroupsPerspectiveBuilder()
 		));
 	}
 
@@ -138,7 +139,7 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 		formLayout.addLabelAndComponent(null, getLocalized("applications.versions"), versionsCombo);
 
 		selectedApplication.onChanged().addListener(app -> {
-			applicationVersionModelBuilder.setEntities(app.getVersions());
+			applicationVersionModelBuilder.setRecords(app.getVersions());
 			appNameField.setValue(app.getName());
 			appTitleField.setValue(getLocalized(app.getTitleKey()));
 			appDescriptionField.setValue(getLocalized(app.getDescriptionKey()));
@@ -299,8 +300,8 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 
 	public void showTextWindow(Icon icon, String title, String content) {
 		DisplayField displayField = new DisplayField(false, true);
-		Window window = UiUtils.createWindow(icon, title);
-		UiUtils.addCancelCloseButton(window, getApplicationInstanceData());
+		Window window = WindowUtils.createWindow(icon, title);
+		WindowUtils.addCancelCloseButton(window, getApplicationInstanceData());
 		displayField.setMargin(Spacing.px(10));
 		displayField.setValue(content);
 		window.setContent(displayField);
@@ -359,7 +360,7 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 			return;
 		}
 
-		Window window = UiUtils.createWindow(ApplicationIcons.UPLOAD, getLocalized("applications.installApplication"));
+		Window window = WindowUtils.createWindow(ApplicationIcons.UPLOAD, getLocalized("applications.installApplication"));
 		ResponsiveForm form = new ResponsiveForm(100, 0, 0);
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(400);
 		ApplicationBuilder applicationBuilder = applicationInfo.getApplicationBuilder();
@@ -436,7 +437,7 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 			showTextWindow(ApplicationIcons.DOCUMENT_TEXT, getLocalized("applications.applicationCaptions"), sb.toString());
 		});
 
-		UiUtils.addCancelCloseButton(window, getApplicationInstanceData());
+		WindowUtils.addCancelCloseButton(window, getApplicationInstanceData());
 		window.show();
 
 

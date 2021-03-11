@@ -32,6 +32,7 @@ import org.teamapps.ux.component.rootpanel.RootPanel;
 import org.teamapps.ux.component.tabpanel.Tab;
 import org.teamapps.ux.component.tabpanel.TabPanel;
 import org.teamapps.ux.component.template.BaseTemplate;
+import org.teamapps.ux.component.template.BaseTemplateRecord;
 import org.teamapps.ux.component.toolbar.Toolbar;
 import org.teamapps.ux.component.toolbar.ToolbarButton;
 import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
@@ -256,7 +257,8 @@ public class ApplicationLauncher {
 		Toolbar toolbar = new Toolbar();
 		ToolbarButtonGroup buttonGroup = toolbar.addButtonGroup(new ToolbarButtonGroup());
 		buttonGroup.setShowGroupSeparator(false);
-		ToolbarButton backButton = ToolbarButton.createSmall(StandardIcon.NAV_LEFT, getLocalized(Dictionary.BACK));
+//		ToolbarButton backButton = ToolbarButton.createSmall(StandardIcon.NAV_LEFT, getLocalized(Dictionary.BACK));
+		ToolbarButton backButton = new ToolbarButton(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, new BaseTemplateRecord(StandardIcon.NAVIGATE_LEFT, getLocalized(Dictionary.BACK), null));
 		backButton.setVisible(false);
 		buttonGroup.addButton(backButton);
 		verticalLayout.addComponent(toolbar);
