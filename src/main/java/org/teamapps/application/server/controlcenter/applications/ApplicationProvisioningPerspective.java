@@ -10,11 +10,11 @@ import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.server.ux.ApplicationUiUtils;
 import org.teamapps.application.server.ux.IconUtils;
-import org.teamapps.application.server.ux.LocalizationUiUtils;
+import org.teamapps.application.server.ux.localize.LocalizationKeyWindow;
+import org.teamapps.application.server.ux.localize.LocalizationUiUtils;
 import org.teamapps.application.server.ux.UiUtils;
 import org.teamapps.application.server.ux.combo.RecordComboBox;
 import org.teamapps.application.server.ux.form.FormPanel;
-import org.teamapps.application.server.ux.form.FormUtils;
 import org.teamapps.application.server.ux.form.FormWindow;
 import org.teamapps.application.tools.EntityListModelBuilder;
 import org.teamapps.application.tools.EntityModelBuilder;
@@ -25,7 +25,6 @@ import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.view.View;
-import org.teamapps.ux.component.absolutelayout.Length;
 import org.teamapps.ux.component.field.CheckBox;
 import org.teamapps.ux.component.field.Fields;
 import org.teamapps.ux.component.field.TemplateField;
@@ -33,7 +32,6 @@ import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.form.ResponsiveForm;
 import org.teamapps.ux.component.form.ResponsiveFormLayout;
 import org.teamapps.ux.component.linkbutton.LinkButton;
-import org.teamapps.ux.component.panel.Panel;
 import org.teamapps.ux.component.table.Table;
 import org.teamapps.ux.component.table.TableColumn;
 import org.teamapps.ux.component.template.BaseTemplate;
@@ -140,6 +138,18 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		formPanel.getEditButton().onClick.addListener(() -> showPerspectiveFormWindow(perspectivesList.getSelectedRecord(), perspectiveModelBuilder));
 		formPanel.getDeleteButton().onClick.addListener(() -> perspectiveModelBuilder.removeRecord(perspectivesList.getSelectedRecord()));
 		addApplicationButton.onClick.addListener(() -> selectedApplication.set(ManagedApplication.create()));
+
+		crateTitleKeyButton.onClicked.addListener(() -> {
+			LocalizationKeyWindow localizationKeyWindow = LocalizationKeyWindow.createSystemKey(userSessionData.getRegistry().getSystemDictionary(), getApplicationInstanceData());
+			localizationKeyWindow.onNewKey.addListener(titleKeyCombo::setValue);
+			localizationKeyWindow.show();
+		});
+
+		createDescriptionKeyButton.onClicked.addListener(() -> {
+			LocalizationKeyWindow localizationKeyWindow = LocalizationKeyWindow.createSystemKey(userSessionData.getRegistry().getSystemDictionary(), getApplicationInstanceData());
+			localizationKeyWindow.onNewKey.addListener(descriptionKeyCombo::setValue);
+			localizationKeyWindow.show();
+		});
 
 		saveApplicationButton.onClick.addListener(() -> {
 			ManagedApplication application = selectedApplication.get();

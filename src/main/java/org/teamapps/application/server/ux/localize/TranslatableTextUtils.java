@@ -1,14 +1,11 @@
-package org.teamapps.application.server.ux.translatable;
+package org.teamapps.application.server.ux.localize;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Language;
 import org.teamapps.application.api.theme.ApplicationIcons;
-import org.teamapps.application.server.system.machinetranslation.TranslationService;
 import org.teamapps.data.extract.PropertyProvider;
-import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.universaldb.index.translation.TranslatableText;
 import org.teamapps.ux.component.field.TemplateField;
-import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.template.BaseTemplate;
 
 import java.util.HashMap;

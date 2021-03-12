@@ -37,7 +37,11 @@ public class FormWindow extends ApplicationWindow {
 	}
 
 	public void addField(String label, Component field) {
-		formLayout.addLabelAndComponent(null, label, field);
+		addField(null, label, field);
+	}
+
+	public void addField(Icon icon, String label, Component field) {
+		formLayout.addLabelAndComponent(icon, label, field);
 		if (field instanceof AbstractField) {
 			fields.add((AbstractField) field);
 		}
@@ -49,5 +53,9 @@ public class FormWindow extends ApplicationWindow {
 
 	public ResponsiveFormLayout getFormLayout() {
 		return formLayout;
+	}
+
+	public List<AbstractField> getFields() {
+		return fields;
 	}
 }

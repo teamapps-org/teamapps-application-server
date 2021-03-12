@@ -24,18 +24,23 @@ public class SystemLocalizationProvider implements LocalizationProvider {
 	}
 
 	private void loadData() {
-		localizationLanguageValueMapByKey = new ConcurrentHashMap<>();
+		Map<String, Map<String, LocalizationValue>> localizationLanguageValueMapByKey = new HashMap<>();
 		LocalizationKey.filter()
 				.application(NumericFilter.equalsFilter(0))
-				.localizationKeyType(EnumFilterType.EQUALS, LocalizationKeyType.DICTIONARY_KEY)
+				.localizationKeyType(EnumFilterType.EQUALS, LocalizationKeyType.SYSTEM_KEY)
 				.execute()
 				.stream()
 				.flatMap(key -> key.getLocalizationValues().stream()).forEach(value -> {
 			localizationLanguageValueMapByKey.computeIfAbsent(value.getLocalizationKey().getKey(), k -> new HashMap<>()).put(value.getLanguage(), value);
 		});
+		this.localizationLanguageValueMapByKey = localizationLanguageValueMapByKey;
 	}
 
-	public void addKey(String key, String language, String value) {
+	public void reload() {
+		loadData();
+	}
+
+	public void createKey(String key, String language, String value) {
 		if (!key.startsWith(SYSTEM_KEY_PREFIX)) {
 			key = SYSTEM_KEY_PREFIX + key;
 		}

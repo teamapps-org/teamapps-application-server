@@ -3,27 +3,20 @@ package org.teamapps.application.server.ux;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
-import org.teamapps.application.server.ux.translatable.TranslatableField;
+import org.teamapps.application.server.ux.localize.TranslatableField;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.icons.Icon;
 import org.teamapps.ux.component.field.DisplayField;
 import org.teamapps.ux.component.field.FieldEditingMode;
 import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.TextField;
-import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.field.combobox.TagBoxWrappingMode;
 import org.teamapps.ux.component.field.combobox.TagComboBox;
 import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.component.template.Template;
-import org.teamapps.ux.component.toolbar.Toolbar;
-import org.teamapps.ux.component.toolbar.ToolbarButton;
-import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
-import org.teamapps.ux.component.window.Window;
 import org.teamapps.ux.session.SessionContext;
 
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class UiUtils {
 
