@@ -45,7 +45,7 @@ public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 
 	@Override
 	public ApplicationVersion getApplicationVersion() {
-		return ApplicationVersion.create(0, 9);
+		return ApplicationVersion.create(0, 10);
 	}
 
 	@Override

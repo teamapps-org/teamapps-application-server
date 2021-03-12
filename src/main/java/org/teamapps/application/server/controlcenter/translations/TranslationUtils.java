@@ -1,0 +1,79 @@
+package org.teamapps.application.server.controlcenter.translations;
+
+import org.teamapps.model.controlcenter.*;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+public class TranslationUtils {
+
+	public static Predicate<LocalizationKey> getFilterPredicate(TranslationWorkState workState, String language) {
+		return switch (workState) {
+			case ALL ->  createFilterPredicate(language, null, null, null);
+			case CORRECTIONS_REQUIRED -> createFilterPredicate(language, null, createTranslationStates(TranslationState.TRANSLATION_REQUESTED), createVerificationStates(TranslationVerificationState.CORRECTIONS_REQUIRED));
+			case TRANSLATION_REQUIRED -> createFilterPredicate(language, null, createTranslationStates(TranslationState.TRANSLATION_REQUESTED), null);
+			case VERIFICATION_REQUIRED -> createFilterPredicate(language, null, createTranslationStates(TranslationState.OK), createVerificationStates(TranslationVerificationState.VERIFICATION_REQUESTED));
+			case VERIFIED -> createFilterPredicate(language, null, null, createVerificationStates(TranslationVerificationState.OK));
+			case UNCLEAR -> createFilterPredicate(language, null, createTranslationStates(TranslationState.UNCLEAR), null);
+			case TRANSLATION_NOT_NECESSARY -> createFilterPredicate(language, null, createTranslationStates(TranslationState.NOT_NECESSARY), null);
+		};
+	}
+
+	public static Predicate<LocalizationKey> createFilterPredicate(String language, Set<MachineTranslationState> machineTranslationStates, Set<TranslationState> translationStates, Set<TranslationVerificationState> verificationStates) {
+		return key -> {
+			LocalizationValue value = getValue(key, language);
+			if (value == null) {
+				return false;
+			}
+			if (machineTranslationStates != null && !machineTranslationStates.contains(value.getMachineTranslationState())) {
+				return false;
+			}
+			if (translationStates != null && !translationStates.contains(value.getTranslationState())) {
+				return false;
+			}
+			if (verificationStates != null && !verificationStates.contains(value.getTranslationVerificationState())) {
+				return false;
+			}
+			return true;
+		};
+	}
+
+	private static Set<MachineTranslationState> createMachineStates(MachineTranslationState... states) {
+		if (states == null || states.length == 0) {
+			return null;
+		} else {
+			return new HashSet<>(Arrays.asList(states));
+		}
+	}
+
+	private static Set<TranslationState> createTranslationStates(TranslationState... states) {
+		if (states == null || states.length == 0) {
+			return null;
+		} else {
+			return new HashSet<>(Arrays.asList(states));
+		}
+	}
+
+	private static Set<TranslationVerificationState> createVerificationStates(TranslationVerificationState... states) {
+		if (states == null || states.length == 0) {
+			return null;
+		} else {
+			return new HashSet<>(Arrays.asList(states));
+		}
+	}
+
+	public static LocalizationValue getValue(LocalizationKey key, String language) {
+		return key.getLocalizationValues().stream()
+				.filter(value -> language.equals(value.getLanguage()))
+				.findAny()
+				.orElse(null);
+	}
+
+	public static Map<String, LocalizationValue> getValueMap(LocalizationKey key) {
+		return key.getLocalizationValues().stream().collect(Collectors.toMap(LocalizationValue::getLanguage, k -> k));
+	}
+}
