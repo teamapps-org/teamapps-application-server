@@ -1,11 +1,14 @@
 package org.teamapps.application.server.system.localization;
 
 import org.teamapps.application.api.localization.LocalizationData;
+import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.machinetranslation.TranslationService;
 import org.teamapps.application.server.system.utils.KeyCompare;
+import org.teamapps.application.server.ux.IconUtils;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.enumeration.EnumFilterType;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
+import org.teamapps.universaldb.index.text.TextFilter;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -25,10 +28,13 @@ public class LocalizationUtil {
 		List<LocalizationKey> localizationKeys = LocalizationKey.filter().application(NumericFilter.equalsFilter(appIdFilter)).execute();
 		KeyCompare<String, LocalizationKey> keyCompare = new KeyCompare<>(localizationMapByKey.keySet(), localizationKeys, s -> s, LocalizationKey::getKey);
 		List<String> newKeys = keyCompare.getNotInB();
+
+		LocalizationTopic topic = getTopic(localizationKeyType, application);
 		for (String key : newKeys) {
 			LocalizationKey localizationKey = LocalizationKey.create()
 					.setApplication(application)
 					.setLocalizationKeyType(localizationKeyType)
+					.setTopics(topic)
 					.setUsed(true)
 					.setKey(key)
 					.save();
@@ -241,6 +247,27 @@ public class LocalizationUtil {
 		} else {
 			return text;
 		}
+	}
+
+	private static LocalizationTopic getTopic(LocalizationKeyType keyType, Application application) {
+		return switch (keyType) {
+			case APPLICATION_RESOURCE_KEY -> getOrCreateTopic(application.getName(), application.getIcon(), application);
+			case DICTIONARY_KEY -> getOrCreateTopic("Dictionary", IconUtils.encodeNoStyle(ApplicationIcons.DICTIONARY), application);
+			case SYSTEM_KEY -> getOrCreateTopic("System", IconUtils.encodeNoStyle(ApplicationIcons.SYSTEM), application);
+			case REPORTING_KEY -> getOrCreateTopic("Reporting", IconUtils.encodeNoStyle(ApplicationIcons.FORM), application);
+		};
+	}
+
+	private static LocalizationTopic getOrCreateTopic(String name, String icon, Application application) {
+		LocalizationTopic topic = LocalizationTopic.filter().title(TextFilter.textEqualsFilter(name)).executeExpectSingleton();
+		if (topic == null) {
+			topic = LocalizationTopic.create()
+					.setTitle(name)
+					.setApplication(application)
+					.setIcon(icon)
+					.save();
+		}
+		return topic;
 	}
 
 }

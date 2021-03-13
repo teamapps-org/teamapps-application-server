@@ -11,20 +11,24 @@ import java.util.stream.Collectors;
 
 public class TranslationUtils {
 
-	public static Predicate<LocalizationKey> getFilterPredicate(TranslationWorkState workState, String language) {
+	public static Predicate<LocalizationKey> getFilterPredicate(TranslationWorkState workState, String language, LocalizationTopic topic) {
+		if (workState == null || language == null) return null;
 		return switch (workState) {
-			case ALL ->  createFilterPredicate(language, null, null, null);
-			case CORRECTIONS_REQUIRED -> createFilterPredicate(language, null, createTranslationStates(TranslationState.TRANSLATION_REQUESTED), createVerificationStates(TranslationVerificationState.CORRECTIONS_REQUIRED));
-			case TRANSLATION_REQUIRED -> createFilterPredicate(language, null, createTranslationStates(TranslationState.TRANSLATION_REQUESTED), null);
-			case VERIFICATION_REQUIRED -> createFilterPredicate(language, null, createTranslationStates(TranslationState.OK), createVerificationStates(TranslationVerificationState.VERIFICATION_REQUESTED));
-			case VERIFIED -> createFilterPredicate(language, null, null, createVerificationStates(TranslationVerificationState.OK));
-			case UNCLEAR -> createFilterPredicate(language, null, createTranslationStates(TranslationState.UNCLEAR), null);
-			case TRANSLATION_NOT_NECESSARY -> createFilterPredicate(language, null, createTranslationStates(TranslationState.NOT_NECESSARY), null);
+			case ALL ->  createFilterPredicate(language, topic, null, null, null);
+			case CORRECTIONS_REQUIRED -> createFilterPredicate(language, topic, null, createTranslationStates(TranslationState.TRANSLATION_REQUESTED), createVerificationStates(TranslationVerificationState.CORRECTIONS_REQUIRED));
+			case TRANSLATION_REQUIRED -> createFilterPredicate(language, topic, null, createTranslationStates(TranslationState.TRANSLATION_REQUESTED), null);
+			case VERIFICATION_REQUIRED -> createFilterPredicate(language, topic, null, createTranslationStates(TranslationState.OK), createVerificationStates(TranslationVerificationState.VERIFICATION_REQUESTED));
+			case VERIFIED -> createFilterPredicate(language, topic, null, null, createVerificationStates(TranslationVerificationState.OK));
+			case UNCLEAR -> createFilterPredicate(language, topic, null, createTranslationStates(TranslationState.UNCLEAR), null);
+			case TRANSLATION_NOT_NECESSARY -> createFilterPredicate(language, topic, null, createTranslationStates(TranslationState.NOT_NECESSARY), null);
 		};
 	}
 
-	public static Predicate<LocalizationKey> createFilterPredicate(String language, Set<MachineTranslationState> machineTranslationStates, Set<TranslationState> translationStates, Set<TranslationVerificationState> verificationStates) {
+	public static Predicate<LocalizationKey> createFilterPredicate(String language, LocalizationTopic topic, Set<MachineTranslationState> machineTranslationStates, Set<TranslationState> translationStates, Set<TranslationVerificationState> verificationStates) {
 		return key -> {
+			if (topic != null && !key.getTopics().contains(topic)) {
+				return false;
+			}
 			LocalizationValue value = getValue(key, language);
 			if (value == null) {
 				return false;
@@ -42,7 +46,7 @@ public class TranslationUtils {
 		};
 	}
 
-	private static Set<MachineTranslationState> createMachineStates(MachineTranslationState... states) {
+	public static Set<MachineTranslationState> createMachineStates(MachineTranslationState... states) {
 		if (states == null || states.length == 0) {
 			return null;
 		} else {
@@ -50,7 +54,7 @@ public class TranslationUtils {
 		}
 	}
 
-	private static Set<TranslationState> createTranslationStates(TranslationState... states) {
+	public static Set<TranslationState> createTranslationStates(TranslationState... states) {
 		if (states == null || states.length == 0) {
 			return null;
 		} else {
@@ -58,7 +62,7 @@ public class TranslationUtils {
 		}
 	}
 
-	private static Set<TranslationVerificationState> createVerificationStates(TranslationVerificationState... states) {
+	public static Set<TranslationVerificationState> createVerificationStates(TranslationVerificationState... states) {
 		if (states == null || states.length == 0) {
 			return null;
 		} else {
@@ -67,10 +71,21 @@ public class TranslationUtils {
 	}
 
 	public static LocalizationValue getValue(LocalizationKey key, String language) {
+		if (key == null) return null;
 		return key.getLocalizationValues().stream()
 				.filter(value -> language.equals(value.getLanguage()))
 				.findAny()
 				.orElse(null);
+	}
+
+	public static String getDisplayValue(LocalizationKey key, String language) {
+		LocalizationValue value = getValue(key, language);
+		return value != null ? value.getCurrentDisplayValue() : null;
+	}
+
+	public static String getDisplayValueNonNull(LocalizationKey key, String language) {
+		String value = getDisplayValue(key, language);
+		return value != null ? value : "";
 	}
 
 	public static Map<String, LocalizationValue> getValueMap(LocalizationKey key) {

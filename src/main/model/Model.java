@@ -182,6 +182,8 @@ public class Model implements SchemaInfoProvider {
 
 		localizationTopic
 				.addReference("keys", localizationKey, true, "topics")
+				.addReference("application", application, false)
+				.addText("icon")
 				.addText("title")
 				.addFile("screenshot")
 		;

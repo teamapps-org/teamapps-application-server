@@ -20,6 +20,10 @@ import java.util.List;
 
 public class UiUtils {
 
+	public static void showNotification(Icon icon, String title) {
+		SessionContext.current().showNotification(icon, title);
+	}
+
 	public static void showSaveNotification(boolean success, ApplicationInstanceData applicationInstanceData) {
 		SessionContext.current().showNotification(
 				success ? ApplicationIcons.OK : ApplicationIcons.ERROR,
