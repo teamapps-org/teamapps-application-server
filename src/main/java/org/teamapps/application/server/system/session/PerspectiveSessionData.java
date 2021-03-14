@@ -10,9 +10,10 @@ import org.teamapps.application.api.organization.OrgUnit;
 import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.user.SessionUser;
 import org.teamapps.icons.Icon;
-import org.teamapps.model.controlcenter.ApplicationActivity;
+import org.teamapps.model.controlcenter.LogLevel;
 import org.teamapps.model.controlcenter.ManagedApplication;
 import org.teamapps.model.controlcenter.ManagedApplicationPerspective;
+import org.teamapps.model.controlcenter.SystemLog;
 import org.teamapps.reporting.convert.DocumentConverter;
 import org.teamapps.universaldb.index.translation.TranslatableText;
 import org.teamapps.ux.application.perspective.Perspective;
@@ -67,6 +68,10 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 		}
 	}
 
+	public ManagedApplicationPerspective getManagedApplicationPerspective() {
+		return managedApplicationPerspective;
+	}
+
 	public ManagedApplicationSessionData getManagedApplicationSessionData() {
 		return managedApplicationSessionData;
 	}
@@ -117,24 +122,24 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 
 	@Override
 	public void writeActivityLog(String title, String data) {
-		ApplicationActivity.create()
+		SystemLog.create()
 				.setManagedApplication(managedApplication)
 				.setManagedPerspective(managedApplicationPerspective)
 				.setApplication(managedApplicationPerspective.getApplicationPerspective().getApplication())
-				.setError(true)
-				.setActivity(title)
+				.setLogLevel(LogLevel.INFO)
+				.setMessage(title)
 				.setDetails(data)
 				.save();
 	}
 
 	@Override
 	public void writeExceptionLog(String title, Throwable throwable) {
-		ApplicationActivity.create()
+		SystemLog.create()
 				.setManagedApplication(managedApplication)
 				.setManagedPerspective(managedApplicationPerspective)
 				.setApplication(managedApplicationPerspective.getApplicationPerspective().getApplication())
-				.setError(true)
-				.setActivity(title)
+				.setLogLevel(LogLevel.ERROR)
+				.setMessage(title)
 				.setDetails(ExceptionUtils.getStackTrace(throwable))
 				.save();
 	}

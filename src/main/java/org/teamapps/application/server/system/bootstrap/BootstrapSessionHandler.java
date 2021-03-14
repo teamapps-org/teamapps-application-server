@@ -10,6 +10,7 @@ import org.teamapps.application.server.controlcenter.ControlCenterAppBuilder;
 import org.teamapps.application.server.controlcenter.dbexplorer.DatabaseExplorerAppBuilder;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
 import org.teamapps.application.server.system.config.SystemConfig;
+import org.teamapps.application.server.system.logging.DatabaseLogAppender;
 import org.teamapps.application.server.system.login.LoginHandler;
 import org.teamapps.application.server.system.machinetranslation.MachineTranslation;
 import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
@@ -68,6 +69,7 @@ public class BootstrapSessionHandler implements SessionHandler {
 		ControlCenterSchema schema = new ControlCenterSchema();
 		universalDB.addAuxiliaryModel(schema, classLoader);
 		universalDB.installAuxiliaryModelClassed(schema, classLoader);
+		DatabaseLogAppender.startLogger();
 		ApplicationConfigXml<SystemConfig> configHandler = new ApplicationConfigXml<>();
 		File systemConfigFile = new File(configPath, "systemConfig.xml");
 		SystemConfig systemConfig = null;

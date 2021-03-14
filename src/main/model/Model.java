@@ -26,13 +26,14 @@ public class Model implements SchemaInfoProvider {
 
 
 		Table systemSettings = db.addTable("systemSettings", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
+		Table systemLog = db.addTable("systemLog", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
 		Table application = db.addTable("application", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
 		Table applicationPerspective = db.addTable("applicationPerspective", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
 		Table applicationPrivilegeGroup = db.addTable("applicationPrivilegeGroup", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
 		Table applicationPrivilege = db.addTable("applicationPrivilege", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
 		Table applicationVersion = db.addTable("applicationVersion", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
 		Table applicationVersionData = db.addTable("applicationVersionData", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
-		Table applicationActivity = db.addTable("applicationActivity", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION);
+
 		Table managedApplication = db.addTable("managedApplication", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
 		Table managedApplicationPerspective = db.addTable("managedApplicationPerspective", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
 
@@ -116,13 +117,14 @@ public class Model implements SchemaInfoProvider {
 				.addInteger("dataRemovedRows")
 		;
 
-		applicationActivity
+		systemLog
+				.addReference("application", application, false)
 				.addReference("managedApplication", managedApplication, false)
 				.addReference("managedPerspective", managedApplicationPerspective, false)
-				.addReference("application", application, false)
-				.addBoolean("error")
-				.addText("activity")
+				.addEnum("logLevel", "info", "warning", "error")
+				.addText("message")
 				.addText("details")
+				.addText("exceptionClass")
 		;
 
 		managedApplication

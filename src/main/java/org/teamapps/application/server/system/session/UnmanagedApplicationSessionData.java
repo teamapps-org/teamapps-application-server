@@ -8,12 +8,13 @@ import org.teamapps.application.api.organization.OrgField;
 import org.teamapps.application.api.organization.OrgUnit;
 import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.user.SessionUser;
+import org.teamapps.model.controlcenter.LogLevel;
 import org.teamapps.model.controlcenter.ManagedApplication;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.icons.Icon;
+import org.teamapps.model.controlcenter.SystemLog;
 import org.teamapps.reporting.convert.DocumentConverter;
 import org.teamapps.model.controlcenter.Application;
-import org.teamapps.model.controlcenter.ApplicationActivity;
 import org.teamapps.universaldb.index.translation.TranslatableText;
 import org.teamapps.ux.application.ResponsiveApplication;
 import org.teamapps.ux.application.perspective.Perspective;
@@ -86,20 +87,22 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 
 	@Override
 	public void writeActivityLog(String title, String data) {
-		ApplicationActivity.create()
+		SystemLog.create()
+				.setManagedApplication(managedApplication)
 				.setApplication(application)
-				.setError(true)
-				.setActivity(title)
+				.setLogLevel(LogLevel.INFO)
+				.setMessage(title)
 				.setDetails(data)
 				.save();
 	}
 
 	@Override
 	public void writeExceptionLog(String title, Throwable throwable) {
-		ApplicationActivity.create()
+		SystemLog.create()
+				.setManagedApplication(managedApplication)
 				.setApplication(application)
-				.setError(true)
-				.setActivity(title)
+				.setLogLevel(LogLevel.ERROR)
+				.setMessage(title)
 				.setDetails(ExceptionUtils.getStackTrace(throwable))
 				.save();
 	}

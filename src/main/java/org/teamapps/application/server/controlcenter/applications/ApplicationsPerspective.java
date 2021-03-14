@@ -29,6 +29,7 @@ import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.view.View;
+import org.teamapps.ux.component.Component;
 import org.teamapps.ux.component.dialogue.FormDialogue;
 import org.teamapps.ux.component.field.*;
 import org.teamapps.ux.component.field.combobox.TagBoxWrappingMode;
@@ -69,11 +70,14 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 	}
 
 	private void createMenu() {
-		setPerspectiveMenuPanel(PerspectiveMenuPanel.createMenuPanel(getApplicationInstanceData(),
-				new ApplicationsPerspectiveBuilder(),
+		ApplicationsPerspectiveBuilder applicationsPerspectiveBuilder = new ApplicationsPerspectiveBuilder();
+		PerspectiveMenuPanel menuPanel = PerspectiveMenuPanel.createMenuPanel(getApplicationInstanceData(),
+				applicationsPerspectiveBuilder,
 				new ApplicationProvisioningPerspectiveBuilder(),
 				new ApplicationGroupsPerspectiveBuilder()
-		));
+		);
+		menuPanel.addInstantiatedPerspective(applicationsPerspectiveBuilder, this);
+		setPerspectiveMenuPanel(menuPanel.getComponent());
 	}
 
 

@@ -3,6 +3,8 @@ package org.teamapps.application.server.system.template;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.localization.Dictionary;
+import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.data.extract.PropertyProvider;
@@ -117,6 +119,29 @@ public class PropertyProviders {
 			Map<String, Object> map = new HashMap<>();
 			map.put(BaseTemplate.PROPERTY_ICON, orgField.getIcon() != null ? SessionContext.current().getIconProvider().decodeIcon(orgField.getIcon()) : null);
 			map.put(BaseTemplate.PROPERTY_CAPTION, applicationInstanceData.getLocalized(orgField.getTitle()));
+			return map;
+		};
+	}
+
+	public static PropertyProvider<User> createUserPropertyProvider() {
+		return (user, propertyNames) -> {
+			Map<String, Object> map = new HashMap<>();
+			if (user.getProfilePicture() != null) {
+				map.put(BaseTemplate.PROPERTY_IMAGE, SessionContext.current().createFileLink(user.getProfilePicture().retrieveFile())); //todo optimize: access should be cached!
+			} else {
+				map.put(BaseTemplate.PROPERTY_ICON, ApplicationIcons.USER);
+			}
+			map.put(BaseTemplate.PROPERTY_CAPTION, user.getLastName() + ", " + user.getFirstName());
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, null); //user.getContainer() != null ? user.getContainer().getOrganizationUnit().getName().getText() :
+			return map;
+		};
+	}
+
+	public static PropertyProvider<String> createStringPropertyProvider(Icon icon) {
+		return (s, propertyNames) -> {
+			Map<String, Object> map = new HashMap<>();
+			map.put(BaseTemplate.PROPERTY_ICON, icon);
+			map.put(BaseTemplate.PROPERTY_CAPTION, s);
 			return map;
 		};
 	}

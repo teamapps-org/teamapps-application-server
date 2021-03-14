@@ -1,8 +1,11 @@
 package org.teamapps.application.server.system.launcher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.application.ApplicationPerspective;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.login.LoginHandler;
@@ -15,6 +18,8 @@ import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ManagedApplication;
 import org.teamapps.model.controlcenter.ManagedApplicationGroup;
 import org.teamapps.model.controlcenter.ManagedApplicationPerspective;
+import org.teamapps.universaldb.UniversalDB;
+import org.teamapps.universaldb.transaction.Transaction;
 import org.teamapps.ux.application.ResponsiveApplication;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.perspective.Perspective;
@@ -39,10 +44,15 @@ import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
 import org.teamapps.ux.component.tree.Tree;
 import org.teamapps.ux.model.ListTreeModel;
 
+import java.lang.invoke.MethodHandles;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ApplicationLauncher {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+	public static final ThreadLocal<ManagedApplication> THREAD_LOCAL_APPLICATION = new ThreadLocal<>();
+	public static final ThreadLocal<ManagedApplicationPerspective> THREAD_LOCAL_MANAGED_PERSPECTIVE = new ThreadLocal<>();
 
 	private final UserSessionData userSessionData;
 	private final SystemRegistry registry;
@@ -54,12 +64,21 @@ public class ApplicationLauncher {
 	private Map<ApplicationData, Tab> tabByApplicationData = new HashMap<>();
 	private Map<ApplicationData, Component> mobilAppByApplicationData = new HashMap<>();
 	private TabPanel applicationsTabPanel;
+	private ManagedApplication currentApplication;
+	private ManagedApplicationPerspective currentPerspective;
 
 	public ApplicationLauncher(UserSessionData userSessionData) {
+		//System.out.println(applicationLauncher.getParent());
 		this.userSessionData = userSessionData;
 		this.rootPanel = userSessionData.getRootPanel();
 		this.registry = userSessionData.getRegistry();
 		this.mobileView = userSessionData.getContext().getClientInfo().isMobileDevice();
+		userSessionData.getContext().addExecutionDecorator(runnable -> {
+			UniversalDB.setUserId(userSessionData.getUser().getId());
+			THREAD_LOCAL_APPLICATION.set(currentApplication);
+			THREAD_LOCAL_MANAGED_PERSPECTIVE.set(currentPerspective);
+			runnable.run();
+		}, true);
 		initApplicationData();
 		createApplicationLauncher();
 		createMainView();
@@ -95,13 +114,11 @@ public class ApplicationLauncher {
 			}
 		}
 		if (mobileView) {
-			//add logout button
 			SimpleItemGroup<ApplicationData> itemGroup = new SimpleItemGroup<>(ApplicationIcons.DELETE, getLocalized(Dictionary.LOGOUT), BaseTemplate.LIST_ITEM_EXTRA_VERY_LARGE_ICON_TWO_LINES);
 			itemView.addGroup(itemGroup);
 			itemGroup.setButtonWidth(220);
 			SimpleItem<ApplicationData> item = itemGroup.addItem(ApplicationIcons.DELETE, getLocalized(Dictionary.LOGOUT), getLocalized(Dictionary.LOGOUT));
 			item.onClick.addListener(this::logout);
-
 		}
 		applicationLauncher = createLauncherView(itemView, mobileView);
 	}
@@ -131,6 +148,9 @@ public class ApplicationLauncher {
 	}
 
 	private void openApplication(ApplicationData applicationData) {
+		currentApplication = applicationData.getManagedApplication();
+		THREAD_LOCAL_APPLICATION.set(currentApplication);
+		LOGGER.info("Open app");
 		if (openedApplications.contains(applicationData)) {
 			if (mobileView) {
 				Component component = mobilAppByApplicationData.get(applicationData);
@@ -155,6 +175,7 @@ public class ApplicationLauncher {
 				tab.onClosed.addListener(() -> {
 					tabByApplicationData.remove(applicationData);
 					openedApplications.remove(applicationData);
+					applicationData.reloadApplicationData(userSessionData);
 				});
 				applicationsTabPanel.addTab(tab, true);
 			}
@@ -206,6 +227,8 @@ public class ApplicationLauncher {
 	}
 
 	private void showPerspective(PerspectiveSessionData perspectiveSessionData, MobileLayout mobileLayout, View applicationMenu, Map<PerspectiveSessionData, ApplicationPerspective> applicationPerspectiveByPerspectiveBuilder) {
+		currentPerspective = perspectiveSessionData.getManagedApplicationPerspective();
+		THREAD_LOCAL_MANAGED_PERSPECTIVE.set(currentPerspective);
 		ResponsiveApplication responsiveApplication = perspectiveSessionData.getManagedApplicationSessionData().getResponsiveApplication();
 		ApplicationPerspective applicationPerspective = applicationPerspectiveByPerspectiveBuilder.get(perspectiveSessionData);
 		if (applicationPerspective == null) {
@@ -308,6 +331,8 @@ public class ApplicationLauncher {
 	}
 
 	private void showPerspective(PerspectiveSessionData perspectiveSessionData, ToolbarButton backButton, MobileLayout mobileLayout, Map<PerspectiveSessionData, ApplicationPerspective> applicationPerspectiveByPerspectiveBuilder) {
+		currentPerspective = perspectiveSessionData.getManagedApplicationPerspective();
+		THREAD_LOCAL_MANAGED_PERSPECTIVE.set(currentPerspective);
 		ResponsiveApplication responsiveApplication = perspectiveSessionData.getManagedApplicationSessionData().getResponsiveApplication();
 		ApplicationPerspective applicationPerspective = applicationPerspectiveByPerspectiveBuilder.get(perspectiveSessionData);
 		if (applicationPerspective == null) {
@@ -319,6 +344,10 @@ public class ApplicationLauncher {
 		if (applicationPerspective.getPerspectiveMenuPanel() != null) {
 			backButton.setVisible(true);
 			mobileLayout.setContent(applicationPerspective.getPerspectiveMenuPanel(), PageTransition.MOVE_TO_LEFT_VS_MOVE_FROM_RIGHT, 500);
+		}
+		if (applicationPerspective instanceof AbstractManagedApplicationPerspective) {
+			AbstractManagedApplicationPerspective managedApplicationPerspective = (AbstractManagedApplicationPerspective) applicationPerspective;
+			managedApplicationPerspective.handleOnAfterLoad();
 		}
 	}
 

@@ -25,6 +25,10 @@ public abstract class AbstractManagedApplicationPerspective extends AbstractAppl
 		organizationField = OrganizationUtils.convert(getApplicationInstanceData().getOrganizationField());
 	}
 
+	public void handleOnAfterLoad() {
+
+	}
+
 	public boolean isAppFilter() {
 		return isOrgFieldFilterApplied() && getMainApplication() != null;
 	}

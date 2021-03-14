@@ -61,7 +61,6 @@ public class LoginHandler {
 	}
 
 	private void handleSuccessfulLogin(User user, RootPanel rootPanel, SessionContext context) {
-		UniversalDB.setUserId(user.getId());
 		new ApplicationLauncher(new UserSessionData(user, context, systemRegistry, rootPanel));
 	}
 }

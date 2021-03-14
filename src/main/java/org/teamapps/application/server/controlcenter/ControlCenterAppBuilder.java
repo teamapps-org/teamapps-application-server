@@ -11,6 +11,7 @@ import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.api.versioning.ApplicationVersion;
 import org.teamapps.application.server.controlcenter.accesscontrol.AccessControlPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.applications.ApplicationsPerspectiveBuilder;
+import org.teamapps.application.server.controlcenter.applocal.AppLocalAdministrationPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.database.DataBasePerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.organization.OrganizationPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.roles.RolesPerspectiveBuilder;
@@ -39,13 +40,14 @@ public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 				new TranslationsPerspectiveBuilder(),
 				new SystemLogPerspectiveBuilder(),
 				new DataBasePerspectiveBuilder(),
-				new SystemConfigurationPerspectiveBuilder()
+				new SystemConfigurationPerspectiveBuilder(),
+				new AppLocalAdministrationPerspectiveBuilder()
 		);
 	}
 
 	@Override
 	public ApplicationVersion getApplicationVersion() {
-		return ApplicationVersion.create(0, 11);
+		return ApplicationVersion.create(0, 13);
 	}
 
 	@Override

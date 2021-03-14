@@ -5,14 +5,15 @@ import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.session.ManagedApplicationSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.icons.Icon;
+import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ManagedApplication;
 
 public class ApplicationData {
 
 
 	private final ManagedApplication managedApplication;
-	private final LoadedApplication loadedApplication;
-	private final ManagedApplicationSessionData applicationSessionData;
+	private LoadedApplication loadedApplication;
+	private ManagedApplicationSessionData applicationSessionData;
 	private final Icon icon;
 	private final String title;
 	private final String description;
@@ -28,6 +29,12 @@ public class ApplicationData {
 		this.title = managedApplication.getTitleKey() != null ? localizationProvider.getLocalized(managedApplication.getTitleKey()) : localizationProvider.getLocalized(loadedApplication.getApplicationBuilder().getApplicationTitleKey());
 		this.description = managedApplication.getDescriptionKey() != null ? localizationProvider.getLocalized(managedApplication.getDescriptionKey()) : localizationProvider.getLocalized(loadedApplication.getApplicationBuilder().getApplicationDescriptionKey());
 		this.applicationPosition = managedApplication.getListingPosition();
+	}
+
+	public void reloadApplicationData(UserSessionData userSessionData) {
+		Application application = managedApplication.getMainApplication();
+		loadedApplication = userSessionData.getRegistry().getLoadedApplication(application);
+		applicationSessionData = userSessionData.createManageApplicationSessionData(managedApplication, new MobileApplicationNavigation());
 	}
 
 	public ManagedApplication getManagedApplication() {
