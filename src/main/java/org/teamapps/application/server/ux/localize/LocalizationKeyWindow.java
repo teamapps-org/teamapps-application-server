@@ -78,7 +78,7 @@ public class LocalizationKeyWindow {
 						.localizationKeyType(EnumFilterType.EQUALS, LocalizationKeyType.SYSTEM_KEY);
 			}
 			LocalizationKey key = keyQuery.executeExpectSingleton();
-			if (key != null || s.length() < 3 || s.contains(" ")) {
+			if (key != null || s == null || s.length() < 3 || s.contains(" ")) {
 				return Collections.singletonList(new FieldMessage(FieldMessage.Severity.ERROR, applicationInstanceData.getLocalized(Dictionary.ERROR_TRANSLATION_KEY_ALREADY_EXISTS)));
 			} else {
 				return null;

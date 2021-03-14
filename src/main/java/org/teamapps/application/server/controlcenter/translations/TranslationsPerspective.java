@@ -24,6 +24,7 @@ import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.view.View;
 import org.teamapps.ux.component.field.DisplayField;
+import org.teamapps.ux.component.field.FieldMessage;
 import org.teamapps.ux.component.field.MultiLineTextField;
 import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.combobox.ComboBox;
@@ -312,16 +313,32 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		});
 
 		verifiedButton.onClick.addListener(() -> {
-
+			LocalizationValue value = TranslationUtils.getValue(selectedKey.get(), currentLanguage);
+			if (value != null && value.getTranslation() != null && value.getTranslationState() == TranslationState.OK) {
+				value.setTranslationVerificationState(TranslationVerificationState.OK).save();
+				keyModelBuilder.selectNextRecord();
+				UiUtils.showSaveNotification(true, getApplicationInstanceData());
+			}
 		});
 
 		incorrectButton.onClick.addListener(() -> {
-
+			LocalizationValue value = TranslationUtils.getValue(selectedKey.get(), currentLanguage);
+			String notes = proofReadNotesField.getValue();
+			if (notes != null && value != null && value.getTranslation() != null && value.getTranslationState() == TranslationState.OK) {
+				value
+						.setTranslationVerificationState(TranslationVerificationState.CORRECTIONS_REQUIRED)
+						.setTranslationState(TranslationState.TRANSLATION_REQUESTED)
+						.setNotes(notes)
+						.save();
+				keyModelBuilder.selectNextRecord();
+				UiUtils.showNotification(ApplicationIcons.OK, getLocalized("translations.translationSuccessfullyRejected"));
+			}
 		});
 
 
 		selectedKey.onChanged().addListener(key -> {
 			Map<String, LocalizationValue> valueMap = TranslationUtils.getValueMap(key);
+			translationField.clearCustomFieldMessages();
 			LocalizationValue languageValue = valueMap.get(currentLanguage);
 			LocalizationValue template1Value = valueMap.get(currentTemplate1);
 			LocalizationValue template2Value = valueMap.get(currentTemplate2);
@@ -333,6 +350,10 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 			template1ValueField.setValue(template1Value == null ? " --- " : template1Value.getCurrentDisplayValue() != null ? template1Value.getCurrentDisplayValue() : " --- ");
 			template2HeaderField.setValue(template2Value);
 			template2ValueField.setValue(template2Value == null ? " --- " : template2Value.getCurrentDisplayValue() != null ? template2Value.getCurrentDisplayValue() : " --- ");
+			if (languageValue != null && languageValue.getNotes() != null) {
+				translationField.addCustomFieldMessage(FieldMessage.Severity.WARNING, languageValue.getNotes());
+			}
+			proofReadNotesField.setValue(languageValue != null ? languageValue.getNotes() : null);
 		});
 
 		languageCombo.onValueChanged.addListener(language -> {
