@@ -142,9 +142,14 @@ public class PropertyProviders {
 	public static PropertyProvider<OrganizationUnit> creatOrganizationUnitPropertyProvider(ApplicationInstanceData applicationInstanceData) {
 		Function<TranslatableText, String> translatableTextExtractor = TranslatableTextUtils.createTranslatableTextExtractor(applicationInstanceData);
 		return (unit, propertyNames) -> {
+			String prefix = "";
+			String abbreviation = translatableTextExtractor.apply(unit.getType().getAbbreviation());
+			if (abbreviation != null) {
+				prefix = abbreviation + "-";
+			}
 			Map<String, Object> map = new HashMap<>();
-			map.put(BaseTemplate.PROPERTY_ICON, IconUtils.decodeIcon(unit.getIcon()));
-			map.put(BaseTemplate.PROPERTY_CAPTION, translatableTextExtractor.apply(unit.getName()));
+			map.put(BaseTemplate.PROPERTY_ICON, unit.getIcon() != null ? IconUtils.decodeIcon(unit.getIcon()) : IconUtils.decodeIcon(unit.getType().getIcon()));
+			map.put(BaseTemplate.PROPERTY_CAPTION, prefix + translatableTextExtractor.apply(unit.getName()));
 			map.put(BaseTemplate.PROPERTY_DESCRIPTION, translatableTextExtractor.apply(unit.getType().getName()));
 			return map;
 		};
