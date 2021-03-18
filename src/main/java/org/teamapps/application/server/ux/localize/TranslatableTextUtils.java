@@ -11,9 +11,30 @@ import org.teamapps.ux.component.template.BaseTemplate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class TranslatableTextUtils {
 
+	public static Function<TranslatableText, String> createTranslatableTextExtractor(ApplicationInstanceData applicationInstanceData) {
+		List<String> rankedLanguages = applicationInstanceData.getUser().getRankedLanguages();
+		return translatableText -> {
+			if (translatableText == null) {
+				return null;
+			}
+			Map<String, String> translationMap = translatableText.getTranslationMap();
+			for (String language : rankedLanguages) {
+				String value = translationMap.get(language);
+				if (value != null) {
+					return value;
+				}
+			}
+			return translatableText.getText();
+		};
+	}
+
+	public static TranslatableField createTranslatableField(ApplicationInstanceData applicationInstanceData) {
+		return new TranslatableField(applicationInstanceData);
+	}
 
 	public static TemplateField<TranslatableText> createTranslatableTemplateField(ApplicationInstanceData applicationInstanceData) {
 		TemplateField<TranslatableText> templateField = new TemplateField<>(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
