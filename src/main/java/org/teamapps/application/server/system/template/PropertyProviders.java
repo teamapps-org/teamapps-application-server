@@ -4,15 +4,20 @@ import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.controlcenter.translations.TranslationUtils;
+import org.teamapps.application.server.ux.IconUtils;
+import org.teamapps.application.server.ux.localize.TranslatableTextUtils;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.data.extract.PropertyProvider;
+import org.teamapps.universaldb.index.translation.TranslatableText;
 import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.session.SessionContext;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class PropertyProviders {
 
@@ -117,11 +122,34 @@ public class PropertyProviders {
 	public static PropertyProvider<OrganizationField> createOrganizationFieldPropertyProvider(ApplicationInstanceData applicationInstanceData) {
 		return (orgField, propertyNames) -> {
 			Map<String, Object> map = new HashMap<>();
-			map.put(BaseTemplate.PROPERTY_ICON, orgField.getIcon() != null ? SessionContext.current().getIconProvider().decodeIcon(orgField.getIcon()) : null);
+			map.put(BaseTemplate.PROPERTY_ICON, IconUtils.decodeIcon(orgField.getIcon()));
 			map.put(BaseTemplate.PROPERTY_CAPTION, applicationInstanceData.getLocalized(orgField.getTitle()));
 			return map;
 		};
 	}
+
+	public static PropertyProvider<OrganizationUnitType> creatOrganizationUnitTypePropertyProvider(ApplicationInstanceData applicationInstanceData) {
+		Function<TranslatableText, String> translatableTextExtractor = TranslatableTextUtils.createTranslatableTextExtractor(applicationInstanceData);
+		return (unitType, propertyNames) -> {
+			Map<String, Object> map = new HashMap<>();
+			map.put(BaseTemplate.PROPERTY_ICON, IconUtils.decodeIcon(unitType.getIcon()));
+			map.put(BaseTemplate.PROPERTY_CAPTION, translatableTextExtractor.apply(unitType.getName()));
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, translatableTextExtractor.apply(unitType.getAbbreviation()));
+			return map;
+		};
+	}
+
+	public static PropertyProvider<OrganizationUnit> creatOrganizationUnitPropertyProvider(ApplicationInstanceData applicationInstanceData) {
+		Function<TranslatableText, String> translatableTextExtractor = TranslatableTextUtils.createTranslatableTextExtractor(applicationInstanceData);
+		return (unit, propertyNames) -> {
+			Map<String, Object> map = new HashMap<>();
+			map.put(BaseTemplate.PROPERTY_ICON, IconUtils.decodeIcon(unit.getIcon()));
+			map.put(BaseTemplate.PROPERTY_CAPTION, translatableTextExtractor.apply(unit.getName()));
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, translatableTextExtractor.apply(unit.getType().getName()));
+			return map;
+		};
+	}
+
 
 	public static PropertyProvider<User> createUserPropertyProvider() {
 		return (user, propertyNames) -> {
