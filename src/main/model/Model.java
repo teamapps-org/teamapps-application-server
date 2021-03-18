@@ -18,6 +18,7 @@ public class Model implements SchemaInfoProvider {
 		Table organizationUnitType = db.addTable("organizationUnitType", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table organizationField = db.addTable("organizationField", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table userContainer = db.addTable("userContainer", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
+		Table address = db.addTable("address", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 
 		Table role = db.addTable("role", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table userRoleAssignment = db.addTable("userRoleAssignment", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
@@ -202,6 +203,7 @@ public class Model implements SchemaInfoProvider {
 				.addText("password")
 				.addText("theme")
 				.addEnum("userAccountStatus", "active", "inactive", "superAdmin")
+				.addReference("address", address, false)
 				.addReference("container", userContainer, false, "users")
 				.addReference("accessTokens", userAccessToken, true, "user")
 				.addReference("roleAssignments", userRoleAssignment, true, "user")
@@ -218,12 +220,41 @@ public class Model implements SchemaInfoProvider {
 				.addText("secureToken")
 		;
 
+		/*
+			https://github.com/google/libaddressinput/blob/master/common/src/main/java/com/google/i18n/addressinput/common/RegionDataConstants.java
+			https://github.com/google/libaddressinput/wiki/AddressValidationMetadata
+
+			N – Name
+			O – Organisation
+			A – Street Address Line(s)
+			D – Dependent locality (may be an inner-city district or a suburb)
+			C – City or Locality
+			S – Administrative area such as a state, province, island etc
+			Z – Zip or postal code
+
+		 */
+
+		address
+				.addText("name") //N
+				.addText("organisation") //O
+				.addText("street") //A
+				.addText("city") //C //City/Town/Village
+				.addText("dependentLocality") //D
+				.addText("state") //S  //State/Province/County
+				.addText("postalCode") //Z //ZIP code/Postal code
+				.addText("country")
+				.addFloat("latitude")
+				.addFloat("longitude")
+
+		;
+
 		organizationUnit
 				.addTranslatableText("name")
 				.addReference("parent", organizationUnit, false, "children")
 				.addReference("children", organizationUnit, true, "parent")
 				.addReference("type", organizationUnitType, false)
 				.addText("icon")
+				.addReference("address", address, false)
 				.addReference("userContainer", userContainer, false, "organizationUnit")
 		;
 
@@ -235,6 +266,7 @@ public class Model implements SchemaInfoProvider {
 				.addBoolean("allowUserContainer")
 				.addReference("defaultChildType", organizationUnitType, false)
 				.addReference("possibleChildrenTypes", organizationUnitType, true)
+				.addEnum("geoLocationType", "country", "state", "city", "place", "none")
 		;
 
 		organizationField
