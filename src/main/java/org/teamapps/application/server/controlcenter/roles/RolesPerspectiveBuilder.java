@@ -20,6 +20,6 @@ public class RolesPerspectiveBuilder extends AbstractPerspectiveBuilder {
 
 	@Override
 	public ApplicationPerspective build(ApplicationInstanceData applicationInstanceData, MutableValue<String> mutableValue) {
-		return null;
+		return new RolesPerspective(applicationInstanceData, mutableValue);
 	}
 }

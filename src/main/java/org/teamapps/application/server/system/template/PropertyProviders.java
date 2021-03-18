@@ -155,6 +155,17 @@ public class PropertyProviders {
 		};
 	}
 
+	public static PropertyProvider<Role> createRolePropertyProvider(ApplicationInstanceData applicationInstanceData) {
+		return (role, propertyNames) -> {
+			Map<String, Object> map = new HashMap<>();
+			map.put(BaseTemplate.PROPERTY_ICON, IconUtils.decodeIcon(role.getIcon()));
+			map.put(BaseTemplate.PROPERTY_CAPTION, applicationInstanceData.getLocalized(role.getTitle()));
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, applicationInstanceData.getLocalized(role.getOrganizationField().getTitle()));
+			return map;
+		};
+	}
+
+
 
 	public static PropertyProvider<User> createUserPropertyProvider() {
 		return (user, propertyNames) -> {
