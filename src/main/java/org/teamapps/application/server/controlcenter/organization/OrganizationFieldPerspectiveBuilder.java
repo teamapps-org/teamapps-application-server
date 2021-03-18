@@ -7,10 +7,10 @@ import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.databinding.MutableValue;
 
-public class OrganizationUnitTypePerspectiveBuilder extends AbstractPerspectiveBuilder {
+public class OrganizationFieldPerspectiveBuilder extends AbstractPerspectiveBuilder {
 
-	public OrganizationUnitTypePerspectiveBuilder() {
-		super("organizationUnitTypePerspective", ApplicationIcons.ELEMENTS_CASCADE, "organizationUnitType.title", "organizationUnitType.desc");
+	public OrganizationFieldPerspectiveBuilder() {
+		super("organizationFieldPerspective", ApplicationIcons.ELEMENTS_TREE, "organizationField.title", "organizationField.desc");
 	}
 
 	@Override
@@ -20,6 +20,6 @@ public class OrganizationUnitTypePerspectiveBuilder extends AbstractPerspectiveB
 
 	@Override
 	public ApplicationPerspective build(ApplicationInstanceData applicationInstanceData, MutableValue<String> mutableValue) {
-		return new OrganizationUnitTypePerspective(applicationInstanceData, mutableValue);
+		return new OrganizationFieldPerspective(applicationInstanceData, mutableValue);
 	}
 }

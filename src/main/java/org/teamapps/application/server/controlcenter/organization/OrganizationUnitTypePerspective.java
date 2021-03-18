@@ -182,7 +182,7 @@ public class OrganizationUnitTypePerspective extends AbstractManagedApplicationP
 		PropertyProvider<GeoLocationType> propertyProvider = (type, propertyNames) -> {
 			Map<String, Object> map = new HashMap<>();
 			map.put(BaseTemplate.PROPERTY_ICON, type != GeoLocationType.NONE ? ApplicationIcons.MAP_LOCATION: ApplicationIcons.SIGN_FORBIDDEN);
-			map.put(BaseTemplate.PROPERTY_CAPTION, getLocalized("organizationUnitType.geoLocationType.") + type.name());
+			map.put(BaseTemplate.PROPERTY_CAPTION, getLocalized("organizationUnitType.geoLocationType." + type.name()));
 			return map;
 		};
 		return ComboBoxUtils.createRecordComboBox(Arrays.asList(GeoLocationType.values()), propertyProvider, BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
