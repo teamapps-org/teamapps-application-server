@@ -93,4 +93,28 @@ public class OrganizationUtils {
 		comboBox.setPropertyProvider(PropertyProviders.createOrganizationFieldPropertyProvider(applicationInstanceData));
 		return comboBox;
 	}
+
+	public static int getLevel(OrganizationUnit unit) {
+		int level = 0;
+		OrganizationUnit parent = unit.getParent();
+		while (parent != null) {
+			level++;
+			parent = parent.getParent();
+		}
+		return level;
+	}
+
+	public static OrganizationUnit getParentWithGeoType(OrganizationUnit unit, GeoLocationType type) {
+		if (unit == null) {
+			return null;
+		}
+		OrganizationUnit parent = unit.getParent();
+		while (parent != null) {
+			if (parent.getType().getGeoLocationType() == type) {
+				return parent;
+			}
+			parent = parent.getParent();
+		}
+		return null;
+	}
 }
