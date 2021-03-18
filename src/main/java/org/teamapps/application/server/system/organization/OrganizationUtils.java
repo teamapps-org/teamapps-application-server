@@ -4,15 +4,18 @@ import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.organization.OrgField;
 import org.teamapps.application.api.organization.OrgUnit;
 import org.teamapps.application.server.system.template.PropertyProviders;
+import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.template.BaseTemplate;
+import org.teamapps.ux.component.template.Template;
+import org.teamapps.ux.component.tree.TreeNodeInfo;
+import org.teamapps.ux.component.tree.TreeNodeInfoImpl;
+import org.teamapps.ux.model.ComboBoxModel;
 import org.teamapps.ux.model.ListTreeModel;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class OrganizationUtils {
@@ -116,5 +119,37 @@ public class OrganizationUtils {
 			parent = parent.getParent();
 		}
 		return null;
+	}
+
+	public static ComboBox<OrganizationUnit> createOrganizationComboBox(Template template, Collection<OrganizationUnit> allowedUnits, ApplicationInstanceData applicationInstanceData) {
+		ComboBox<OrganizationUnit> comboBox = new ComboBox<>(template);
+		ComboBoxModel<OrganizationUnit> model = new ComboBoxModel<OrganizationUnit>() {
+			@Override
+			public List<OrganizationUnit> getRecords(String query) {
+				return queryOrganizationUnits(query, allowedUnits);
+			}
+
+			@Override
+			public TreeNodeInfo getTreeNodeInfo(OrganizationUnit unit) {
+				return new TreeNodeInfoImpl<>(unit.getParent());
+			}
+		};
+		comboBox.setModel(model);
+		comboBox.setShowExpanders(true);
+		PropertyProvider<OrganizationUnit> propertyProvider = PropertyProviders.creatOrganizationUnitPropertyProvider(applicationInstanceData);
+		comboBox.setPropertyProvider(propertyProvider);
+		Function<OrganizationUnit, String> recordToStringFunction = unit -> {
+			Map<String, Object> values = propertyProvider.getValues(unit, Collections.singleton(BaseTemplate.PROPERTY_CAPTION));
+			Object result = values.get(BaseTemplate.PROPERTY_CAPTION);
+			return (String) result;
+		};
+		comboBox.setRecordToStringFunction(recordToStringFunction);
+		return comboBox;
+	}
+
+	public static List<OrganizationUnit> queryOrganizationUnits(String query, Collection<OrganizationUnit> allowedUnits) {
+		return query == null || query.isBlank() ?
+				allowedUnits.stream().limit(50).collect(Collectors.toList()) :
+				OrganizationUnit.filter().parseFullTextFilter(query).execute().stream().filter(allowedUnits::contains).limit(50).collect(Collectors.toList());
 	}
 }
