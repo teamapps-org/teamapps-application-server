@@ -10,7 +10,7 @@ import org.teamapps.databinding.MutableValue;
 public class OrganizationPerspectiveBuilder extends AbstractPerspectiveBuilder {
 
 	public OrganizationPerspectiveBuilder() {
-		super("organizationPerspective", ApplicationIcons.PIECES, "organization.title", "organization.desc");
+		super("organizationPerspective", ApplicationIcons.ELEMENTS_HIERARCHY, "organization.title", "organization.desc");
 	}
 
 	@Override
@@ -20,6 +20,6 @@ public class OrganizationPerspectiveBuilder extends AbstractPerspectiveBuilder {
 
 	@Override
 	public ApplicationPerspective build(ApplicationInstanceData applicationInstanceData, MutableValue<String> mutableValue) {
-		return null;
+		return new OrganizationPerspective(applicationInstanceData, mutableValue);
 	}
 }
