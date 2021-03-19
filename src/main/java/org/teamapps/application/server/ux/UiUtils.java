@@ -16,7 +16,11 @@ import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.component.template.Template;
 import org.teamapps.ux.session.SessionContext;
 
-import java.util.List;
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class UiUtils {
 
@@ -29,10 +33,6 @@ public class UiUtils {
 				success ? ApplicationIcons.OK : ApplicationIcons.ERROR,
 				success ? applicationInstanceData.getLocalized(Dictionary.RECORD_SUCCESSFULLY_SAVED) : applicationInstanceData.getLocalized(Dictionary.ERROR_WHEN_SAVING)
 		);
-	}
-
-	public static TranslatableField createTranslatableField(ApplicationInstanceData applicationInstanceData) {
-		return new TranslatableField(applicationInstanceData);
 	}
 
 	public static <TYPE> TemplateField<TYPE> createTemplateField(Template template, PropertyProvider<TYPE> propertyProvider) {
@@ -94,5 +94,33 @@ public class UiUtils {
 		return tagComboBox;
 	}
 
+	public static <RECORD> Function<RECORD, String> createRecordQueryStringFunction(PropertyProvider<RECORD> propertyProvider, String... properties) {
+		Set<String> keys = properties != null && properties.length > 0 ? new HashSet<>(Arrays.asList(properties)) : new HashSet<>(Arrays.asList(BaseTemplate.PROPERTY_CAPTION)) ;
+		return record -> {
+			Map<String, Object> values = propertyProvider.getValues(record, keys);
+			return values.entrySet().stream()
+					.filter(entry -> keys.contains(entry.getKey()))
+					.map(Map.Entry::getValue)
+					.filter(Objects::nonNull)
+					.map(v -> (String) v)
+					.collect(Collectors.joining(", ")).toLowerCase();
+		};
+	}
+
+	public static <RECORD> Function<RECORD, String> createRecordToStringFunction(PropertyProvider<RECORD> propertyProvider) {
+		return createRecordToStringFunction(propertyProvider, BaseTemplate.PROPERTY_CAPTION);
+	}
+
+	public static <RECORD> Function<RECORD, String> createRecordToStringFunction(PropertyProvider<RECORD> propertyProvider, String property) {
+		return record -> {
+			Object value = propertyProvider.getValues(record, Collections.singleton(property)).get(property);
+			return value != null ? (String) value : "";
+		};
+	}
+
+	public static <RECORD> BiFunction<RECORD, String, Boolean> createRecordFilterFunction(PropertyProvider<RECORD> propertyProvider, String... properties) {
+		Function<RECORD, String> queryStringFunction = createRecordQueryStringFunction(propertyProvider, properties);
+		return (record, s) -> s == null || s.isBlank() || queryStringFunction.apply(record).contains(s.toLowerCase());
+	}
 
 }
