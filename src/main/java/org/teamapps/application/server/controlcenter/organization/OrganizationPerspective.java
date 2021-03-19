@@ -57,8 +57,8 @@ public class OrganizationPerspective extends AbstractManagedApplicationPerspecti
 		menuPanel.addInstantiatedPerspective(organizationPerspectiveBuilder, this);
 		setPerspectiveMenuPanel(menuPanel.getComponent());
 
-		View masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.PIECES, getLocalized("organization.organizationUnits"), null));
-		View detailView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.PIECES, getLocalized("organization.organizationUnit"), null));
+		View masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.ELEMENTS_HIERARCHY, getLocalized("organization.organizationUnits"), null));
+		View detailView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.ELEMENTS_HIERARCHY, getLocalized("organization.organizationUnit"), null));
 		detailView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
 
 		EntityModelBuilder<OrganizationUnit> orgUnitModelBuilder = new EntityModelBuilder<>(OrganizationUnit::filter, getApplicationInstanceData());

@@ -3,6 +3,7 @@ package org.teamapps.application.server.system.template;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.localization.Dictionary;
+import org.teamapps.application.api.privilege.PrivilegeObject;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.controlcenter.translations.TranslationUtils;
 import org.teamapps.application.server.ux.IconUtils;
@@ -60,6 +61,16 @@ public class PropertyProviders {
 			map.put(BaseTemplate.PROPERTY_ICON, userSessionData.decodeIcon(applicationPrivilegeGroup.getIcon()));
 			map.put(BaseTemplate.PROPERTY_CAPTION, localizationProvider.getLocalized(applicationPrivilegeGroup.getTitleKey()));
 			map.put(BaseTemplate.PROPERTY_DESCRIPTION, localizationProvider.getLocalized(applicationPrivilegeGroup.getDescriptionKey()));
+			return map;
+		};
+	}
+
+	public static PropertyProvider<PrivilegeObject> createPrivilegeObjectPropertyProvider() {
+		return (privilegeObject, propertyNames) -> {
+			Map<String, Object> map = new HashMap<>();
+			map.put(BaseTemplate.PROPERTY_ICON, privilegeObject.getIcon());
+			map.put(BaseTemplate.PROPERTY_CAPTION, privilegeObject.getTitleKey());
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, privilegeObject.getDescriptionKey());
 			return map;
 		};
 	}
@@ -160,7 +171,7 @@ public class PropertyProviders {
 			Map<String, Object> map = new HashMap<>();
 			map.put(BaseTemplate.PROPERTY_ICON, IconUtils.decodeIcon(role.getIcon()));
 			map.put(BaseTemplate.PROPERTY_CAPTION, applicationInstanceData.getLocalized(role.getTitle()));
-			map.put(BaseTemplate.PROPERTY_DESCRIPTION, applicationInstanceData.getLocalized(role.getOrganizationField().getTitle()));
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, role.getOrganizationField() != null ? applicationInstanceData.getLocalized(role.getOrganizationField().getTitle()) : null);
 			return map;
 		};
 	}

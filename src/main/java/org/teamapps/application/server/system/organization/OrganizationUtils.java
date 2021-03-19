@@ -7,6 +7,8 @@ import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.ux.component.field.combobox.ComboBox;
+import org.teamapps.ux.component.field.combobox.TagBoxWrappingMode;
+import org.teamapps.ux.component.field.combobox.TagComboBox;
 import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.component.template.Template;
 import org.teamapps.ux.component.tree.TreeNodeInfo;
@@ -151,5 +153,19 @@ public class OrganizationUtils {
 		return query == null || query.isBlank() ?
 				allowedUnits.stream().limit(50).collect(Collectors.toList()) :
 				OrganizationUnit.filter().parseFullTextFilter(query).execute().stream().filter(allowedUnits::contains).limit(50).collect(Collectors.toList());
+	}
+
+	public static TagComboBox<OrganizationUnitType> createOrganizationUnitTypeTagComboBox(int limit, ApplicationInstanceData applicationInstanceData) {
+		TagComboBox<OrganizationUnitType> tagComboBox = new TagComboBox<>(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
+		tagComboBox.setModel(query -> query == null || query.isBlank() ?
+				OrganizationUnitType.getAll().stream().limit(limit).collect(Collectors.toList()) :
+				OrganizationUnitType.filter().parseFullTextFilter(query).execute().stream().limit(limit).collect(Collectors.toList())
+		);
+		PropertyProvider<OrganizationUnitType> propertyProvider = PropertyProviders.creatOrganizationUnitTypePropertyProvider(applicationInstanceData);
+		tagComboBox.setPropertyProvider(propertyProvider);
+		tagComboBox.setRecordToStringFunction(unitType -> (String) propertyProvider.getValues(unitType, Collections.emptyList()).get(BaseTemplate.PROPERTY_CAPTION));
+		tagComboBox.setWrappingMode(TagBoxWrappingMode.SINGLE_TAG_PER_LINE);
+		tagComboBox.setDistinct(true);
+		return tagComboBox;
 	}
 }

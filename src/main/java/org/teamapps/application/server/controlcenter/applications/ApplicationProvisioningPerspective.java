@@ -203,6 +203,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 
 		});
 		applicationDetailsView.setComponent(applicationForm);
+		selectedApplication.set(ManagedApplication.create());
 	}
 
 	private void showPerspectiveFormWindow(ManagedApplicationPerspective managedApplicationPerspective, EntityListModelBuilder<ManagedApplicationPerspective> perspectiveModelBuilder) {

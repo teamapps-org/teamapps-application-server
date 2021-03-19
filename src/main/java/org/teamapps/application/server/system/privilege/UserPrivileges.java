@@ -10,6 +10,7 @@ import org.teamapps.application.server.system.utils.RoleUtils;
 import org.teamapps.application.server.system.utils.ValueConverterUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class UserPrivileges {
 
@@ -134,8 +135,8 @@ public class UserPrivileges {
 			PrivilegeApplicationKey privilegeApplicationKey = PrivilegeApplicationKey.create(privilegeAssignment);
 			OrganizationUnit fixedOrganizationRoot = privilegeAssignment.getFixedOrganizationRoot();
 			List<OrganizationUnitType> organizationUnitTypeFilter = privilegeAssignment.getOrganizationUnitTypeFilter();
-			PrivilegeGroup privilegeGroup = privilegeProvider.getPrivilegeGroup(privilegeAssignment.getPrivilegeGroup());
-			List<Privilege> privileges = privilegeProvider.getPrivilegesByNameList(ValueConverterUtils.decompressToStringList(privilegeAssignment.getPrivileges()));
+			PrivilegeGroup privilegeGroup = privilegeProvider.getPrivilegeGroup(privilegeAssignment.getPrivilegeGroup().getName());
+			List<Privilege> privileges = privilegeProvider.getPrivilegesByNameList(privilegeAssignment.getPrivileges().stream().map(ApplicationPrivilege::getName).collect(Collectors.toList()));
 			boolean privilegeObjectInheritance = privilegeAssignment.getPrivilegeObjectInheritance();
 			List<Integer> privilegeObjectIdList = ValueConverterUtils.decompressIds(privilegeAssignment.getPrivilegeObjects());
 			List<PrivilegeObject> privilegeObjects = privilegeProvider.getPrivilegeObjects(privilegeGroup, privilegeObjectIdList, privilegeObjectInheritance);

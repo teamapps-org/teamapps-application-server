@@ -134,7 +134,7 @@ public class ApplicationGroupsPerspective extends AbstractManagedApplicationPers
 				UiUtils.showSaveNotification(false, getApplicationInstanceData());
 			}
 		});
-
+		selectedGroup.set(ManagedApplicationGroup.create());
 	}
 
 	private void changeApplicationOrder(EntityListModelBuilder<ManagedApplication> applicationModelBuilder, Table<ManagedApplication> applicationTable, boolean moveUp) {

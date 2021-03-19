@@ -60,6 +60,7 @@ public class PerspectiveMenuPanel {
 			applicationPerspective = builder.build(applicationInstanceData, null);
 			perspectiveByBuilderMap.put(builder, applicationPerspective);
 		}
+		tree.setSelectedNode(builder);
 		applicationInstanceData.showPerspective(applicationPerspective.getPerspective());
 	}
 

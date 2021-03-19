@@ -125,7 +125,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 			roleComboBox.setValue(userRoleAssignment.getRole());
 			organizationComboBox.setValue(userRoleAssignment.getOrganizationUnit());
 		});
-
+		selectedUserRoleAssignment.set(UserRoleAssignment.create());
 	}
 
 }

@@ -15,6 +15,7 @@ import org.teamapps.application.server.system.login.LoginHandler;
 import org.teamapps.application.server.system.machinetranslation.MachineTranslation;
 import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
 import org.teamapps.application.server.system.utils.ValueConverterUtils;
+import org.teamapps.icon.flags.FlagIcon;
 import org.teamapps.icon.standard.StandardIcon;
 import org.teamapps.icon.standard.StandardIconStyles;
 import org.teamapps.model.ControlCenterSchema;
@@ -112,6 +113,8 @@ public class BootstrapSessionHandler implements SessionHandler {
 		}
 		//todo remove:
 		context.getIconProvider().setDefaultStyleForIconClass(StandardIcon.class, StandardIconStyles.VIVID_STANDARD_SHADOW_1);
+
+		context.getIconProvider().registerIconLibrary(FlagIcon.class);
 		new LoginHandler(systemRegistry).handleNewSession(context);
 	}
 

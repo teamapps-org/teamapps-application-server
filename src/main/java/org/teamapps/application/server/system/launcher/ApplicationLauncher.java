@@ -19,7 +19,6 @@ import org.teamapps.model.controlcenter.ManagedApplication;
 import org.teamapps.model.controlcenter.ManagedApplicationGroup;
 import org.teamapps.model.controlcenter.ManagedApplicationPerspective;
 import org.teamapps.universaldb.UniversalDB;
-import org.teamapps.universaldb.transaction.Transaction;
 import org.teamapps.ux.application.ResponsiveApplication;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.perspective.Perspective;

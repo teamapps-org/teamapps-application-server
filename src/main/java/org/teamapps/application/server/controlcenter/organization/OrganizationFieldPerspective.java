@@ -35,8 +35,8 @@ public class OrganizationFieldPerspective extends AbstractManagedApplicationPers
 	}
 
 	private void createUi() {
-		View masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.CONSOLE, getLocalized("organizationField.organizationFields"), null));
-		View detailView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.CONSOLE, getLocalized("organizationField.organizationField"), null));
+		View masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.ELEMENTS_TREE, getLocalized("organizationField.organizationFields"), null));
+		View detailView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.ELEMENTS_TREE, getLocalized("organizationField.organizationField"), null));
 		detailView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
 
 		EntityModelBuilder<OrganizationField> orgFieldModelBuilder = new EntityModelBuilder<>(OrganizationField::filter, getApplicationInstanceData());
@@ -85,7 +85,7 @@ public class OrganizationFieldPerspective extends AbstractManagedApplicationPers
 			translatableNameField.setValue(type.getTitle());
 			iconComboBox.setValue(IconUtils.decodeIcon(type.getIcon()));
 		});
-
+		selectedField.set(OrganizationField.create());
 	}
 
 

@@ -163,7 +163,7 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 			privilegesSendingRolesTagCombo.setValue(role.getPrivilegesSendingRoles());
 			noDirectMembershipsCheckBox.setValue(role.getNoDirectMemberships());
 		});
-
+		selectedRole.set(Role.create());
 	}
 
 	private TagComboBox<Role> createRoleTagComboBox() {

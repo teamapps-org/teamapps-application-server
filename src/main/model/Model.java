@@ -119,10 +119,12 @@ public class Model implements SchemaInfoProvider {
 		;
 
 		systemLog
-				.addReference("application", application, false)
 				.addReference("managedApplication", managedApplication, false)
 				.addReference("managedPerspective", managedApplicationPerspective, false)
+				.addReference("application", application, false)
+				.addReference("applicationVersion", applicationVersion, false)
 				.addEnum("logLevel", "info", "warning", "error")
+				.addText("thread")
 				.addText("message")
 				.addText("details")
 				.addText("exceptionClass")
@@ -245,7 +247,6 @@ public class Model implements SchemaInfoProvider {
 				.addText("country")
 				.addFloat("latitude")
 				.addFloat("longitude")
-
 		;
 
 		organizationUnit
@@ -270,7 +271,6 @@ public class Model implements SchemaInfoProvider {
 		;
 
 		organizationField
-				.addText("name")
 				.addTranslatableText("title")
 				.addText("icon")
 		;
@@ -309,8 +309,8 @@ public class Model implements SchemaInfoProvider {
 		rolePrivilegeAssignment
 				.addReference("role", role, false, "privilegeAssignments")
 				.addReference("application", application, false)
-				.addText("privilegeGroup")
-				.addText("privileges")
+				.addReference("privilegeGroup", applicationPrivilegeGroup, false)
+				.addReference("privileges", applicationPrivilege, true)
 				.addText("privilegeObjects")
 				.addBoolean("privilegeObjectInheritance")
 				.addReference("organizationFieldFilter", organizationField, false)

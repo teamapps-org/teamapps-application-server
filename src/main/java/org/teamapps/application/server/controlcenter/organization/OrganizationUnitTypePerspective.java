@@ -4,6 +4,7 @@ import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
+import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.server.ux.IconUtils;
 import org.teamapps.application.server.ux.UiUtils;
@@ -51,8 +52,8 @@ public class OrganizationUnitTypePerspective extends AbstractManagedApplicationP
 	}
 
 	private void createUi() {
-		View masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.CONSOLE, getLocalized("organizationUnitType.organizationUnitTypes"), null));
-		View detailView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.CONSOLE, getLocalized("organizationUnitType.organizationUnitType"), null));
+		View masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.ELEMENTS_CASCADE, getLocalized("organizationUnitType.organizationUnitTypes"), null));
+		View detailView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.ELEMENTS_CASCADE, getLocalized("organizationUnitType.organizationUnitType"), null));
 		detailView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
 
 		EntityModelBuilder<OrganizationUnitType> orgUnitModelBuilder = new EntityModelBuilder<>(OrganizationUnitType::filter, getApplicationInstanceData());
@@ -98,7 +99,7 @@ public class OrganizationUnitTypePerspective extends AbstractManagedApplicationP
 		CheckBox translateOrgUnitsCheckBox = new CheckBox(getLocalized("organizationUnitType.translateOrganizationUnits"));
 		CheckBox allowAsUserContainerCheckBox = new CheckBox(getLocalized("organizationUnitType.allowAsUserContainer"));
 		ComboBox<OrganizationUnitType> defaultChildTypeCombo = createOrgUnitTypeComboBox();
-		TagComboBox<OrganizationUnitType> possibleChildrenTagCombo = createOrgUnitTypeTagComboBox();
+		TagComboBox<OrganizationUnitType> possibleChildrenTagCombo = OrganizationUtils.createOrganizationUnitTypeTagComboBox(50, getApplicationInstanceData());
 		ComboBox<GeoLocationType> geoLocationComboBox = createGeoLocationComboBox();
 
 		ResponsiveForm form = new ResponsiveForm(120, 120, 0);
@@ -147,23 +148,7 @@ public class OrganizationUnitTypePerspective extends AbstractManagedApplicationP
 			possibleChildrenTagCombo.setValue(type.getPossibleChildrenTypes());
 			geoLocationComboBox.setValue(type.getGeoLocationType());
 		});
-
-	}
-
-
-	private TagComboBox<OrganizationUnitType> createOrgUnitTypeTagComboBox() {
-		TagComboBox<OrganizationUnitType> tagComboBox = new TagComboBox<>(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
-		tagComboBox.setModel(query -> query == null || query.isBlank() ?
-				OrganizationUnitType.getAll().stream().limit(50).collect(Collectors.toList()) :
-				OrganizationUnitType.filter().parseFullTextFilter(query).execute().stream().limit(50).collect(Collectors.toList())
-		);
-		PropertyProvider<OrganizationUnitType> propertyProvider = PropertyProviders.creatOrganizationUnitTypePropertyProvider(getApplicationInstanceData());
-		tagComboBox.setPropertyProvider(propertyProvider);
-		tagComboBox.setRecordToStringFunction(unitType -> (String) propertyProvider.getValues(unitType, Collections.emptyList()).get(BaseTemplate.PROPERTY_CAPTION));
-		tagComboBox.setWrappingMode(TagBoxWrappingMode.SINGLE_TAG_PER_LINE);
-		tagComboBox.setDistinct(true);
-		return tagComboBox;
-
+		selectedType.set(OrganizationUnitType.create());
 	}
 
 	private ComboBox<OrganizationUnitType> createOrgUnitTypeComboBox() {

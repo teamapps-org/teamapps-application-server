@@ -2,6 +2,7 @@ package org.teamapps.application.server.controlcenter.applocal;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.server.controlcenter.applications.ApplicationUpdatesPerspectiveBuilder;
+import org.teamapps.application.server.controlcenter.systemlog.SystemLogPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.translations.TranslationsPerspectiveBuilder;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.application.PerspectiveMenuPanel;
@@ -21,7 +22,8 @@ public class AppLocalAdministrationPerspective extends AbstractManagedApplicatio
 		translationsPerspectiveBuilder = new TranslationsPerspectiveBuilder();
 		menuPanel = PerspectiveMenuPanel.createMenuPanel(getApplicationInstanceData(),
 				translationsPerspectiveBuilder,
-				new ApplicationUpdatesPerspectiveBuilder()
+				new ApplicationUpdatesPerspectiveBuilder(),
+				new SystemLogPerspectiveBuilder()
 		);
 		setPerspectiveMenuPanel(menuPanel.getComponent());
 	}
