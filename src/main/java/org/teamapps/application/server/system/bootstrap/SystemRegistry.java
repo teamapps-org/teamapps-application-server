@@ -61,15 +61,17 @@ public class SystemRegistry {
 			if (applicationInstaller.installApplication()) {
 				ApplicationInfo applicationInfo = applicationInstaller.getApplicationInfo();
 				Application application = applicationInfo.getApplication();
-				ManagedApplication managedApplication = ManagedApplication.create()
-						.setMainApplication(application)
-						.setApplicationGroup(unspecifiedApplicationGroup)
-						.save();
-				for (ApplicationPerspective perspective : application.getPerspectives()) {
-					ManagedApplicationPerspective.create()
-							.setManagedApplication(managedApplication)
-							.setApplicationPerspective(perspective)
+				if (application.getVersions().size() == 1) {
+					ManagedApplication managedApplication = ManagedApplication.create()
+							.setMainApplication(application)
+							.setApplicationGroup(unspecifiedApplicationGroup)
 							.save();
+					for (ApplicationPerspective perspective : application.getPerspectives()) {
+						ManagedApplicationPerspective.create()
+								.setManagedApplication(managedApplication)
+								.setApplicationPerspective(perspective)
+								.save();
+					}
 				}
 			} else {
 				System.out.println("Error installing " + applicationInstaller.getApplicationInfo().getName() + ": " + applicationInstaller.getApplicationInfo().getErrorMessage());
@@ -84,7 +86,9 @@ public class SystemRegistry {
 	public void loadApplication(ApplicationInstaller applicationInstaller) {
 		LoadedApplication loadedApplication = applicationInstaller.loadApplication();
 		System.out.println("Loaded app:" + applicationInstaller.getApplicationInfo().getName());
-		addLoadedApplication(loadedApplication);
+		if (applicationInstaller.getApplicationInfo().getErrors().isEmpty()) {
+			addLoadedApplication(loadedApplication);
+		}
 	}
 
 	public void addLoadedApplication(LoadedApplication loadedApplication) {

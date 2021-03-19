@@ -61,7 +61,7 @@ public class DatabaseExplorerAppBuilder implements ApplicationBuilder {
 
 	@Override
 	public List<PrivilegeGroup> getPrivilegeGroups() {
-		return DatabasePrivileges.getPrivileges();
+		return Collections.emptyList(); //DatabasePrivileges.getPrivileges();
 	}
 
 	@Override

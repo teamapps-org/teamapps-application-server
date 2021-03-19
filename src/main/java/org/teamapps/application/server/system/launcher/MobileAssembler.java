@@ -5,6 +5,7 @@ import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.common.format.Color;
 import org.teamapps.icon.material.MaterialIcon;
+import org.teamapps.icons.Icon;
 import org.teamapps.ux.application.ResponsiveApplication;
 import org.teamapps.ux.application.ResponsiveApplicationToolbar;
 import org.teamapps.ux.application.assembler.ApplicationAssembler;
@@ -263,36 +264,36 @@ public class MobileAssembler implements ApplicationAssembler {
 	}
 
 	private SimpleItem<Void> getViewTypeItem(Panel panel) {
-		String description = panel.getTitle();
+		String title = panel.getTitle();
+		Icon icon = panel.getIcon();
 		Component content = panel.getContent();
 		if (content == null) {
 			return null;
 		}
 		if (content instanceof Table) {
-			return new SimpleItem<>(ApplicationIcons.SPREADSHEET, getLocalized(Dictionary.TABLE), description);
+			return new SimpleItem<>(icon != null ? icon : ApplicationIcons.SPREADSHEET, title, getLocalized(Dictionary.TABLE));
 		}
 		if (content instanceof ItemView || content instanceof InfiniteItemView2) {
-			return new SimpleItem<>(ApplicationIcons.LIST_STYLE_BULLETS, getLocalized(Dictionary.LIST), description);
+			return new SimpleItem<>(icon != null ? icon : ApplicationIcons.LIST_STYLE_BULLETS, title, getLocalized(Dictionary.LIST));
 		}
 		if (content instanceof ResponsiveForm) {
-			return new SimpleItem<>(ApplicationIcons.FORM, getLocalized(Dictionary.FORM), description);
+			return new SimpleItem<>(icon != null ? icon : ApplicationIcons.FORM, title, getLocalized(Dictionary.FORM));
 		}
 		if (content instanceof Calendar) {
-			return new SimpleItem<>(ApplicationIcons.CALENDAR, getLocalized(Dictionary.CALENDAR), description);
+			return new SimpleItem<>(icon != null ? icon : ApplicationIcons.CALENDAR, title, getLocalized(Dictionary.CALENDAR));
 		}
 		if (content instanceof TimeGraph) {
-			return new SimpleItem<>(ApplicationIcons.CHART_LINE, getLocalized(Dictionary.TIMELINE), description);
+			return new SimpleItem<>(icon != null ? icon : ApplicationIcons.CHART_LINE, title, getLocalized(Dictionary.TIMELINE));
 		}
 		if (content instanceof Tree) {
-			return new SimpleItem<>(ApplicationIcons.TEXT_TREE, getLocalized(Dictionary.TREE), description);
+			return new SimpleItem<>(icon != null ? icon : ApplicationIcons.TEXT_TREE, title, getLocalized(Dictionary.TREE));
 		}
 		if (content instanceof MapView) {
-			return new SimpleItem<>(ApplicationIcons.MAP, getLocalized(Dictionary.MAP), description);
+			return new SimpleItem<>(icon != null ? icon : ApplicationIcons.MAP, title, getLocalized(Dictionary.MAP));
 		}
 		if (content instanceof ForceLayoutGraph) {
-			return new SimpleItem<>(ApplicationIcons.GRAPH_CONNECTION_DIRECTED, getLocalized(Dictionary.NETWORK), description);
+			return new SimpleItem<>(icon != null ? icon : ApplicationIcons.GRAPH_CONNECTION_DIRECTED, title, getLocalized(Dictionary.NETWORK));
 		}
-
 		return new SimpleItem<>(panel.getIcon(), panel.getTitle(), null);
 	}
 

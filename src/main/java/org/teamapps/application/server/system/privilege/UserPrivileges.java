@@ -203,6 +203,9 @@ public class UserPrivileges {
 	public ApplicationPrivilegeProvider getApplicationPrivilegeProvider(PrivilegeApplicationKey privilegeApplicationKey) {
 		UserApplicationPrivilege userApplicationPrivilege = userApplicationPrivilegeByApplication.get(privilegeApplicationKey);
 		if (userApplicationPrivilege == null) {
+			if (user.getUserAccountStatus() == UserAccountStatus.SUPER_ADMIN) {
+				return new AllowAllPrivilegeProvider();
+			}
 			userApplicationPrivilege = new UserApplicationPrivilege(this, privilegeApplicationKey);
 			userApplicationPrivilegeByApplication.put(privilegeApplicationKey, userApplicationPrivilege);
 		}

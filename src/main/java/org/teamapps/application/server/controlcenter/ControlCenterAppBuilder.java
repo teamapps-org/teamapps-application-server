@@ -47,7 +47,7 @@ public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 
 	@Override
 	public ApplicationVersion getApplicationVersion() {
-		return ApplicationVersion.create(0, 13);
+		return ApplicationVersion.create(0, 30);
 	}
 
 	@Override
@@ -77,6 +77,7 @@ public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 
 	@Override
 	public List<PrivilegeGroup> getPrivilegeGroups() {
+//		new Privileges();
 		return Privileges.getPrivileges();
 	}
 
@@ -103,6 +104,6 @@ public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 
 	@Override
 	public boolean isApplicationAccessible(ApplicationPrivilegeProvider privilegeProvider) {
-		return true;
+		return privilegeProvider.isAllowed(Privileges.LAUNCH_APPLICATION);
 	}
 }

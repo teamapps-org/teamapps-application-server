@@ -75,7 +75,7 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 		TemplateField<Role> roleTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createRolePropertyProvider(getApplicationInstanceData()));
 		TemplateField<Application> applicationTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createApplicationPropertyProvider(userSessionData));
 		TemplateField<ApplicationPrivilegeGroup> applicationPrivilegeGroupTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createApplicationPrivilegeGroupPropertyProvider(userSessionData));
-		TagComboBox<ApplicationPrivilege> applicationPrivilegesTableField = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createApplicationPrivilegePropertyProvider(userSessionData));
+		TagComboBox<ApplicationPrivilege> applicationPrivilegesTableField = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createApplicationPrivilegePropertyProvider(userSessionData));
 		TemplateField<OrganizationUnit> customOrganizationUnitTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.creatOrganizationUnitPropertyProvider(getApplicationInstanceData()));
 
 		table.addColumn(new TableColumn<RolePrivilegeAssignment>(RolePrivilegeAssignment.FIELD_ROLE, getLocalized("roles.role"), roleTableField).setDefaultWidth(200));
@@ -100,20 +100,6 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 		buttonGroup = detailView.addLocalButtonGroup(new ToolbarButtonGroup());
 		ToolbarButton saveButton = buttonGroup.addButton(ToolbarButton.createSmall(ApplicationIcons.FLOPPY_DISK, getLocalized(Dictionary.SAVE_CHANGES)));
 
-		/*
-				.addReference("role", role, false, "privilegeAssignments")
-				.addReference("application", application, false)
-				.addText("privilegeGroup")
-				.addText("privileges")
-				.addText("privilegeObjects")
-				.addBoolean("privilegeObjectInheritance")
-				.addReference("organizationFieldFilter", organizationField, false)
-				.addReference("fixedOrganizationRoot", organizationUnit, false)
-				.addReference("organizationUnitTypeFilter", organizationUnitType, true)
-		;
-		 */
-
-
 		ComboBox<Role> roleComboBox = ComboBoxUtils.createRecordComboBox(
 				() -> isAppFilter() ? Role.filter().organizationField(NumericFilter.equalsFilter(getOrganizationField().getId())).execute() : Role.getAll(),
 				PropertyProviders.createRolePropertyProvider(getApplicationInstanceData()),
@@ -124,7 +110,7 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 		ComboBox<ApplicationPrivilegeGroup> privilegeGroupComboBox = createPrivilegeGroupComboBox(applicationComboBox);
 		TagComboBox<ApplicationPrivilege> privilegesTagComboBox = createPrivilegeTagComboBox(privilegeGroupComboBox);
 		TagComboBox<PrivilegeObject> privilegeObjectTagComboBox = createPrivilegeObjectTagComboBox(applicationComboBox, privilegeGroupComboBox);
-		CheckBox privilegeObjectInheritanceCheckBox = new CheckBox(getLocalized("xxx"));
+		CheckBox privilegeObjectInheritanceCheckBox = new CheckBox(getLocalized("accessControl.privilegeObjectInheritance"));
 		ComboBox<OrganizationField> organizationFieldFilterComboBox = createOrganizationFieldComboBox();
 		ComboBox<OrganizationUnit> organizationFilterComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), getApplicationInstanceData());
 		TagComboBox<OrganizationUnitType> organizationUnitTypeFilterTagComboBox = OrganizationUtils.createOrganizationUnitTypeTagComboBox(50, getApplicationInstanceData());
@@ -167,7 +153,7 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 						.setApplication(applicationComboBox.getValue())
 						.setPrivilegeGroup(privilegeGroupComboBox.getValue())
 						.setPrivileges(privilegesTagComboBox.getValue())
-						.setPrivilegeObjects(ValueConverterUtils.compressStringList(privilegeObjectTagComboBox.getValue().stream().map(p -> "" + p.getId()).collect(Collectors.toList())))
+						.setPrivilegeObjects(privilegeObjectTagComboBox.getValue() != null ? ValueConverterUtils.compressStringList(privilegeObjectTagComboBox.getValue().stream().map(p -> "" + p.getId()).collect(Collectors.toList())) : null)
 						.setPrivilegeObjectInheritance(privilegeObjectInheritanceCheckBox.getValue())
 						.setOrganizationFieldFilter(organizationField)
 						.setFixedOrganizationRoot(organizationFilterComboBox.getValue())
@@ -239,13 +225,13 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 		TagComboBox<ApplicationPrivilege> tagComboBox = new TagComboBox<>(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
 		PropertyProvider<ApplicationPrivilege> propertyProvider = PropertyProviders.createApplicationPrivilegePropertyProvider(userSessionData);
 		Function<ApplicationPrivilege, String> recordToString = UiUtils.createRecordToStringFunction(propertyProvider);
-		ApplicationPrivilegeGroup privilegeGroup = privilegeGroupComboBox.getValue();
-		ComboBoxModel<ApplicationPrivilege> comboBoxModel = ComboBoxUtils.createComboBoxModel(() -> privilegeGroup != null ? privilegeGroup.getPrivileges() : null, propertyProvider, 50);
+		ComboBoxModel<ApplicationPrivilege> comboBoxModel = ComboBoxUtils.createComboBoxModel(() -> privilegeGroupComboBox.getValue() != null ? privilegeGroupComboBox.getValue().getPrivileges() : null, propertyProvider, 50);
 		tagComboBox.setModel(comboBoxModel);
 		tagComboBox.setPropertyProvider(propertyProvider);
 		tagComboBox.setRecordToStringFunction(recordToString);
 		tagComboBox.setDistinct(true);
 		tagComboBox.setWrappingMode(TagBoxWrappingMode.SINGLE_TAG_PER_LINE);
+		tagComboBox.setShowClearButton(true);
 		return tagComboBox;
 	}
 
@@ -253,8 +239,7 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 		ComboBox<ApplicationPrivilegeGroup> comboBox = new ComboBox<>(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
 		PropertyProvider<ApplicationPrivilegeGroup> propertyProvider = PropertyProviders.createApplicationPrivilegeGroupPropertyProvider(userSessionData);
 		Function<ApplicationPrivilegeGroup, String> recordToString = UiUtils.createRecordToStringFunction(propertyProvider);
-		Application application = applicationComboBox.getValue();
-		ComboBoxModel<ApplicationPrivilegeGroup> comboBoxModel = ComboBoxUtils.createComboBoxModel(() -> application != null ? application.getPrivilegeGroups() : Collections.emptyList(), propertyProvider, 50);
+		ComboBoxModel<ApplicationPrivilegeGroup> comboBoxModel = ComboBoxUtils.createComboBoxModel(() -> applicationComboBox.getValue() != null ? applicationComboBox.getValue().getPrivilegeGroups() : Collections.emptyList(), propertyProvider, 50);
 		comboBox.setModel(comboBoxModel);
 		comboBox.setPropertyProvider(propertyProvider);
 		comboBox.setRecordToStringFunction(recordToString);

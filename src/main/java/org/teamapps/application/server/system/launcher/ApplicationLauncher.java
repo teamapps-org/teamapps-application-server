@@ -113,7 +113,7 @@ public class ApplicationLauncher {
 			}
 		}
 		if (mobileView) {
-			SimpleItemGroup<ApplicationData> itemGroup = new SimpleItemGroup<>(ApplicationIcons.DELETE, getLocalized(Dictionary.LOGOUT), BaseTemplate.LIST_ITEM_EXTRA_VERY_LARGE_ICON_TWO_LINES);
+			SimpleItemGroup<ApplicationData> itemGroup = new SimpleItemGroup<>(ApplicationIcons.LOG_OUT, getLocalized(Dictionary.LOGOUT), BaseTemplate.LIST_ITEM_EXTRA_VERY_LARGE_ICON_TWO_LINES);
 			itemView.addGroup(itemGroup);
 			itemGroup.setButtonWidth(220);
 			SimpleItem<ApplicationData> item = itemGroup.addItem(ApplicationIcons.DELETE, getLocalized(Dictionary.LOGOUT), getLocalized(Dictionary.LOGOUT));
@@ -137,7 +137,7 @@ public class ApplicationLauncher {
 			Tab applicationsTab = new Tab(ApplicationIcons.HOME, getLocalized(Dictionary.APPLICATIONS), applicationLauncher);
 			applicationsTabPanel.addTab(applicationsTab, true);
 
-			Tab logoutTab = new Tab(ApplicationIcons.ERROR, getLocalized(Dictionary.LOGOUT), null);
+			Tab logoutTab = new Tab(ApplicationIcons.LOG_OUT, getLocalized(Dictionary.LOGOUT), null);
 			logoutTab.setLazyLoading(true);
 			logoutTab.setRightSide(true);
 			applicationsTabPanel.addTab(logoutTab, false);

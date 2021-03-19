@@ -60,6 +60,7 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 		detailView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
 
 		ComboBox<LogLevel> logLeveComboBox = createLogLeveComboBox();
+		//todo use managed application
 		ComboBox<Application> applicationComboBox = ApplicationUiUtils.createApplicationComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, userSessionData);
 		ComboBox<User> userComboBox = createUserComboBox();
 		ComboBox<String> exceptionClassComboBox = createExceptionClassComboBox();
@@ -78,6 +79,11 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 		formLayout.addLabelAndField(null, getLocalized("systemLog.user"), userComboBox, false);
 		formLayout.addLabelAndField(null, getLocalized("applications.application"), applicationComboBox);
 		formLayout.addLabelAndField(null, getLocalized("systemLog.exceptionClass"), exceptionClassComboBox, false);
+		//todo change app to managed app
+		//todo add managed perspective
+		//todo add application version
+		//todo add thread
+
 
 		EntityModelBuilder<SystemLog> logModelBuilder = new EntityModelBuilder<>(() -> isAppFilter() ? SystemLog.filter().application(NumericFilter.equalsFilter(getMainApplication().getId())) : SystemLog.filter(), getApplicationInstanceData());
 		logModelBuilder.attachSearchField(masterView);
