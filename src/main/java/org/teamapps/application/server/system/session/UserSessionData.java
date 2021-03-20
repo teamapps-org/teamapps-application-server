@@ -113,4 +113,8 @@ public class UserSessionData {
 	public void invalidate() {
 		userPrivileges = null;
 	}
+
+	public List<String> getRankedLanguages() {
+		return sessionUser.getRankedLanguages();
+	}
 }

@@ -17,6 +17,10 @@ public class TranslatableTextUtils {
 
 	public static Function<TranslatableText, String> createTranslatableTextExtractor(ApplicationInstanceData applicationInstanceData) {
 		List<String> rankedLanguages = applicationInstanceData.getUser().getRankedLanguages();
+		return createTranslatableTextExtractor(rankedLanguages);
+	}
+
+	public static Function<TranslatableText, String> createTranslatableTextExtractor(List<String> rankedLanguages) {
 		return translatableText -> {
 			if (translatableText == null) {
 				return null;

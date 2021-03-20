@@ -8,6 +8,7 @@ import org.teamapps.application.server.system.config.SystemConfig;
 import org.teamapps.application.server.system.localization.DictionaryLocalizationProvider;
 import org.teamapps.application.server.system.localization.SystemLocalizationProvider;
 import org.teamapps.application.server.system.machinetranslation.TranslationService;
+import org.teamapps.application.server.system.server.SecureResourceHandler;
 import org.teamapps.application.server.ux.IconUtils;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.reporting.convert.DocumentConverter;
@@ -28,6 +29,7 @@ public class SystemRegistry {
 	private final SystemLocalizationProvider systemDictionary;
 	private final Map<Application, LoadedApplication> loadedApplicationMap = new HashMap<>();
 	private final ManagedApplicationGroup unspecifiedApplicationGroup;
+	private final BaseResourceLinkProvider baseResourceLinkProvider;
 
 	public SystemRegistry(SystemConfig systemConfig, BootstrapSessionHandler bootstrapSessionHandler, UniversalDB universalDB, TranslationService translationService) {
 		this.systemConfig = systemConfig;
@@ -36,6 +38,7 @@ public class SystemRegistry {
 		this.translationService = translationService;
 		this.dictionary = new DictionaryLocalizationProvider(translationService, systemConfig.getLocalizationConfig().getRequiredLanguages());
 		this.systemDictionary = new SystemLocalizationProvider(translationService, systemConfig.getLocalizationConfig().getRequiredLanguages());
+		this.baseResourceLinkProvider = new BaseResourceLinkProvider();
 		unspecifiedApplicationGroup = getOrCreateUnspecifiedApplicationGroup();
 	}
 
@@ -121,5 +124,9 @@ public class SystemRegistry {
 
 	public TranslationService getTranslationService() {
 		return translationService;
+	}
+
+	public BaseResourceLinkProvider getBaseResourceLinkProvider() {
+		return baseResourceLinkProvider;
 	}
 }

@@ -4,6 +4,7 @@ import org.teamapps.application.api.privilege.Privilege;
 import org.teamapps.application.api.privilege.PrivilegeObject;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,7 +41,7 @@ public class ValueConverterUtils {
 
 	public static List<String> decompressToStringList(String value) {
 		if (value == null || value.isBlank()) {
-			return null;
+			return Collections.emptyList();
 		} else {
 			return Arrays.stream(value.split("\n"))
 					.filter(n -> n != null && !n.isBlank())
@@ -50,7 +51,7 @@ public class ValueConverterUtils {
 
 	public static List<Integer> decompressIds(String ids) {
 		if (ids == null || ids.isBlank()) {
-			return null;
+			return Collections.emptyList();
 		} else {
 			return Arrays.stream(ids.split("\n"))
 					.filter(n -> n != null && !n.isBlank())

@@ -11,7 +11,12 @@ public class Model implements SchemaInfoProvider {
 		schema.setSchemaName("ControlCenterSchema");
 		Database db = schema.addDatabase("controlCenter");
 
+		//api model:
+		Table language = db.addTable("language", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
+		Table country = db.addTable("country", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
+		Table currency = db.addTable("currency", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
 
+		//system model:
 		Table user = db.addTable("user", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
 		Table userAccessToken = db.addTable("userAccessToken", KEEP_DELETED, TRACK_CREATION);
 		Table organizationUnit = db.addTable("organizationUnit", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
@@ -55,9 +60,31 @@ public class Model implements SchemaInfoProvider {
 		Table appointmentSeries = db.addTable("appointmentSeries", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 
 
+		language
+				.addText("isoCode")
+				.addText("icon")
+				.addText("englishDisplayName")
+				.addBoolean("nonLatinScript")
+				.addBoolean("rightToLeftLanguage")
+				.addReference("localizationKey", localizationKey, false)
+		;
+
+		country
+				.addText("isoCode")
+				.addText("icon")
+				.addText("englishDisplayName")
+				.addReference("localizationKey", localizationKey, false)
+				.addText("addressFormat")
+				.addReference("mainLanguage", language, false)
+				.addReference("otherLanguages", language, true)
+				.addReference("currency", currency, false)
+				.addReference("otherCurrencies", currency, true)
+		;
+
 		systemSettings
 				.addText("allowedBaseLanguages")
 		;
+
 		application
 				.addText("name")
 				.addText("icon")
@@ -196,12 +223,13 @@ public class Model implements SchemaInfoProvider {
 		user
 				.addText("firstName")
 				.addText("lastName")
-				.addFile("profilePicture")
-				.addFile("profilePictureLarge")
+				.addBinary("profilePicture")
+				.addBinary("profilePictureLarge")
 				.addText("languages")
 				.addText("email")
 				.addText("mobile")
 				.addText("login")
+				.addTimestamp("lastLogin")
 				.addText("password")
 				.addText("theme")
 				.addEnum("userAccountStatus", "active", "inactive", "superAdmin")

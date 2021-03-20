@@ -22,11 +22,15 @@ public class PublicLinkResourceProvider implements ResourceProvider {
 	public static final String SERVLET_PATH_PREFIX = "/pl/";
 	private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
 
-	private final String serverUrl;
 	private final Map<String, Resource> resourceByUuid = new ConcurrentHashMap<>();
 
-	public PublicLinkResourceProvider(String serverUrl) {
-		this.serverUrl = serverUrl.endsWith("/") ? serverUrl.substring(0, serverUrl.length() - 1) : serverUrl;
+	private static final PublicLinkResourceProvider INSTANCE = new PublicLinkResourceProvider();
+
+	public static PublicLinkResourceProvider getInstance() {
+		return INSTANCE;
+	}
+
+	private PublicLinkResourceProvider() {
 	}
 
 	@Override
@@ -41,7 +45,7 @@ public class PublicLinkResourceProvider implements ResourceProvider {
 		SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
 			resourceByUuid.remove(linkName);
 		}, availabilityDuration.toSeconds(), TimeUnit.SECONDS);
-		String link = serverUrl + SERVLET_PATH_PREFIX + linkName;
+		String link = SERVLET_PATH_PREFIX + linkName;
 		LOGGER.info("Generating link for resource {} --> {}", resource.getName(), link);
 		return link;
 	}

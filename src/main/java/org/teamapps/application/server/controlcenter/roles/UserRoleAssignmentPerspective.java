@@ -5,6 +5,8 @@ import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
+import org.teamapps.application.server.system.session.PerspectiveSessionData;
+import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.server.ux.UiUtils;
 import org.teamapps.application.server.ux.combo.ComboBoxUtils;
@@ -35,10 +37,14 @@ import java.util.stream.Collectors;
 public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPerspective {
 
 	private final TwoWayBindableValue<UserRoleAssignment> selectedUserRoleAssignment = TwoWayBindableValue.create();
+	private final PerspectiveSessionData perspectiveSessionData;
+	private final UserSessionData userSessionData;
 
 
 	public UserRoleAssignmentPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
 		super(applicationInstanceData, perspectiveInfoBadgeValue);
+		perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
+		userSessionData = perspectiveSessionData.getManagedApplicationSessionData().getUserSessionData();
 		createUi();
 	}
 
@@ -57,7 +63,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 		table.setStripedRows(false);
 		roleModelBuilder.updateModels();
 
-		TemplateField<User> userTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider());
+		TemplateField<User> userTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(userSessionData));
 		TemplateField<Role> roleTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createRolePropertyProvider(getApplicationInstanceData()));
 		TemplateField<OrganizationUnit> orgUnitTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.creatOrganizationUnitPropertyProvider(getApplicationInstanceData()));
 
@@ -83,7 +89,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 		ComboBox<User> userCombobox = ComboBoxUtils.createComboBox(query -> query == null || query.isBlank() ?
 						User.getAll().stream().limit(50).collect(Collectors.toList()) :
 						User.filter().parseFullTextFilter(query).execute().stream().limit(50).collect(Collectors.toList()),
-				PropertyProviders.createUserPropertyProvider(), BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
+				PropertyProviders.createUserPropertyProvider(userSessionData), BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
 		ComboBox<Role> roleComboBox = ComboBoxUtils.createRecordComboBox(
 				() -> isAppFilter() ? Role.filter().organizationField(NumericFilter.equalsFilter(getOrganizationField().getId())).execute() : Role.getAll(),
 				PropertyProviders.createRolePropertyProvider(getApplicationInstanceData()),

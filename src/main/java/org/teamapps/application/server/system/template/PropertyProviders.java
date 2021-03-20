@@ -176,18 +176,18 @@ public class PropertyProviders {
 		};
 	}
 
-
-
-	public static PropertyProvider<User> createUserPropertyProvider() {
+	public static PropertyProvider<User> createUserPropertyProvider(UserSessionData userSessionData) {
+		Function<TranslatableText, String> translatableTextExtractor = TranslatableTextUtils.createTranslatableTextExtractor(userSessionData.getRankedLanguages());
 		return (user, propertyNames) -> {
 			Map<String, Object> map = new HashMap<>();
-			if (user.getProfilePicture() != null) {
-				map.put(BaseTemplate.PROPERTY_IMAGE, SessionContext.current().createFileLink(user.getProfilePicture().retrieveFile())); //todo optimize: access should be cached!
+			String userProfilePictureLink = userSessionData.getRegistry().getBaseResourceLinkProvider().getUserProfilePictureLink(user);
+			if (userProfilePictureLink != null) {
+				map.put(BaseTemplate.PROPERTY_IMAGE, userProfilePictureLink);
 			} else {
 				map.put(BaseTemplate.PROPERTY_ICON, ApplicationIcons.USER);
 			}
-			map.put(BaseTemplate.PROPERTY_CAPTION, user.getLastName() + ", " + user.getFirstName());
-			map.put(BaseTemplate.PROPERTY_DESCRIPTION, null); //user.getContainer() != null ? user.getContainer().getOrganizationUnit().getName().getText() :
+			map.put(BaseTemplate.PROPERTY_CAPTION, user.getFirstName() + " " + user.getLastName());
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, user.getContainer() != null ? translatableTextExtractor.apply(user.getContainer().getOrganizationUnit().getName()) : null);
 			return map;
 		};
 	}

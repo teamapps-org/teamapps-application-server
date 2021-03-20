@@ -96,6 +96,9 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 		table.setDisplayAsList(true);
 		table.setStripedRows(false);
 		table.setRowHeight(28);
+		table.setCssStyle("background-color", "white");
+		table.setCssStyle("border-top", "1px solid " + Color.MATERIAL_GREY_400.toHtmlColorString());
+
 
 		TemplateField<ManagedApplication> managedApplicationField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationPropertyProvider(userSessionData));
 		TemplateField<ManagedApplicationPerspective> perspectiveField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationPerspectivePropertyProvider(userSessionData));
@@ -133,7 +136,7 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 		TemplateField<ManagedApplication> managedApplicationFormField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationPropertyProvider(userSessionData));
 		TemplateField<ManagedApplicationPerspective> perspectiveFormField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationPerspectivePropertyProvider(userSessionData));
 		TemplateField<LogLevel> logLevelFormField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, createLogLevelPropertyProvider());
-		TemplateField<User> userFormField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider());
+		TemplateField<User> userFormField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(userSessionData));
 		DisplayField exceptionClassFormField = new DisplayField();
 		DisplayField messageFormField = new DisplayField();
 		MultiLineTextField detailsFormField = new MultiLineTextField();
@@ -208,7 +211,7 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 
 	private ComboBox<User> createUserComboBox() {
 		ComboBox<User> comboBox = new ComboBox<>(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
-		comboBox.setPropertyProvider(PropertyProviders.createUserPropertyProvider());
+		comboBox.setPropertyProvider(PropertyProviders.createUserPropertyProvider(userSessionData));
 		comboBox.setRecordToStringFunction(user -> user.getFirstName() + " " + user.getLastName());
 		comboBox.setModel(query -> query == null || query.isBlank() ?
 				User.getAll().stream().limit(50).collect(Collectors.toList()) :

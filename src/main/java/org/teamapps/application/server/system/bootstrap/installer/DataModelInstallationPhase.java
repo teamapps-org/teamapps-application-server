@@ -110,6 +110,7 @@ public class DataModelInstallationPhase implements ApplicationInstallationPhase 
 			if (classLoader == null) {
 				classLoader = this.getClass().getClassLoader();
 			}
+			universalDB.addAuxiliaryModel(databaseModel, classLoader);
 			universalDB.installAuxiliaryModelClassed(databaseModel, classLoader);
 		} catch (Exception e) {
 			e.printStackTrace();
