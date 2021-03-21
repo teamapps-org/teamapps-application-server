@@ -14,6 +14,7 @@ import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
 import org.teamapps.application.server.system.server.ApplicationServer;
 import org.teamapps.application.server.system.server.SessionHandler;
 import org.teamapps.application.server.system.server.SessionManager;
+import org.teamapps.application.server.system.template.Templates;
 import org.teamapps.application.server.system.utils.ValueConverterUtils;
 import org.teamapps.icon.flags.FlagIcon;
 import org.teamapps.icon.standard.StandardIcon;
@@ -30,6 +31,7 @@ import org.teamapps.ux.session.SessionContext;
 import java.io.File;
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class BootstrapSessionHandler implements SessionHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -115,6 +117,9 @@ public class BootstrapSessionHandler implements SessionHandler {
 		context.getIconProvider().setDefaultStyleForIconClass(StandardIcon.class, StandardIconStyles.VIVID_STANDARD_SHADOW_1);
 
 		context.getIconProvider().registerIconLibrary(FlagIcon.class);
+		context.registerTemplates(Arrays.stream(Templates.values())
+				.collect(Collectors.toMap(Enum::name, Templates::getTemplate)));
+
 		new LoginHandler(systemRegistry).handleNewSession(context);
 	}
 

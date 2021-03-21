@@ -66,6 +66,7 @@ public class PerspectiveMenuPanel {
 
 	public void addInstantiatedPerspective(AbstractPerspectiveBuilder builder, ApplicationPerspective perspective) {
 		perspectiveByBuilderMap.put(builder, perspective);
+		tree.setSelectedNode(tree.getModel().getRecords().stream().filter(record -> record.equals(builder)).findAny().orElse(null));
 	}
 
 	public Component getComponent() {

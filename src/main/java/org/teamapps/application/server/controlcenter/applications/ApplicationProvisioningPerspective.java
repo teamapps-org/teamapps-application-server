@@ -100,7 +100,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		perspectivesList.addColumn(new TableColumn("application", getLocalized("applications.application"), applicationColumnField));
 		perspectivesList.setPropertyExtractor((record, propertyName) -> switch (propertyName){
 			case "perspective" -> record;
-			case "application" -> record.getApplicationPerspective().getApplication();
+			case "application" -> record.getApplicationPerspective() != null ? record.getApplicationPerspective().getApplication() : null;
 			default -> null;
 		});
 
@@ -198,7 +198,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 			iconComboBox.setValue(app.getIcon() != null ? IconUtils.decodeIcon(app.getIcon()) : app.getMainApplication() != null ? IconUtils.decodeIcon(app.getMainApplication().getIcon()) : null);
 			titleKeyCombo.setValue(app.getTitleKey() != null ? app.getTitleKey() : app.getMainApplication() != null ? app.getMainApplication().getTitleKey() : null);
 			descriptionKeyCombo.setValue(app.getDescriptionKey() != null ? app.getDescriptionKey() : app.getMainApplication() != null ? app.getMainApplication().getDescriptionKey() : null);
-			perspectiveModelBuilder.setRecords(app.getPerspectives().stream().sorted((Comparator.comparingInt(ManagedApplicationPerspective::getListingPosition))).collect(Collectors.toList()));
+			perspectiveModelBuilder.setRecords(app.getPerspectives().stream().filter(perspective -> perspective.getApplicationPerspective() != null).sorted((Comparator.comparingInt(ManagedApplicationPerspective::getListingPosition))).collect(Collectors.toList()));
 			applicationGroupComboBox.setValue(app.getApplicationGroup());
 
 		});

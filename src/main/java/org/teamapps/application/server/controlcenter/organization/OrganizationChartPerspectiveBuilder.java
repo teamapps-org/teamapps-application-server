@@ -20,6 +20,6 @@ public class OrganizationChartPerspectiveBuilder extends AbstractPerspectiveBuil
 
 	@Override
 	public ApplicationPerspective build(ApplicationInstanceData applicationInstanceData, MutableValue<String> mutableValue) {
-		return new OrganizationPerspective(applicationInstanceData, mutableValue);
+		return new OrganizationChartPerspective(applicationInstanceData, mutableValue);
 	}
 }
