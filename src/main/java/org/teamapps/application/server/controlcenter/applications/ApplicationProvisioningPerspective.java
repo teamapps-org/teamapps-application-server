@@ -186,7 +186,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 			titleKeyCombo.setValue(app != null ? app.getTitleKey() : null);
 			descriptionKeyCombo.setValue(app != null ? app.getDescriptionKey() : null);
 			if (selectedApplication.get() != null && !selectedApplication.get().isStored()) {
-				List<ManagedApplicationPerspective> perspectives = app.getPerspectives().stream().map(p -> ManagedApplicationPerspective.create().setApplicationPerspective(p)).collect(Collectors.toList());
+				List<ManagedApplicationPerspective> perspectives = app.getPerspectives().stream().filter(ApplicationPerspective::getAutoProvision).map(p -> ManagedApplicationPerspective.create().setApplicationPerspective(p)).collect(Collectors.toList());
 				perspectiveModelBuilder.setRecords(perspectives);
 			}
 		});
@@ -240,7 +240,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 			descriptionKeyCombo.setValue(perspective.getDescriptionKeyOverride() != null ? perspective.getDescriptionKeyOverride() : perspective.getApplicationPerspective().getDescriptionKey());
 		}
 
-		Arrays.asList(applicationsPerspectiveCombo, iconComboBox, titleKeyCombo, descriptionKeyCombo).forEach(f -> f.setRequired(true));
+		Arrays.asList(applicationsPerspectiveCombo, iconComboBox, titleKeyCombo, descriptionKeyCombo, applicationsPerspectiveCombo).forEach(f -> f.setRequired(true));
 
 		applicationComboBox.onValueChanged.addListener(app -> applicationsPerspectiveCombo.setRecords(app.getPerspectives()));
 		applicationsPerspectiveCombo.onValueChanged.addListener(p -> {
@@ -250,7 +250,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		});
 
 		formWindow.getSaveButton().onClick.addListener(() -> {
-			if (Fields.validateAll(applicationsPerspectiveCombo, iconComboBox, titleKeyCombo, descriptionKeyCombo)) {
+			if (Fields.validateAll(applicationsPerspectiveCombo, iconComboBox, titleKeyCombo, descriptionKeyCombo, applicationsPerspectiveCombo)) {
 				ApplicationPerspective applicationPerspective = applicationsPerspectiveCombo.getValue();
 				perspective.setApplicationPerspective(applicationPerspective);
 				perspective.setIconOverride(applicationPerspective.getIcon().equals(iconComboBox.getValue()) ? null : IconUtils.encodeNoStyle(iconComboBox.getValue()));
