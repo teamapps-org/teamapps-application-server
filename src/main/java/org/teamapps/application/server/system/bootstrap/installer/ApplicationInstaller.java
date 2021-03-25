@@ -1,6 +1,7 @@
 package org.teamapps.application.server.system.bootstrap.installer;
 
 import org.teamapps.application.api.application.ApplicationBuilder;
+import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.config.LocalizationConfig;
@@ -67,7 +68,6 @@ public class ApplicationInstaller {
 	public boolean installApplication() {
 		if (applicationInfo.isChecked() && applicationInfo.getErrors().isEmpty()) {
 			applicationInstallationPhases.forEach(phase -> phase.installApplication(applicationInfo));
-			applicationInfo.getApplicationBuilder().bootstrapApplicationBuilder();
 			applicationInfo.getApplication().setInstalledVersion(applicationInfo.getApplicationVersion()).save();
 			LocalizationUtil.translateAllApplicationValues(translationService, applicationInfo.getApplication());
 			return true;
@@ -80,6 +80,16 @@ public class ApplicationInstaller {
 		if (applicationInfo.isChecked() && applicationInfo.getErrors().isEmpty()) {
 			applicationInfo.createLoadedApplication();
 			applicationInstallationPhases.forEach(phase -> phase.loadApplication(applicationInfo));
+			ApplicationConfig applicationConfig = applicationInfo.getApplicationBuilder().getApplicationConfig();
+			Application application = applicationInfo.getApplication();
+			if (applicationConfig != null && application.getConfig() != null) {
+				try {
+					applicationConfig.updateConfig(application.getConfig());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			applicationInfo.getApplicationBuilder().bootstrapApplicationBuilder();
 			return applicationInfo.getLoadedApplication();
 		}
 		return null;

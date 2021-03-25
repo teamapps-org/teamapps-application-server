@@ -1,5 +1,7 @@
 package org.teamapps.application.server.system.bootstrap;
 
+import org.teamapps.model.controlcenter.ApplicationVersionData;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +10,27 @@ public class ApplicationInfoDataElement {
 	private String data;
 	private List<String> dataAdded = new ArrayList<>();
 	private List<String> dataRemoved = new ArrayList<>();
+
+	public static String getChangeString(ApplicationVersionData versionData) {
+		return versionData != null ? "+ " + versionData.getDataAddedRows() + " | - " + versionData.getDataRemovedRows() : null;
+	}
+
+	public static String getMultiLineChangeHtml(ApplicationVersionData versionData, String addedTitle, String removedTitle) {
+		if (versionData == null) {
+			return null;
+		} else {
+			StringBuilder sb = new StringBuilder();
+			sb.append("<b>").append(addedTitle).append("</b>:<br>");
+			sb.append(versionData.getDataAdded() != null ? versionData.getDataAdded().replace("\n", "<br>") : "");
+			sb.append("<br><b>").append(removedTitle).append("</b>:<br>");
+			sb.append(versionData.getDataRemoved() != null ? versionData.getDataRemoved().replace("\n", "<br>"): "");
+			return sb.toString();
+		}
+	}
+
+	public ApplicationInfoDataElement() {
+
+	}
 
 	public String getChangeString() {
 		return "+ " + dataAdded.size() + " | - " + dataRemoved.size();

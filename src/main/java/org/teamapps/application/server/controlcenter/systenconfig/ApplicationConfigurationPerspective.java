@@ -1,0 +1,87 @@
+package org.teamapps.application.server.controlcenter.systenconfig;
+
+import org.teamapps.application.api.application.ApplicationInstanceData;
+import org.teamapps.application.api.localization.Dictionary;
+import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
+import org.teamapps.application.server.system.bootstrap.LoadedApplication;
+import org.teamapps.application.server.system.session.PerspectiveSessionData;
+import org.teamapps.application.server.system.session.UserSessionData;
+import org.teamapps.application.server.system.template.PropertyProviders;
+import org.teamapps.application.server.ux.UiUtils;
+import org.teamapps.application.tools.EntityModelBuilder;
+import org.teamapps.databinding.MutableValue;
+import org.teamapps.databinding.TwoWayBindableValue;
+import org.teamapps.model.controlcenter.Application;
+import org.teamapps.ux.application.layout.StandardLayout;
+import org.teamapps.ux.application.view.View;
+import org.teamapps.ux.component.field.MultiLineTextField;
+import org.teamapps.ux.component.table.Table;
+import org.teamapps.ux.component.template.BaseTemplate;
+import org.teamapps.ux.component.toolbar.ToolbarButton;
+import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
+
+public class ApplicationConfigurationPerspective extends AbstractManagedApplicationPerspective {
+
+
+	private final PerspectiveSessionData perspectiveSessionData;
+	private final UserSessionData userSessionData;
+	private final TwoWayBindableValue<Application> selectedApplication = TwoWayBindableValue.create();
+
+	public ApplicationConfigurationPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
+		super(applicationInstanceData, perspectiveInfoBadgeValue);
+		perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
+		userSessionData = perspectiveSessionData.getManagedApplicationSessionData().getUserSessionData();
+		createUi();
+	}
+
+	private void createUi() {
+		View masterView = null;
+		View detailsView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.CODE_LINE, getLocalized("applicationConfiguration.title"), null));
+
+		if (!isAppFilter()) {
+			masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.CODE_LINE, getLocalized("applications.title"), null));
+			EntityModelBuilder<Application> applicationModelBuilder = new EntityModelBuilder<>(Application::filter, getApplicationInstanceData());
+			Table<Application> applicationsTable = applicationModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES, PropertyProviders.createApplicationPropertyProvider(userSessionData), 60);
+			applicationModelBuilder.attachSearchField(masterView);
+			applicationModelBuilder.attachViewCountHandler(masterView, () -> getLocalized(Dictionary.APPLICATIONS));
+			applicationModelBuilder.onSelectedRecordChanged.addListener(app -> selectedApplication.set(app));
+			applicationModelBuilder.updateModels();
+			masterView.setComponent(applicationsTable);
+		}
+
+		MultiLineTextField configField = new MultiLineTextField();
+		detailsView.setComponent(configField);
+
+		ToolbarButtonGroup buttonGroup = detailsView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
+		ToolbarButton saveButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.FLOPPY_DISKS, getLocalized(Dictionary.SAVE_CHANGES), getLocalized("applicationConfiguration.updateApplicationConfiguration")));
+
+		saveButton.onClick.addListener(() -> {
+			Application application = selectedApplication.get();
+			String config = configField.getValue();
+			if (application == null && config != null && !config.isBlank()) {
+				return;
+			}
+			LoadedApplication loadedApplication = userSessionData.getRegistry().getLoadedApplication(application);
+			try {
+				loadedApplication.getApplicationBuilder().updateConfig(config);
+				application.setConfig(config).save();
+			} catch (Exception e) {
+				UiUtils.showNotification(ApplicationIcons.ERROR, e.getMessage());
+				e.printStackTrace();
+			}
+		});
+
+		selectedApplication.onChanged().addListener(application -> {
+			LoadedApplication loadedApplication = userSessionData.getRegistry().getLoadedApplication(application);
+			String xml = loadedApplication.getApplicationBuilder().getApplicationConfigXml();
+			configField.setValue(xml);
+		});
+
+		if (isAppFilter()) {
+			selectedApplication.set(getMainApplication());
+		}
+	}
+
+
+}

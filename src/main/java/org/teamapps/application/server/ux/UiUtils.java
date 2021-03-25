@@ -51,6 +51,16 @@ public class UiUtils {
 		return templateField;
 	}
 
+	public static TemplateField<String> createIconFixedIconTemplateField(Icon icon) {
+		TemplateField<String> templateField = new TemplateField<>(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
+		templateField.setPropertyExtractor((value, propertyName) -> switch (propertyName) {
+			case BaseTemplate.PROPERTY_ICON -> icon;
+			case BaseTemplate.PROPERTY_CAPTION -> value;
+			default -> null;
+		});
+		return templateField;
+	}
+
 	public static TemplateField<String> createSingleValueTemplateField(Icon icon, String title) {
 		TemplateField<String> templateField = new TemplateField<>(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
 		templateField.setPropertyExtractor((value, propertyName) -> switch (propertyName) {

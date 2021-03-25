@@ -7,10 +7,10 @@ import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.databinding.MutableValue;
 
-public class SystemConfigurationPerspectiveBuilder extends AbstractPerspectiveBuilder {
+public class ApplicationConfigurationPerspectiveBuilder extends AbstractPerspectiveBuilder {
 
-	public SystemConfigurationPerspectiveBuilder() {
-		super("systemConfigurationPerspective", ApplicationIcons.RACK_SERVERS, "systemConfiguration.title", "systemConfiguration.desc");
+	public ApplicationConfigurationPerspectiveBuilder() {
+		super("applicationConfigurationPerspective2", ApplicationIcons.CODE_LINE, "applicationConfiguration.title", "applicationConfiguration.desc");
 	}
 
 	@Override
@@ -19,7 +19,12 @@ public class SystemConfigurationPerspectiveBuilder extends AbstractPerspectiveBu
 	}
 
 	@Override
+	public boolean autoProvisionPerspective() {
+		return true;
+	}
+
+	@Override
 	public ApplicationPerspective build(ApplicationInstanceData applicationInstanceData, MutableValue<String> mutableValue) {
-		return null;
+		return new ApplicationConfigurationPerspective(applicationInstanceData, mutableValue);
 	}
 }

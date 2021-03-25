@@ -19,6 +19,11 @@ public class OrganizationPerspectiveBuilder extends AbstractPerspectiveBuilder {
 	}
 
 	@Override
+	public boolean autoProvisionPerspective() {
+		return true;
+	}
+
+	@Override
 	public ApplicationPerspective build(ApplicationInstanceData applicationInstanceData, MutableValue<String> mutableValue) {
 		return new OrganizationPerspective(applicationInstanceData, mutableValue);
 	}

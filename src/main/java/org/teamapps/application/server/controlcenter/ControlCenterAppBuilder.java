@@ -3,6 +3,7 @@ package org.teamapps.application.server.controlcenter;
 import org.teamapps.application.api.application.ApplicationPerspectiveBuilder;
 import org.teamapps.application.api.application.PerspectiveBuilder;
 import org.teamapps.application.api.config.ApplicationConfig;
+import org.teamapps.application.api.config.ApplicationConfigXml;
 import org.teamapps.application.api.localization.LocalizationData;
 import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.api.privilege.ApplicationRole;
@@ -10,13 +11,21 @@ import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.api.versioning.ApplicationVersion;
 import org.teamapps.application.server.controlcenter.accesscontrol.AccessControlPerspectiveBuilder;
+import org.teamapps.application.server.controlcenter.applications.ApplicationGroupsPerspectiveBuilder;
+import org.teamapps.application.server.controlcenter.applications.ApplicationProvisioningPerspectiveBuilder;
+import org.teamapps.application.server.controlcenter.applications.ApplicationUpdatesPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.applications.ApplicationsPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.applocal.AppLocalAdministrationPerspectiveBuilder;
+import org.teamapps.application.server.controlcenter.config.ControlCenterConfig;
 import org.teamapps.application.server.controlcenter.database.DataBasePerspectiveBuilder;
+import org.teamapps.application.server.controlcenter.organization.OrganizationChartPerspectiveBuilder;
+import org.teamapps.application.server.controlcenter.organization.OrganizationFieldPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.organization.OrganizationPerspectiveBuilder;
+import org.teamapps.application.server.controlcenter.organization.OrganizationUnitTypePerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.roles.RolesPerspectiveBuilder;
+import org.teamapps.application.server.controlcenter.roles.UserRoleAssignmentPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.systemlog.SystemLogPerspectiveBuilder;
-import org.teamapps.application.server.controlcenter.systenconfig.SystemConfigurationPerspectiveBuilder;
+import org.teamapps.application.server.controlcenter.systenconfig.ApplicationConfigurationPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.translations.TranslationsPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.users.UsersPerspectiveBuilder;
 import org.teamapps.icons.Icon;
@@ -29,6 +38,14 @@ import java.util.Locale;
 
 public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 
+	private ApplicationConfig<ControlCenterConfig> applicationConfig;
+
+	public ControlCenterAppBuilder() {
+		applicationConfig = new ApplicationConfig<>();
+		ControlCenterConfig config = new ControlCenterConfig();
+		applicationConfig.setConfig(config);
+	}
+
 	@Override
 	public List<PerspectiveBuilder> getPerspectiveBuilders() {
 		return Arrays.asList(
@@ -40,14 +57,24 @@ public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 				new TranslationsPerspectiveBuilder(),
 				new SystemLogPerspectiveBuilder(),
 				new DataBasePerspectiveBuilder(),
-				new SystemConfigurationPerspectiveBuilder(),
-				new AppLocalAdministrationPerspectiveBuilder()
+				new ApplicationConfigurationPerspectiveBuilder(),
+
+				new AppLocalAdministrationPerspectiveBuilder(),
+				new ApplicationGroupsPerspectiveBuilder(),
+				new ApplicationProvisioningPerspectiveBuilder(),
+				new ApplicationUpdatesPerspectiveBuilder(),
+				new OrganizationChartPerspectiveBuilder(),
+				new OrganizationFieldPerspectiveBuilder(),
+				new OrganizationUnitTypePerspectiveBuilder(),
+				new UserRoleAssignmentPerspectiveBuilder()
+
+
 		);
 	}
 
 	@Override
 	public ApplicationVersion getApplicationVersion() {
-		return ApplicationVersion.create(0, 30);
+		return ApplicationVersion.create(0, 34);
 	}
 
 	@Override
@@ -94,8 +121,9 @@ public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 
 	@Override
 	public ApplicationConfig getApplicationConfig() {
-		return null;
+		return applicationConfig;
 	}
+
 
 	@Override
 	public void bootstrapApplicationBuilder() {
@@ -106,4 +134,5 @@ public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 	public boolean isApplicationAccessible(ApplicationPrivilegeProvider privilegeProvider) {
 		return privilegeProvider.isAllowed(Privileges.LAUNCH_APPLICATION);
 	}
+
 }

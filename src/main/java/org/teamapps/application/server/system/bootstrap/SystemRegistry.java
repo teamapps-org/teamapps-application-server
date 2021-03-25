@@ -16,8 +16,10 @@ import org.teamapps.universaldb.UniversalDB;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class SystemRegistry {
 
@@ -69,7 +71,8 @@ public class SystemRegistry {
 							.setMainApplication(application)
 							.setApplicationGroup(unspecifiedApplicationGroup)
 							.save();
-					for (ApplicationPerspective perspective : application.getPerspectives()) {
+					List<ApplicationPerspective> perspectives = application.getPerspectives().stream().filter(perspective -> perspective.getAutoProvision()).collect(Collectors.toList());
+					for (ApplicationPerspective perspective : perspectives) {
 						ManagedApplicationPerspective.create()
 								.setManagedApplication(managedApplication)
 								.setApplicationPerspective(perspective)

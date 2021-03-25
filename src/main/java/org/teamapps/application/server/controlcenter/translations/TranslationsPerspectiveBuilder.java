@@ -10,11 +10,16 @@ import org.teamapps.databinding.MutableValue;
 public class TranslationsPerspectiveBuilder extends AbstractPerspectiveBuilder {
 
 	public TranslationsPerspectiveBuilder() {
-		super("translationsPerspective", ApplicationIcons.DOCUMENT_TEXT, "translations.title", "translations.desc");
+		super("translationsPerspective", ApplicationIcons.SPELL_CHECK, "translations.title", "translations.desc");
 	}
 
 	@Override
 	public boolean isPerspectiveAccessible(ApplicationPrivilegeProvider applicationPrivilegeProvider) {
+		return true;
+	}
+
+	@Override
+	public boolean autoProvisionPerspective() {
 		return true;
 	}
 

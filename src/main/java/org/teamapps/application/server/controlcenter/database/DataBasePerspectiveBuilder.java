@@ -20,6 +20,11 @@ public class DataBasePerspectiveBuilder extends AbstractPerspectiveBuilder {
 	}
 
 	@Override
+	public boolean autoProvisionPerspective() {
+		return true;
+	}
+
+	@Override
 	public ApplicationPerspective build(ApplicationInstanceData applicationInstanceData, MutableValue<String> mutableValue) {
 		return null;
 	}

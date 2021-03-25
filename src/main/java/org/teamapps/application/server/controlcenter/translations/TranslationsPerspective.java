@@ -66,17 +66,17 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 	}
 
 	private void createUi() {
-		View localizationKeyView = View.createView(StandardLayout.CENTER, ApplicationIcons.DOCUMENT_TEXT, getLocalized("translations.overView"), null);
+		View localizationKeyView = View.createView(StandardLayout.CENTER, ApplicationIcons.SPELL_CHECK, getLocalized("translations.overView"), null);
 		View topicImageView = View.createView(StandardLayout.CENTER_BOTTOM, ApplicationIcons.FORM, getLocalized(Dictionary.PREVIEW_IMAGE), null);
-		View translationView = View.createView(StandardLayout.RIGHT, ApplicationIcons.DOCUMENT_TEXT, getLocalized("translations.translation"), null);
+		View translationView = View.createView(StandardLayout.RIGHT, ApplicationIcons.SPELL_CHECK, getLocalized("translations.translation"), null);
 		localizationKeyView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
 		translationView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
 
 		topicImageView.setVisible(false);
 
 		ToolbarButtonGroup buttonGroup = localizationKeyView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton overViewButtonOn = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.DOCUMENT_TEXT, ApplicationIcons.CHECKBOX), getLocalized("translations.overView"), getLocalized("translations.showOverView")));
-		ToolbarButton overViewButtonOff = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.DOCUMENT_TEXT, ApplicationIcons.DELETE), getLocalized("translations.overView"), getLocalized("translations.hideOverView")));
+		ToolbarButton overViewButtonOn = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.SPELL_CHECK, ApplicationIcons.CHECKBOX), getLocalized("translations.overView"), getLocalized("translations.showOverView")));
+		ToolbarButton overViewButtonOff = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.SPELL_CHECK, ApplicationIcons.DELETE), getLocalized("translations.overView"), getLocalized("translations.hideOverView")));
 		overViewButtonOn.setVisible(false);
 		/*
 			Main toolbar:

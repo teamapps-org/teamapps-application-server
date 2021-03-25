@@ -91,6 +91,7 @@ public class Model implements SchemaInfoProvider {
 				.addText("titleKey")
 				.addText("descriptionKey")
 				.addBoolean("unmanagedApplication")
+				.addText("config")
 				.addReference("perspectives", applicationPerspective, true, "application", true)
 				.addReference("privilegeGroups", applicationPrivilegeGroup, true, "application")
 				.addReference("versions", applicationVersion, true, "application")
@@ -104,6 +105,7 @@ public class Model implements SchemaInfoProvider {
 				.addText("icon")
 				.addText("titleKey")
 				.addText("descriptionKey")
+				.addBoolean("autoProvision")
 				.addReference("managedPerspectives", managedApplicationPerspective, true, "applicationPerspective", true)
 		;
 
