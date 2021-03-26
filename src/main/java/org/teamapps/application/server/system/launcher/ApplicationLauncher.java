@@ -12,6 +12,8 @@ import org.teamapps.application.server.system.login.LoginHandler;
 import org.teamapps.application.server.system.session.ManagedApplicationSessionData;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
+import org.teamapps.application.server.system.template.PropertyProviders;
+import org.teamapps.application.server.ux.UiUtils;
 import org.teamapps.common.format.Color;
 import org.teamapps.icon.standard.StandardIcon;
 import org.teamapps.model.controlcenter.Application;
@@ -25,6 +27,10 @@ import org.teamapps.ux.application.perspective.Perspective;
 import org.teamapps.ux.application.view.View;
 import org.teamapps.ux.component.Component;
 import org.teamapps.ux.component.animation.PageTransition;
+import org.teamapps.ux.component.dialogue.FormDialogue;
+import org.teamapps.ux.component.field.FieldEditingMode;
+import org.teamapps.ux.component.field.MultiLineTextField;
+import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.TextField;
 import org.teamapps.ux.component.flexcontainer.VerticalLayout;
 import org.teamapps.ux.component.itemview.SimpleItem;
@@ -67,7 +73,6 @@ public class ApplicationLauncher {
 	private ManagedApplicationPerspective currentPerspective;
 
 	public ApplicationLauncher(UserSessionData userSessionData) {
-		//System.out.println(applicationLauncher.getParent());
 		this.userSessionData = userSessionData;
 		this.rootPanel = userSessionData.getRootPanel();
 		this.registry = userSessionData.getRegistry();
@@ -76,11 +81,38 @@ public class ApplicationLauncher {
 			UniversalDB.setUserId(userSessionData.getUser().getId());
 			THREAD_LOCAL_APPLICATION.set(currentApplication);
 			THREAD_LOCAL_MANAGED_PERSPECTIVE.set(currentPerspective);
-			runnable.run();
+			try {
+				runnable.run();
+			} catch (Throwable e) {
+				LOGGER.error("Application crash", e);
+				handleSessionException(e);
+			}
 		}, true);
 		initApplicationData();
 		createApplicationLauncher();
 		createMainView();
+	}
+
+	private void handleSessionException(Throwable e) {
+		ManagedApplication managedApplication = currentApplication;
+		ManagedApplicationPerspective perspective = THREAD_LOCAL_MANAGED_PERSPECTIVE.get();
+		closeApplication(managedApplication);
+		FormDialogue dialogue = FormDialogue.create(ApplicationIcons.SIGN_WARNING, getLocalized(Dictionary.ERROR), getLocalized(Dictionary.SENTENCE_ERROR_THE_ACTIVE_APPLICATION_CAUSED__));
+		TemplateField<ManagedApplication> managedApplicationField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationPropertyProvider(userSessionData));
+		TemplateField<ManagedApplicationPerspective> perspectiveField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationPerspectivePropertyProvider(userSessionData));
+		TextField errorField = new TextField();
+		errorField.setEditingMode(FieldEditingMode.READONLY);
+		managedApplicationField.setValue(managedApplication);
+		perspectiveField.setValue(perspective);
+		errorField.setValue(e.getMessage());
+		dialogue.addField(null, getLocalized(Dictionary.APPLICATION), managedApplicationField);
+		dialogue.addField(null, getLocalized(Dictionary.APPLICATION_PERSPECTIVE), perspectiveField);
+		dialogue.addField(null, getLocalized(Dictionary.ERROR), errorField);
+		dialogue.addOkButton(getLocalized(Dictionary.O_K));
+		dialogue.setCloseOnEscape(true);
+		dialogue.setAutoCloseOnOk(true);
+		dialogue.setCloseable(true);
+		dialogue.show();
 	}
 
 	private void initApplicationData() {
@@ -116,7 +148,7 @@ public class ApplicationLauncher {
 			SimpleItemGroup<ApplicationData> itemGroup = new SimpleItemGroup<>(ApplicationIcons.LOG_OUT, getLocalized(Dictionary.LOGOUT), BaseTemplate.LIST_ITEM_EXTRA_VERY_LARGE_ICON_TWO_LINES);
 			itemView.addGroup(itemGroup);
 			itemGroup.setButtonWidth(220);
-			SimpleItem<ApplicationData> item = itemGroup.addItem(ApplicationIcons.DELETE, getLocalized(Dictionary.LOGOUT), getLocalized(Dictionary.LOGOUT));
+			SimpleItem<ApplicationData> item = itemGroup.addItem(ApplicationIcons.LOG_OUT, getLocalized(Dictionary.LOGOUT), getLocalized(Dictionary.LOGOUT));
 			item.onClick.addListener(this::logout);
 		}
 		applicationLauncher = createLauncherView(itemView, mobileView);
@@ -143,6 +175,32 @@ public class ApplicationLauncher {
 			applicationsTabPanel.addTab(logoutTab, false);
 			logoutTab.onSelected.addListener(this::logout);
 			rootPanel.setContent(applicationsTabPanel);
+		}
+	}
+
+	private void closeApplication(ManagedApplication managedApplication) {
+		if (managedApplication == null) {
+			return;
+		}
+		ApplicationData runningApplication = null;
+		for (ApplicationData applicationData : openedApplications) {
+			if (applicationData.getManagedApplication().equals(managedApplication)) {
+				runningApplication = applicationData;
+			}
+		}
+		if (runningApplication != null) {
+			if (mobileView) {
+				//todo
+			} else {
+				Tab tab = tabByApplicationData.get(runningApplication);
+				if (tab != null) {
+					//todo get from app data all app created tabs and close them as well
+					applicationsTabPanel.removeTab(tab);
+					tabByApplicationData.remove(runningApplication);
+					openedApplications.remove(runningApplication);
+					runningApplication.reloadApplicationData(userSessionData);
+				}
+			}
 		}
 	}
 

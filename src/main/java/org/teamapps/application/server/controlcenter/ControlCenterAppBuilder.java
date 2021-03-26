@@ -3,7 +3,6 @@ package org.teamapps.application.server.controlcenter;
 import org.teamapps.application.api.application.ApplicationPerspectiveBuilder;
 import org.teamapps.application.api.application.PerspectiveBuilder;
 import org.teamapps.application.api.config.ApplicationConfig;
-import org.teamapps.application.api.config.ApplicationConfigXml;
 import org.teamapps.application.api.localization.LocalizationData;
 import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.api.privilege.ApplicationRole;
@@ -41,8 +40,8 @@ public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 	private ApplicationConfig<ControlCenterConfig> applicationConfig;
 
 	public ControlCenterAppBuilder() {
-		applicationConfig = new ApplicationConfig<>();
 		ControlCenterConfig config = new ControlCenterConfig();
+		applicationConfig = new ApplicationConfig<>();
 		applicationConfig.setConfig(config);
 	}
 
@@ -55,9 +54,9 @@ public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 				new AccessControlPerspectiveBuilder(),
 				new ApplicationsPerspectiveBuilder(),
 				new TranslationsPerspectiveBuilder(),
+				new ApplicationConfigurationPerspectiveBuilder(),
 				new SystemLogPerspectiveBuilder(),
 				new DataBasePerspectiveBuilder(),
-				new ApplicationConfigurationPerspectiveBuilder(),
 
 				new AppLocalAdministrationPerspectiveBuilder(),
 				new ApplicationGroupsPerspectiveBuilder(),

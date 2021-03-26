@@ -36,7 +36,7 @@ public class DatabaseExplorerAppBuilder implements ApplicationBuilder {
 
 	@Override
 	public Icon getApplicationIcon() {
-		return ApplicationIcons.DATA_TABLE;
+		return ApplicationIcons.DATA;
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class DatabaseExplorerAppBuilder implements ApplicationBuilder {
 
 	@Override
 	public String getApplicationTitleKey() {
-		return Dictionary.CREATION_DATE;
+		return Dictionary.DATABASE;
 	}
 
 	@Override
@@ -88,6 +88,7 @@ public class DatabaseExplorerAppBuilder implements ApplicationBuilder {
 	public ApplicationConfig getApplicationConfig() {
 		return null;
 	}
+
 
 	@Override
 	public void bootstrapApplicationBuilder() {

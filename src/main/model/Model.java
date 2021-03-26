@@ -151,6 +151,7 @@ public class Model implements SchemaInfoProvider {
 				.addReference("managedApplication", managedApplication, false)
 				.addReference("managedPerspective", managedApplicationPerspective, false)
 				.addReference("application", application, false)
+				.addReference("applicationPerspective", applicationPerspective, false)
 				.addReference("applicationVersion", applicationVersion, false)
 				.addEnum("logLevel", "info", "warning", "error")
 				.addText("thread")

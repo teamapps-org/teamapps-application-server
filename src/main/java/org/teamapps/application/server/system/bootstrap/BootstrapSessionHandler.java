@@ -2,7 +2,6 @@ package org.teamapps.application.server.system.bootstrap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.teamapps.application.api.config.ApplicationConfigXml;
 import org.teamapps.application.server.controlcenter.ControlCenterAppBuilder;
 import org.teamapps.application.server.controlcenter.dbexplorer.DatabaseExplorerAppBuilder;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
@@ -73,15 +72,8 @@ public class BootstrapSessionHandler implements SessionHandler {
 		universalDB.addAuxiliaryModel(schema, classLoader);
 		universalDB.installAuxiliaryModelClassed(schema, classLoader);
 		DatabaseLogAppender.startLogger();
-		ApplicationConfigXml<SystemConfig> configHandler = new ApplicationConfigXml<>();
-		File systemConfigFile = new File(configPath, "systemConfig.xml");
-		SystemConfig systemConfig = null;
-		if (systemConfigFile.exists()) {
-			systemConfig = configHandler.readConfigFile(systemConfigFile);
-		} else {
-			systemConfig = new SystemConfig();
-			configHandler.writeConfig(systemConfig, systemConfigFile);
-		}
+
+		SystemConfig systemConfig = new SystemConfig();
 		MachineTranslation machineTranslation = null;
 		if (systemConfig.getMachineTranslation().isActive()) {
 			machineTranslation = new MachineTranslation();

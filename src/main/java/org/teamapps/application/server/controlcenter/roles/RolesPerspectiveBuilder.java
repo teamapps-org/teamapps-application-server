@@ -10,7 +10,7 @@ import org.teamapps.databinding.MutableValue;
 public class RolesPerspectiveBuilder extends AbstractPerspectiveBuilder {
 
 	public RolesPerspectiveBuilder() {
-		super("rolesPerspective", ApplicationIcons.USERS_THREE_RELATION, "roles.title", "roles.desc");
+		super("rolesPerspective", ApplicationIcons.WORKER, "roles.title", "roles.desc");
 	}
 
 	@Override

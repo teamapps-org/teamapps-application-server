@@ -147,13 +147,16 @@ public class OrganizationPerspective extends AbstractManagedApplicationPerspecti
 			}
 		});
 
+		if (OrganizationUnit.getCount() == 0) {
+			selectedUnit.set(OrganizationUnit.create().setParent(null));
+		}
 	}
 
 	private ComboBox<OrganizationUnitType> createOrgUnitTypeComboBox() {
 		ComboBox<OrganizationUnitType> comboBox = new ComboBox<>(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
 		PropertyProvider<OrganizationUnitType> propertyProvider = PropertyProviders.creatOrganizationUnitTypePropertyProvider(getApplicationInstanceData());
 		comboBox.setModel(query -> {
-			List<OrganizationUnitType> allowedTypes = selectedUnit.get().getParent() != null ? selectedUnit.get().getParent().getType().getPossibleChildrenTypes() : OrganizationUnitType.getAll();
+			List<OrganizationUnitType> allowedTypes = selectedUnit.get() != null && selectedUnit.get().getParent() != null ? selectedUnit.get().getParent().getType().getPossibleChildrenTypes() : OrganizationUnitType.getAll();
 			if (query == null || query.isBlank()) {
 				return allowedTypes;
 			} else {

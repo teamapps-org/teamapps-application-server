@@ -49,8 +49,8 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 	}
 
 	private void createUi() {
-		View masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.CONSOLE, getLocalized("roles.roles"), null));
-		View detailView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.CONSOLE, getLocalized("roles.role"), null));
+		View masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.WORKER, getLocalized("roles.roles"), null));
+		View detailView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.WORKER, getLocalized("roles.role"), null));
 		detailView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
 
 		EntityModelBuilder<Role> roleModelBuilder = new EntityModelBuilder<>(() -> isAppFilter() ? Role.filter().organizationField(NumericFilter.equalsFilter(getOrganizationField().getId())) : Role.filter(), getApplicationInstanceData());

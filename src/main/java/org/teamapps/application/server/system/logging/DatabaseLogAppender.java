@@ -23,6 +23,7 @@ public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEven
 		ManagedApplication managedApplication = ApplicationLauncher.THREAD_LOCAL_APPLICATION.get();
 		ManagedApplicationPerspective managedApplicationPerspective = ApplicationLauncher.THREAD_LOCAL_MANAGED_PERSPECTIVE.get();
 		Application application = managedApplication != null ? managedApplication.getMainApplication() : null;
+		ApplicationPerspective applicationPerspective = managedApplicationPerspective != null ? managedApplicationPerspective.getApplicationPerspective() : null;
 		ApplicationVersion applicationVersion = application != null ? application.getInstalledVersion() : null;
 		String threadName = event.getThreadName();
 		String message = event.getFormattedMessage();
@@ -38,6 +39,7 @@ public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEven
 				.setManagedApplication(managedApplication)
 				.setManagedPerspective(managedApplicationPerspective)
 				.setApplication(application)
+				.setApplicationPerspective(applicationPerspective)
 				.setApplicationVersion(applicationVersion)
 				.setExceptionClass(exceptionClass)
 				.setThread(threadName)

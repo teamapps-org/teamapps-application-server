@@ -6,6 +6,7 @@ import org.teamapps.application.api.user.SessionUser;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.launcher.MobileApplicationNavigation;
+import org.teamapps.application.server.system.localization.ApplicationScopeLocalizationProvider;
 import org.teamapps.application.server.system.localization.UserLocalizationProvider;
 import org.teamapps.application.server.system.privilege.PrivilegeApplicationKey;
 import org.teamapps.application.server.system.privilege.UserPrivileges;
@@ -63,7 +64,8 @@ public class UserSessionData {
 	private ApplicationLocalizationProvider createApplicationLocalizationProvider(Application application) {
 		List<String> rankedLanguages = sessionUser.getRankedLanguages();
 		LoadedApplication loadedApplication = registry.getLoadedApplication(application);
-		return new UserLocalizationProvider(rankedLanguages, registry.getDictionary(), registry.getSystemDictionary(), loadedApplication.getApplicationLocalizationProvider());
+		ApplicationScopeLocalizationProvider applicationLocalizationProvider = loadedApplication != null ? loadedApplication.getApplicationLocalizationProvider() : null;
+		return new UserLocalizationProvider(rankedLanguages, registry.getDictionary(), registry.getSystemDictionary(), applicationLocalizationProvider);
 	}
 
 	public Icon<?, ?> decodeIcon(String name) {

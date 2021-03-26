@@ -80,11 +80,15 @@ public class ApplicationInstaller {
 		if (applicationInfo.isChecked() && applicationInfo.getErrors().isEmpty()) {
 			applicationInfo.createLoadedApplication();
 			applicationInstallationPhases.forEach(phase -> phase.loadApplication(applicationInfo));
-			ApplicationConfig applicationConfig = applicationInfo.getApplicationBuilder().getApplicationConfig();
+			ClassLoader classLoader = applicationInfo.getApplicationClassLoader();
+			if (classLoader == null) {
+				classLoader = this.getClass().getClassLoader();
+			}
+			String applicationConfig = applicationInfo.getApplicationBuilder().getApplicationConfigXml(classLoader);
 			Application application = applicationInfo.getApplication();
 			if (applicationConfig != null && application.getConfig() != null) {
 				try {
-					applicationConfig.updateConfig(application.getConfig());
+					applicationInfo.getApplicationBuilder().updateConfig(application.getConfig(), classLoader);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

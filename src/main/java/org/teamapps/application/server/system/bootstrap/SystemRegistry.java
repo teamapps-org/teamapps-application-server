@@ -1,5 +1,7 @@
 package org.teamapps.application.server.system.bootstrap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.application.ApplicationBuilder;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
@@ -15,6 +17,7 @@ import org.teamapps.reporting.convert.DocumentConverter;
 import org.teamapps.universaldb.UniversalDB;
 
 import java.io.File;
+import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +25,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SystemRegistry {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private final SystemConfig systemConfig;
 	private final BootstrapSessionHandler bootstrapSessionHandler;
@@ -90,10 +95,14 @@ public class SystemRegistry {
 	}
 
 	public void loadApplication(ApplicationInstaller applicationInstaller) {
-		LoadedApplication loadedApplication = applicationInstaller.loadApplication();
-		System.out.println("Loaded app:" + applicationInstaller.getApplicationInfo().getName());
-		if (applicationInstaller.getApplicationInfo().getErrors().isEmpty()) {
-			addLoadedApplication(loadedApplication);
+		try {
+			LoadedApplication loadedApplication = applicationInstaller.loadApplication();
+			System.out.println("Loaded app:" + applicationInstaller.getApplicationInfo().getName());
+			if (applicationInstaller.getApplicationInfo().getErrors().isEmpty()) {
+				addLoadedApplication(loadedApplication);
+			}
+		} catch (Throwable e) {
+			LOGGER.error("Error loading application: " + applicationInstaller.getApplicationInfo(), e);
 		}
 	}
 

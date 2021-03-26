@@ -1,5 +1,7 @@
 package org.teamapps.application.server.controlcenter.systenconfig;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
@@ -21,8 +23,10 @@ import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.component.toolbar.ToolbarButton;
 import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
 
-public class ApplicationConfigurationPerspective extends AbstractManagedApplicationPerspective {
+import java.lang.invoke.MethodHandles;
 
+public class ApplicationConfigurationPerspective extends AbstractManagedApplicationPerspective {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private final PerspectiveSessionData perspectiveSessionData;
 	private final UserSessionData userSessionData;
@@ -64,17 +68,18 @@ public class ApplicationConfigurationPerspective extends AbstractManagedApplicat
 			}
 			LoadedApplication loadedApplication = userSessionData.getRegistry().getLoadedApplication(application);
 			try {
-				loadedApplication.getApplicationBuilder().updateConfig(config);
+				loadedApplication.getApplicationBuilder().updateConfig(config, loadedApplication.getApplicationClassLoaderOrDefault());
 				application.setConfig(config).save();
 			} catch (Exception e) {
 				UiUtils.showNotification(ApplicationIcons.ERROR, e.getMessage());
+				LOGGER.error("ERROR UPDATING APPLICATION CONFIG: " + application.getName() + ": " +e.getMessage());
 				e.printStackTrace();
 			}
 		});
 
 		selectedApplication.onChanged().addListener(application -> {
 			LoadedApplication loadedApplication = userSessionData.getRegistry().getLoadedApplication(application);
-			String xml = loadedApplication.getApplicationBuilder().getApplicationConfigXml();
+			String xml = loadedApplication.getApplicationBuilder().getApplicationConfigXml(loadedApplication.getApplicationClassLoaderOrDefault());
 			configField.setValue(xml);
 		});
 

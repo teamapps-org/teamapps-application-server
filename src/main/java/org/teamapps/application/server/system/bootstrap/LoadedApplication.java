@@ -70,6 +70,10 @@ public class LoadedApplication {
 		return applicationClassLoader;
 	}
 
+	public ClassLoader getApplicationClassLoaderOrDefault() {
+		return applicationClassLoader != null ? applicationClassLoader : this.getClass().getClassLoader();
+	}
+
 	public boolean isUnmanagedPerspectives() {
 		return unmanagedPerspectives;
 	}
