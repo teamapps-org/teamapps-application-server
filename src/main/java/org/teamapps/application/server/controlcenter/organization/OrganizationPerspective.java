@@ -69,6 +69,8 @@ public class OrganizationPerspective extends AbstractManagedApplicationPerspecti
 		orgUnitModelBuilder.updateModels();
 		masterView.setComponent(tree);
 
+		//printUnits(OrganizationUnit.getById(1), 0);
+
 		ToolbarButtonGroup buttonGroup = detailView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
 		ToolbarButton addButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.ADD, getLocalized(Dictionary.ADD), getLocalized(Dictionary.ADD_RECORD)));
 
@@ -149,6 +151,18 @@ public class OrganizationPerspective extends AbstractManagedApplicationPerspecti
 
 		if (OrganizationUnit.getCount() == 0) {
 			selectedUnit.set(OrganizationUnit.create().setParent(null));
+		}
+	}
+
+	private void printUnits(OrganizationUnit unit, int level) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < level; i++) {
+			sb.append("\t");
+		}
+		String space = sb.toString();
+		System.out.println(space + unit.getName().getText() + " (" + unit.getType().getName().getText() + ")");
+		for (OrganizationUnit child : unit.getChildren()) {
+			printUnits(child, level + 1);
 		}
 	}
 
