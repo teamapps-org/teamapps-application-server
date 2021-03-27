@@ -50,6 +50,7 @@ import org.teamapps.ux.component.tree.Tree;
 import org.teamapps.ux.model.ListTreeModel;
 
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -88,6 +89,7 @@ public class ApplicationLauncher {
 				handleSessionException(e);
 			}
 		}, true);
+		userSessionData.getUser().setLastLogin(Instant.now());
 		initApplicationData();
 		createApplicationLauncher();
 		createMainView();

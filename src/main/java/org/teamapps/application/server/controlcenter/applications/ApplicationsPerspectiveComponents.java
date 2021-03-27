@@ -35,6 +35,7 @@ import org.teamapps.ux.component.field.upload.simple.SimpleFileField;
 import org.teamapps.ux.component.form.ResponsiveForm;
 import org.teamapps.ux.component.form.ResponsiveFormLayout;
 import org.teamapps.ux.component.format.Spacing;
+import org.teamapps.ux.component.progress.MultiProgressDisplay;
 import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.component.toolbar.ToolbarButton;
 import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
@@ -297,13 +298,18 @@ public class ApplicationsPerspectiveComponents extends AbstractManagedApplicatio
 		window.setContent(form);
 		ToolbarButtonGroup buttonGroup = window.getToolbar().addButtonGroup(new ToolbarButtonGroup());
 		buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.INSTALL, getLocalized("applications.installApplication"), getLocalized("applications.installApplication"))).onClick.addListener(() -> {
-			if (userSessionData.getRegistry().installAndLoadApplication(installer)) {
-				SessionContext.current().showNotification(ApplicationIcons.OK, getLocalized("applications.installationSuccessful"));
-				window.close();
-			} else {
-				SessionContext.current().showNotification(ApplicationIcons.ERROR, getLocalized("applications.installationNotSuccessful"));
-				window.close();
-			}
+			SessionContext context = SessionContext.current();
+			window.close();
+			getApplicationInstanceData().getMultiProgressDisplay().addTask(ApplicationIcons.INSTALL, getLocalized("applications.installApplication"), progressMonitor -> {
+				boolean result = userSessionData.getRegistry().installAndLoadApplication(installer);
+				context.runWithContext(() -> {
+					if (result) {
+						SessionContext.current().showNotification(ApplicationIcons.OK, getLocalized("applications.installationSuccessful"));
+					} else {
+						SessionContext.current().showNotification(ApplicationIcons.ERROR, getLocalized("applications.installationNotSuccessful"));
+					}
+				});
+			});
 		});
 
 		buttonGroup = window.getToolbar().addButtonGroup(new ToolbarButtonGroup());
