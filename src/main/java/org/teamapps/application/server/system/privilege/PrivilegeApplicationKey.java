@@ -1,6 +1,5 @@
 package org.teamapps.application.server.system.privilege;
 
-import org.teamapps.application.api.organization.OrgField;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.model.controlcenter.*;
 
@@ -10,12 +9,12 @@ public class PrivilegeApplicationKey {
 
 	public static PrivilegeApplicationKey create(ManagedApplicationPerspective perspective) {
 		OrganizationField organizationField = perspective.getManagedApplication().getOrganizationField();
-		OrgField orgField = OrganizationUtils.convert(organizationField);
+		OrganizationFieldView organizationFieldView = OrganizationUtils.convert(organizationField);
 		Application application = perspective.getApplicationPerspective().getApplication();
 		if (application == null) {
 			return null;
 		}
-		return new PrivilegeApplicationKey(application, orgField);
+		return new PrivilegeApplicationKey(application, organizationFieldView);
 	}
 
 	public static PrivilegeApplicationKey createUnmanagedKey(ManagedApplication managedApplication) {
@@ -37,20 +36,20 @@ public class PrivilegeApplicationKey {
 
 	private final String key;
 	private final Application application;
-	private final OrgField orgField;
+	private final OrganizationFieldView organizationFieldView;
 
-	private PrivilegeApplicationKey(Application application, OrgField orgField) {
+	private PrivilegeApplicationKey(Application application, OrganizationFieldView organizationFieldView) {
 		this.application = application;
-		this.orgField = orgField;
-		this.key = orgField != null ? application.getId() + "-" + orgField.getId() : application.getId() + "";
+		this.organizationFieldView = organizationFieldView;
+		this.key = organizationFieldView != null ? application.getId() + "-" + organizationFieldView.getId() : application.getId() + "";
 	}
 
 	public Application getApplication() {
 		return application;
 	}
 
-	public OrgField getOrgField() {
-		return orgField;
+	public OrganizationFieldView getOrganizationFieldView() {
+		return organizationFieldView;
 	}
 
 	@Override

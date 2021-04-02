@@ -1,9 +1,9 @@
 package org.teamapps.application.server.system.privilege;
 
-import org.teamapps.application.api.organization.OrgUnit;
 import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.model.controlcenter.OrganizationUnit;
+import org.teamapps.model.controlcenter.OrganizationUnitView;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public class AllowAllPrivilegeProvider implements ApplicationPrivilegeProvider {
 	}
 
 	@Override
-	public boolean isAllowed(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege, OrgUnit orgUnit) {
+	public boolean isAllowed(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege, OrganizationUnitView organizationUnitView) {
 		return true;
 	}
 
@@ -29,7 +29,7 @@ public class AllowAllPrivilegeProvider implements ApplicationPrivilegeProvider {
 	}
 
 	@Override
-	public boolean isAllowed(OrganizationalPrivilegeGroup organizationalPrivilegeGroup, Privilege privilege, OrgUnit orgUnit) {
+	public boolean isAllowed(OrganizationalPrivilegeGroup organizationalPrivilegeGroup, Privilege privilege, OrganizationUnitView organizationUnitView) {
 		return true;
 	}
 
@@ -39,12 +39,12 @@ public class AllowAllPrivilegeProvider implements ApplicationPrivilegeProvider {
 	}
 
 	@Override
-	public List<OrgUnit> getAllowedUnits(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege) {
+	public List<OrganizationUnitView> getAllowedUnits(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege) {
 		return OrganizationUtils.convertList(OrganizationUnit.getAll());
 	}
 
 	@Override
-	public List<OrgUnit> getAllowedUnits(OrganizationalPrivilegeGroup organizationalPrivilegeGroup, Privilege privilege) {
+	public List<OrganizationUnitView> getAllowedUnits(OrganizationalPrivilegeGroup organizationalPrivilegeGroup, Privilege privilege) {
 		return OrganizationUtils.convertList(OrganizationUnit.getAll());
 	}
 

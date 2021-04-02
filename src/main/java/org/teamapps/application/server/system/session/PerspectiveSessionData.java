@@ -5,15 +5,11 @@ import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.application.PerspectiveBuilder;
 import org.teamapps.application.api.desktop.ApplicationDesktop;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
-import org.teamapps.application.api.organization.OrgField;
-import org.teamapps.application.api.organization.OrgUnit;
 import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.user.SessionUser;
+import org.teamapps.application.server.ux.IconUtils;
 import org.teamapps.icons.Icon;
-import org.teamapps.model.controlcenter.LogLevel;
-import org.teamapps.model.controlcenter.ManagedApplication;
-import org.teamapps.model.controlcenter.ManagedApplicationPerspective;
-import org.teamapps.model.controlcenter.SystemLog;
+import org.teamapps.model.controlcenter.*;
 import org.teamapps.reporting.convert.DocumentConverter;
 import org.teamapps.universaldb.index.translation.TranslatableText;
 import org.teamapps.ux.application.perspective.Perspective;
@@ -46,7 +42,7 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 
 	public Icon getIcon() {
 		if (managedApplicationPerspective.getIconOverride() != null) {
-			return userSessionData.getIconProvider().decodeIcon(managedApplicationPerspective.getIconOverride());
+			return IconUtils.decodeIcon(managedApplicationPerspective.getIconOverride());
 		} else {
 			return perspectiveBuilder.getIcon();
 		}
@@ -86,8 +82,8 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	}
 
 	@Override
-	public OrgField getOrganizationField() {
-		return managedApplicationSessionData.getOrgField();
+	public OrganizationFieldView getOrganizationField() {
+		return managedApplicationSessionData.getOrganizationFieldView();
 	}
 
 	@Override
@@ -160,8 +156,8 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	}
 
 	@Override
-	public boolean isAllowed(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege, OrgUnit orgUnit) {
-		return privilegeProvider.isAllowed(simpleOrganizationalPrivilege, orgUnit);
+	public boolean isAllowed(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege, OrganizationUnitView organizationUnitView) {
+		return privilegeProvider.isAllowed(simpleOrganizationalPrivilege, organizationUnitView);
 	}
 
 	@Override
@@ -175,8 +171,8 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	}
 
 	@Override
-	public boolean isAllowed(OrganizationalPrivilegeGroup organizationalPrivilegeGroup, Privilege privilege, OrgUnit orgUnit) {
-		return privilegeProvider.isAllowed(organizationalPrivilegeGroup, privilege, orgUnit);
+	public boolean isAllowed(OrganizationalPrivilegeGroup organizationalPrivilegeGroup, Privilege privilege, OrganizationUnitView organizationUnitView) {
+		return privilegeProvider.isAllowed(organizationalPrivilegeGroup, privilege, organizationUnitView);
 	}
 
 	@Override
@@ -185,12 +181,12 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	}
 
 	@Override
-	public List<OrgUnit> getAllowedUnits(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege) {
+	public List<OrganizationUnitView> getAllowedUnits(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege) {
 		return privilegeProvider.getAllowedUnits(simpleOrganizationalPrivilege);
 	}
 
 	@Override
-	public List<OrgUnit> getAllowedUnits(OrganizationalPrivilegeGroup organizationalPrivilegeGroup, Privilege privilege) {
+	public List<OrganizationUnitView> getAllowedUnits(OrganizationalPrivilegeGroup organizationalPrivilegeGroup, Privilege privilege) {
 		return privilegeProvider.getAllowedUnits(organizationalPrivilegeGroup, privilege);
 	}
 

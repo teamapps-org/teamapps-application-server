@@ -3,18 +3,17 @@ package org.teamapps.application.server.system.session;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.application.PerspectiveBuilder;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
-import org.teamapps.application.api.organization.OrgField;
 import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.launcher.MobileApplicationNavigation;
 import org.teamapps.application.server.system.launcher.MobileAssembler;
 import org.teamapps.application.server.system.localization.UserLocalizationProvider;
-import org.teamapps.application.server.system.organization.OrgFieldImpl;
 import org.teamapps.application.server.system.privilege.AllowAllPrivilegeProvider;
 import org.teamapps.application.server.system.privilege.PrivilegeApplicationKey;
 import org.teamapps.model.controlcenter.ManagedApplication;
 import org.teamapps.model.controlcenter.ManagedApplicationPerspective;
+import org.teamapps.model.controlcenter.OrganizationFieldView;
 import org.teamapps.model.controlcenter.UserAccountStatus;
 import org.teamapps.ux.application.ResponsiveApplication;
 import org.teamapps.ux.application.assembler.DesktopApplicationAssembler;
@@ -24,7 +23,7 @@ public class ManagedApplicationSessionData {
 
 	private final UserSessionData userSessionData;
 	private final ManagedApplication managedApplication;
-	private final OrgField orgField;
+	private final OrganizationFieldView organizationFieldView;
 	private final MobileApplicationNavigation mobileNavigation;
 
 	private final LoadedApplication mainApplication;
@@ -35,7 +34,7 @@ public class ManagedApplicationSessionData {
 	public ManagedApplicationSessionData(UserSessionData userSessionData, ManagedApplication managedApplication, MobileApplicationNavigation mobileNavigation) {
 		this.userSessionData = userSessionData;
 		this.managedApplication = managedApplication;
-		this.orgField = managedApplication.getOrganizationField() != null ? new OrgFieldImpl(managedApplication.getOrganizationField()) : null;
+		this.organizationFieldView = managedApplication.getOrganizationField() != null ? OrganizationFieldView.getById(managedApplication.getOrganizationField().getId()) : null;
 		this.mobileNavigation = mobileNavigation;
 
 		this.responsiveApplication = ResponsiveApplication.createApplication(
@@ -93,8 +92,8 @@ public class ManagedApplicationSessionData {
 		return mobileNavigation;
 	}
 
-	public OrgField getOrgField() {
-		return orgField;
+	public OrganizationFieldView getOrganizationFieldView() {
+		return organizationFieldView;
 	}
 
 	public LoadedApplication getMainApplication() {

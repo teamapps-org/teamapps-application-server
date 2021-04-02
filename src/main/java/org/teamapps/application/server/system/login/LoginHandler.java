@@ -6,7 +6,6 @@ import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.model.controlcenter.User;
 import org.teamapps.model.controlcenter.UserAccountStatus;
-import org.teamapps.universaldb.UniversalDB;
 import org.teamapps.universaldb.index.enumeration.EnumFilterType;
 import org.teamapps.universaldb.index.text.TextFilter;
 import org.teamapps.ux.component.login.LoginWindow;
@@ -35,7 +34,6 @@ public class LoginHandler {
 		context.registerBackgroundImage("login", backgroundUrl, backgroundUrl);
 		context.setBackgroundImage("login", 0);
 
-
 		loginWindow.onLogin.addListener(loginData -> {
 			boolean result = false;
 			User user = null;
@@ -53,7 +51,7 @@ public class LoginHandler {
 			}
 			if (result) {
 				handleSuccessfulLogin(user, rootPanel, context);
-			} else  {
+			} else {
 				loginWindow.setError();
 			}
 		});

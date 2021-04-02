@@ -1,56 +1,37 @@
 package org.teamapps.application.server.controlcenter.applications;
 
-import org.teamapps.application.api.application.ApplicationBuilder;
 import org.teamapps.application.api.application.ApplicationInstanceData;
-import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.localization.Dictionary;
-import org.teamapps.application.api.localization.LocalizationEntry;
-import org.teamapps.application.api.localization.LocalizationEntrySet;
-import org.teamapps.application.api.privilege.ApplicationRole;
-import org.teamapps.application.api.privilege.Privilege;
-import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.application.PerspectiveMenuPanel;
-import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfoDataElement;
-import org.teamapps.application.server.system.bootstrap.LoadedApplication;
-import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
+import org.teamapps.application.server.ux.IconUtils;
 import org.teamapps.application.server.ux.UiUtils;
-import org.teamapps.application.server.ux.window.WindowUtils;
 import org.teamapps.application.tools.EntityListModelBuilder;
 import org.teamapps.application.tools.EntityModelBuilder;
 import org.teamapps.common.format.Color;
 import org.teamapps.databinding.MutableValue;
 import org.teamapps.databinding.TwoWayBindableValue;
-import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.view.View;
-import org.teamapps.ux.component.Component;
-import org.teamapps.ux.component.dialogue.FormDialogue;
 import org.teamapps.ux.component.field.*;
 import org.teamapps.ux.component.field.combobox.TagBoxWrappingMode;
 import org.teamapps.ux.component.field.combobox.TagComboBox;
-import org.teamapps.ux.component.field.upload.FileFieldDisplayType;
-import org.teamapps.ux.component.field.upload.simple.FileItem;
-import org.teamapps.ux.component.field.upload.simple.SimpleFileField;
 import org.teamapps.ux.component.form.ResponsiveForm;
 import org.teamapps.ux.component.form.ResponsiveFormLayout;
-import org.teamapps.ux.component.format.Spacing;
-import org.teamapps.ux.component.infiniteitemview.InfiniteItemView2;
 import org.teamapps.ux.component.table.Table;
 import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.component.toolbar.ToolbarButton;
 import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
-import org.teamapps.ux.component.window.Window;
-import org.teamapps.ux.session.SessionContext;
 
-import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ApplicationsPerspective extends AbstractManagedApplicationPerspective {
@@ -206,19 +187,9 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 					.distinct()
 					.collect(Collectors.toList()));
 
-			applicationDetailsView.getPanel().setIcon(userSessionData.getIconProvider().decodeIcon(app.getIcon()));
+			applicationDetailsView.getPanel().setIcon(IconUtils.decodeIcon(app.getIcon()));
 			applicationDetailsView.getPanel().setTitle(userSessionData.getApplicationLocalizationProvider(app).getLocalized(app.getTitleKey()));
 			applicationDetailsView.focus();
-			System.out.println(app);
-			for (ApplicationPerspective perspective : app.getPerspectives()) {
-//				System.out.println(perspective);
-			}
-
-
-			for (ApplicationPerspective perspective : ApplicationPerspective.getAll()) {
-				//System.out.println(perspective);
-			}
-
 
 			selectedApplicationVersion.set(app.getInstalledVersion());
 		});

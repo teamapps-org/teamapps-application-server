@@ -1,7 +1,8 @@
 package org.teamapps.application.server.system.privilege;
 
-import org.teamapps.application.api.organization.OrgUnit;
+
 import org.teamapps.application.api.privilege.*;
+import org.teamapps.model.controlcenter.OrganizationUnitView;
 
 import java.util.*;
 
@@ -10,10 +11,10 @@ public class UserApplicationPrivilege implements ApplicationPrivilegeProvider {
 	private final UserPrivileges userPrivileges;
 	private final PrivilegeApplicationKey privilegeApplicationKey;
 	private Set<SimplePrivilege> simplePrivileges;
-	private Map<SimpleOrganizationalPrivilege, Set<OrgUnit>> simpleOrganizationalPrivilegeSetMap;
+	private Map<SimpleOrganizationalPrivilege, Set<OrganizationUnitView>> simpleOrganizationalPrivilegeSetMap;
 	private Map<SimpleCustomObjectPrivilege, Set<PrivilegeObject>> simpleCustomObjectPrivilegeSetMap;
 	private Map<StandardPrivilegeGroup, Set<Privilege>> standardPrivilegeGroupSetMap;
-	private Map<OrganizationalPrivilegeGroup, Map<Privilege, Set<OrgUnit>>> organizationalPrivilegeGroupMap;
+	private Map<OrganizationalPrivilegeGroup, Map<Privilege, Set<OrganizationUnitView>>> organizationalPrivilegeGroupMap;
 	private Map<CustomObjectPrivilegeGroup, Map<Privilege, Set<PrivilegeObject>>> customObjectPrivilegeGroupMap;
 
 	public UserApplicationPrivilege(UserPrivileges userPrivileges, PrivilegeApplicationKey privilegeApplicationKey) {
@@ -41,11 +42,11 @@ public class UserApplicationPrivilege implements ApplicationPrivilegeProvider {
 	}
 
 	@Override
-	public boolean isAllowed(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege, OrgUnit orgUnit) {
+	public boolean isAllowed(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege, OrganizationUnitView organizationUnitView) {
 		if (simpleOrganizationalPrivilegeSetMap == null || !simpleOrganizationalPrivilegeSetMap.containsKey(simpleOrganizationalPrivilege)) {
 			return false;
 		} else {
-			return simpleOrganizationalPrivilegeSetMap.get(simpleOrganizationalPrivilege).contains(orgUnit);
+			return simpleOrganizationalPrivilegeSetMap.get(simpleOrganizationalPrivilege).contains(organizationUnitView);
 		}
 	}
 
@@ -68,12 +69,12 @@ public class UserApplicationPrivilege implements ApplicationPrivilegeProvider {
 	}
 
 	@Override
-	public boolean isAllowed(OrganizationalPrivilegeGroup organizationalPrivilegeGroup, Privilege privilege, OrgUnit orgUnit) {
+	public boolean isAllowed(OrganizationalPrivilegeGroup organizationalPrivilegeGroup, Privilege privilege, OrganizationUnitView organizationUnitView) {
 		if (organizationalPrivilegeGroupMap == null || !organizationalPrivilegeGroupMap.containsKey(organizationalPrivilegeGroup)) {
 			return false;
 		} else {
-			Set<OrgUnit> orgUnits = organizationalPrivilegeGroupMap.get(organizationalPrivilegeGroup).get(privilege);
-			if (orgUnits != null && orgUnits.contains(orgUnit)) {
+			Set<OrganizationUnitView> organizationUnitViews = organizationalPrivilegeGroupMap.get(organizationalPrivilegeGroup).get(privilege);
+			if (organizationUnitViews != null && organizationUnitViews.contains(organizationUnitView)) {
 				return true;
 			} else {
 				return false;
@@ -96,7 +97,7 @@ public class UserApplicationPrivilege implements ApplicationPrivilegeProvider {
 	}
 
 	@Override
-	public List<OrgUnit> getAllowedUnits(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege) {
+	public List<OrganizationUnitView> getAllowedUnits(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege) {
 		if (simpleOrganizationalPrivilegeSetMap == null || !simpleOrganizationalPrivilegeSetMap.containsKey(simpleOrganizationalPrivilege)) {
 			return Collections.emptyList();
 		} else {
@@ -105,12 +106,12 @@ public class UserApplicationPrivilege implements ApplicationPrivilegeProvider {
 	}
 
 	@Override
-	public List<OrgUnit> getAllowedUnits(OrganizationalPrivilegeGroup organizationalPrivilegeGroup, Privilege privilege) {
+	public List<OrganizationUnitView> getAllowedUnits(OrganizationalPrivilegeGroup organizationalPrivilegeGroup, Privilege privilege) {
 		if (organizationalPrivilegeGroupMap == null || !organizationalPrivilegeGroupMap.containsKey(organizationalPrivilegeGroup)) {
 			return Collections.emptyList();
 		} else {
-			Set<OrgUnit> orgUnits = organizationalPrivilegeGroupMap.get(organizationalPrivilegeGroup).get(privilege);
-			return new ArrayList<>(orgUnits);
+			Set<OrganizationUnitView> organizationUnitViews = organizationalPrivilegeGroupMap.get(organizationalPrivilegeGroup).get(privilege);
+			return new ArrayList<>(organizationUnitViews);
 		}
 	}
 

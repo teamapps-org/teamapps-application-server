@@ -1,8 +1,7 @@
 package org.teamapps.application.server.system.organization;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
-import org.teamapps.application.api.organization.OrgField;
-import org.teamapps.application.api.organization.OrgUnit;
+
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.model.controlcenter.*;
@@ -22,32 +21,32 @@ import java.util.stream.Collectors;
 
 public class OrganizationUtils {
 
-	public static Set<OrgUnit> convertSet(Collection<OrganizationUnit> organizationUnits) {
+	public static Set<OrganizationUnitView> convertSet(Collection<OrganizationUnit> organizationUnits) {
 		return organizationUnits.stream()
-				.map(OrgUnitImpl::new)
+				.map(unit -> OrganizationUnitView.getById(unit.getId()))
 				.collect(Collectors.toSet());
 	}
 
-	public static List<OrgUnit> convertList(Collection<OrganizationUnit> organizationUnits) {
+	public static List<OrganizationUnitView> convertList(Collection<OrganizationUnit> organizationUnits) {
 		return organizationUnits.stream()
-				.map(OrgUnitImpl::new)
+				.map(unit -> OrganizationUnitView.getById(unit.getId()))
 				.collect(Collectors.toList());
 	}
 
-	public static OrgUnit convert(OrganizationUnit organizationUnit) {
-		return organizationUnit != null ? new OrgUnitImpl(organizationUnit) : null;
+	public static OrganizationUnitView convert(OrganizationUnit organizationUnit) {
+		return organizationUnit != null ? OrganizationUnitView.getById(organizationUnit.getId()) : null;
 	}
 
-	public static OrganizationUnit convert(OrgUnit orgUnit) {
-		return orgUnit != null && orgUnit.getId() > 0 ? OrganizationUnit.getById(orgUnit.getId()) : null;
+	public static OrganizationUnit convert(OrganizationUnitView OrganizationUnitView) {
+		return OrganizationUnitView != null && OrganizationUnitView.getId() > 0 ? OrganizationUnit.getById(OrganizationUnitView.getId()) : null;
 	}
 
-	public static OrgField convert(OrganizationField organizationField) {
-		return organizationField != null ? new OrgFieldImpl(organizationField) : null;
+	public static OrganizationFieldView convert(OrganizationField organizationField) {
+		return organizationField != null ? OrganizationFieldView.getById(organizationField.getId()) : null;
 	}
 
-	public static OrganizationField convert(OrgField orgField) {
-		return orgField != null && orgField.getId() > 0 ? OrganizationField.getById(orgField.getId()) : null;
+	public static OrganizationField convert(OrganizationFieldView OrganizationFieldView) {
+		return OrganizationFieldView != null && OrganizationFieldView.getId() > 0 ? OrganizationField.getById(OrganizationFieldView.getId()) : null;
 	}
 
 	public static Set<OrganizationUnit> getAllUnits(OrganizationUnit unit, Collection<OrganizationUnitType> unitTypesFilter) {

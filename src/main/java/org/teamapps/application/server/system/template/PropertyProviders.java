@@ -131,10 +131,10 @@ public class PropertyProviders {
 	}
 
 	public static PropertyProvider<OrganizationField> createOrganizationFieldPropertyProvider(ApplicationInstanceData applicationInstanceData) {
-		return (orgField, propertyNames) -> {
+		return (organizationFieldView, propertyNames) -> {
 			Map<String, Object> map = new HashMap<>();
-			map.put(BaseTemplate.PROPERTY_ICON, IconUtils.decodeIcon(orgField.getIcon()));
-			map.put(BaseTemplate.PROPERTY_CAPTION, applicationInstanceData.getLocalized(orgField.getTitle()));
+			map.put(BaseTemplate.PROPERTY_ICON, IconUtils.decodeIcon(organizationFieldView.getIcon()));
+			map.put(BaseTemplate.PROPERTY_CAPTION, applicationInstanceData.getLocalized(organizationFieldView.getTitle()));
 			return map;
 		};
 	}

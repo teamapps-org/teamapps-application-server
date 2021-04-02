@@ -8,6 +8,7 @@ import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
+import org.teamapps.application.server.system.config.ThemingConfig;
 import org.teamapps.application.server.system.login.LoginHandler;
 import org.teamapps.application.server.system.session.ManagedApplicationSessionData;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
@@ -163,7 +164,14 @@ public class ApplicationLauncher {
 	}
 
 	private void createMainView() {
-		userSessionData.getContext().showDefaultBackground(500);
+		ThemingConfig themingConfig = registry.getSystemConfig().getThemingConfig();
+		if (themingConfig.isCustomApplicationBackground() && themingConfig.getDefaultApplicationBackgroundUrl() != null) {
+			userSessionData.getContext().registerBackgroundImage("defaultBackground", themingConfig.getDefaultApplicationBackgroundUrl(), themingConfig.getDefaultApplicationBackgroundUrl());
+			userSessionData.getContext().setBackgroundImage("defaultBackground", 0);
+		} else {
+			userSessionData.getContext().showDefaultBackground(500);
+		}
+
 		if (mobileView) {
 			rootPanel.setContent(applicationLauncher);
 		} else {

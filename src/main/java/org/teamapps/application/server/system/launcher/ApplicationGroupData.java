@@ -1,6 +1,7 @@
 package org.teamapps.application.server.system.launcher;
 
 import org.teamapps.application.server.system.session.UserSessionData;
+import org.teamapps.application.server.ux.IconUtils;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.ManagedApplicationGroup;
 
@@ -18,7 +19,7 @@ public class ApplicationGroupData {
 	private final List<ApplicationData> applications = new ArrayList<>();
 
 	public ApplicationGroupData(ManagedApplicationGroup applicationGroup, UserSessionData userSessionData) {
-		this.icon = applicationGroup.getIcon() != null ? userSessionData.getIconProvider().decodeIcon(applicationGroup.getIcon()) : null;
+		this.icon = applicationGroup.getIcon() != null ? IconUtils.decodeIcon(applicationGroup.getIcon()) : null;
 		this.title = userSessionData.getDictionary().getLocalized(applicationGroup.getTitleKey());
 		this.groupPosition = applicationGroup.getListingPosition();
 	}

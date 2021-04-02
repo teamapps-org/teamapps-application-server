@@ -2,9 +2,6 @@ package org.teamapps.application.server.system.config;
 
 public class MachineTranslation {
 
-	//todo move this to db - config ui
-
-
 	private boolean active;
 	private String deepLKey = "deepKey";
 	private String googleKey = "googleKey";

@@ -15,7 +15,6 @@ import org.teamapps.application.server.controlcenter.applications.ApplicationPro
 import org.teamapps.application.server.controlcenter.applications.ApplicationUpdatesPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.applications.ApplicationsPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.applocal.AppLocalAdministrationPerspectiveBuilder;
-import org.teamapps.application.server.controlcenter.config.ControlCenterConfig;
 import org.teamapps.application.server.controlcenter.database.DataBasePerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.organization.OrganizationChartPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.organization.OrganizationFieldPerspectiveBuilder;
@@ -27,6 +26,7 @@ import org.teamapps.application.server.controlcenter.systemlog.SystemLogPerspect
 import org.teamapps.application.server.controlcenter.systenconfig.ApplicationConfigurationPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.translations.TranslationsPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.users.UsersPerspectiveBuilder;
+import org.teamapps.application.server.system.config.SystemConfig;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.ControlCenterSchema;
 import org.teamapps.universaldb.schema.SchemaInfoProvider;
@@ -37,10 +37,10 @@ import java.util.Locale;
 
 public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 
-	private ApplicationConfig<ControlCenterConfig> applicationConfig;
+	private ApplicationConfig<SystemConfig> applicationConfig;
 
 	public ControlCenterAppBuilder() {
-		ControlCenterConfig config = new ControlCenterConfig();
+		SystemConfig config = new SystemConfig();
 		applicationConfig = new ApplicationConfig<>();
 		applicationConfig.setConfig(config);
 	}

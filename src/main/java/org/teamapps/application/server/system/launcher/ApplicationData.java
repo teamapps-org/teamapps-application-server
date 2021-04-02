@@ -4,6 +4,7 @@ import org.teamapps.application.api.localization.ApplicationLocalizationProvider
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.session.ManagedApplicationSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
+import org.teamapps.application.server.ux.IconUtils;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ManagedApplication;
@@ -23,8 +24,7 @@ public class ApplicationData {
 		this.managedApplication = managedApplication;
 		this.loadedApplication = loadedApplication;
 		this.applicationSessionData = applicationSessionData;
-		UserSessionData userSessionData = applicationSessionData.getUserSessionData();
-		this.icon = managedApplication.getIcon() != null ? userSessionData.getIconProvider().decodeIcon(managedApplication.getIcon()) : loadedApplication.getApplicationBuilder().getApplicationIcon();
+		this.icon = managedApplication.getIcon() != null ? IconUtils.decodeIcon(managedApplication.getIcon()) : loadedApplication.getApplicationBuilder().getApplicationIcon();
 		ApplicationLocalizationProvider localizationProvider = applicationSessionData.getMainApplicationLocalizationProvider();
 		this.title = managedApplication.getTitleKey() != null ? localizationProvider.getLocalized(managedApplication.getTitleKey()) : localizationProvider.getLocalized(loadedApplication.getApplicationBuilder().getApplicationTitleKey());
 		this.description = managedApplication.getDescriptionKey() != null ? localizationProvider.getLocalized(managedApplication.getDescriptionKey()) : localizationProvider.getLocalized(loadedApplication.getApplicationBuilder().getApplicationDescriptionKey());

@@ -25,6 +25,16 @@ public class Model implements SchemaInfoProvider {
 		Table userContainer = db.addTable("userContainer", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table address = db.addTable("address", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 
+		//views:
+		Table organizationUnitView = db.addView("organizationUnitView");
+		Table organizationUnitTypeView = db.addView("organizationUnitTypeView");
+		Table organizationFieldView = db.addView("organizationFieldView");
+		Table addressView = db.addView("addressView");
+		organizationUnit.addView(organizationUnitView);
+		organizationUnitType.addView(organizationUnitTypeView);
+		organizationField.addView(organizationFieldView);
+		address.addView(addressView);
+
 		Table role = db.addTable("role", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table userRoleAssignment = db.addTable("userRoleAssignment", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table rolePrivilegeAssignment = db.addTable("rolePrivilegeAssignment", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
@@ -280,6 +290,19 @@ public class Model implements SchemaInfoProvider {
 				.addFloat("longitude")
 		;
 
+		addressView
+				.addText("name") //N
+				.addText("organisation") //O
+				.addText("street") //A
+				.addText("city") //C //City/Town/Village
+				.addText("dependentLocality") //D
+				.addText("state") //S  //State/Province/County
+				.addText("postalCode") //Z //ZIP code/Postal code
+				.addText("country")
+				.addFloat("latitude")
+				.addFloat("longitude")
+		;
+
 		organizationUnit
 				.addTranslatableText("name")
 				.addReference("parent", organizationUnit, false, "children")
@@ -289,6 +312,16 @@ public class Model implements SchemaInfoProvider {
 				.addReference("address", address, false)
 				.addReference("userContainer", userContainer, false, "organizationUnit")
 		;
+
+		organizationUnitView
+				.addTranslatableText("name")
+				.addReference("parent", organizationUnitView, false, "children")
+				.addReference("children", organizationUnitView, true, "parent")
+				.addReference("type", organizationUnitTypeView, false)
+				.addText("icon")
+				.addReference("address", addressView, false)
+		;
+
 
 		organizationUnitType
 				.addTranslatableText("name")
@@ -301,7 +334,23 @@ public class Model implements SchemaInfoProvider {
 				.addEnum("geoLocationType", "country", "state", "city", "place", "none")
 		;
 
+		organizationUnitTypeView
+				.addTranslatableText("name")
+				.addTranslatableText("abbreviation")
+				.addText("icon")
+				.addBoolean("translateOrganizationUnits")
+				.addBoolean("allowUserContainer")
+				.addReference("defaultChildType", organizationUnitTypeView, false)
+				.addReference("possibleChildrenTypes", organizationUnitTypeView, true)
+				.addEnum("geoLocationType", "country", "state", "city", "place", "none")
+		;
+
 		organizationField
+				.addTranslatableText("title")
+				.addText("icon")
+		;
+
+		organizationFieldView
 				.addTranslatableText("title")
 				.addText("icon")
 		;
