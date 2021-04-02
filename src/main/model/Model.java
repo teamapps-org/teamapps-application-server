@@ -26,14 +26,10 @@ public class Model implements SchemaInfoProvider {
 		Table address = db.addTable("address", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 
 		//views:
-		Table organizationUnitView = db.addView("organizationUnitView");
-		Table organizationUnitTypeView = db.addView("organizationUnitTypeView");
-		Table organizationFieldView = db.addView("organizationFieldView");
-		Table addressView = db.addView("addressView");
-		organizationUnit.addView(organizationUnitView);
-		organizationUnitType.addView(organizationUnitTypeView);
-		organizationField.addView(organizationFieldView);
-		address.addView(addressView);
+		Table organizationUnitView = db.addView("organizationUnitView", organizationUnit);
+		Table organizationUnitTypeView = db.addView("organizationUnitTypeView", organizationUnitType);
+		Table organizationFieldView = db.addView("organizationFieldView", organizationField);
+		Table addressView = db.addView("addressView", address);
 
 		Table role = db.addTable("role", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table userRoleAssignment = db.addTable("userRoleAssignment", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
