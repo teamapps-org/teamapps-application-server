@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * TeamApps Application Server
+ * ---
+ * Copyright (C) 2020 - 2021 TeamApps.org
+ * ---
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package org.teamapps.application.server.system.bootstrap;
 
 import org.slf4j.Logger;
@@ -11,6 +30,7 @@ import org.teamapps.application.server.system.localization.DictionaryLocalizatio
 import org.teamapps.application.server.system.localization.SystemLocalizationProvider;
 import org.teamapps.application.server.system.machinetranslation.TranslationService;
 import org.teamapps.application.server.system.server.SecureResourceHandler;
+import org.teamapps.application.server.system.server.SessionIconRegistryHandler;
 import org.teamapps.application.server.ux.IconUtils;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.reporting.convert.DocumentConverter;
@@ -37,6 +57,8 @@ public class SystemRegistry {
 	private final Map<Application, LoadedApplication> loadedApplicationMap = new HashMap<>();
 	private final ManagedApplicationGroup unspecifiedApplicationGroup;
 	private final BaseResourceLinkProvider baseResourceLinkProvider;
+	private SessionIconRegistryHandler iconRegistryHandler;
+
 
 	public SystemRegistry(SystemConfig systemConfig, BootstrapSessionHandler bootstrapSessionHandler, UniversalDB universalDB, TranslationService translationService) {
 		this.systemConfig = systemConfig;
@@ -140,5 +162,13 @@ public class SystemRegistry {
 
 	public BaseResourceLinkProvider getBaseResourceLinkProvider() {
 		return baseResourceLinkProvider;
+	}
+
+	public SessionIconRegistryHandler getIconRegistryHandler() {
+		return iconRegistryHandler;
+	}
+
+	public void setIconRegistryHandler(SessionIconRegistryHandler iconRegistryHandler) {
+		this.iconRegistryHandler = iconRegistryHandler;
 	}
 }

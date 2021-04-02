@@ -19,17 +19,12 @@
  */
 package org.teamapps.application.server.system.server;
 
-
-import org.teamapps.universaldb.UniversalDB;
+import org.teamapps.model.controlcenter.User;
 import org.teamapps.ux.session.SessionContext;
 
-import java.io.File;
+public interface SessionIconRegistryHandler {
 
-public interface SessionHandler {
+	void handleNewSession(SessionContext context);
 
-	void init(SessionManager sessionManager, UniversalDB universalDb, File configPath);
-
-	void handleSessionStart(SessionContext context);
-
-
+	void handleAuthenticatedUser(User user, SessionContext context);
 }

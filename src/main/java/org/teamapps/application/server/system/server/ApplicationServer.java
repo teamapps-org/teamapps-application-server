@@ -1,6 +1,6 @@
 /*-
  * ========================LICENSE_START=================================
- * TeamApps Application API
+ * TeamApps Application Server
  * ---
  * Copyright (C) 2020 - 2021 TeamApps.org
  * ---

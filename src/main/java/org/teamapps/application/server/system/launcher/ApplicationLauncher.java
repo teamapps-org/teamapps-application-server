@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * TeamApps Application Server
+ * ---
+ * Copyright (C) 2020 - 2021 TeamApps.org
+ * ---
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package org.teamapps.application.server.system.launcher;
 
 import org.slf4j.Logger;
@@ -16,7 +35,6 @@ import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.server.ux.UiUtils;
 import org.teamapps.common.format.Color;
-import org.teamapps.icon.standard.StandardIcon;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ManagedApplication;
 import org.teamapps.model.controlcenter.ManagedApplicationGroup;
@@ -30,7 +48,6 @@ import org.teamapps.ux.component.Component;
 import org.teamapps.ux.component.animation.PageTransition;
 import org.teamapps.ux.component.dialogue.FormDialogue;
 import org.teamapps.ux.component.field.FieldEditingMode;
-import org.teamapps.ux.component.field.MultiLineTextField;
 import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.TextField;
 import org.teamapps.ux.component.flexcontainer.VerticalLayout;
@@ -269,7 +286,7 @@ public class ApplicationLauncher {
 			}
 		}
 
-		View applicationMenu = View.createView(StandardLayout.LEFT, StandardIcon.RADIO_BUTTON_GROUP, getLocalized(Dictionary.APPLICATION_MENU), null);
+		View applicationMenu = View.createView(StandardLayout.LEFT, ApplicationIcons.RADIO_BUTTON_GROUP, getLocalized(Dictionary.APPLICATION_MENU), null);
 		applicationMenu.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.84f));
 		responsiveApplication.addApplicationView(applicationMenu);
 		MobileLayout mobileLayout = new MobileLayout();
@@ -338,7 +355,7 @@ public class ApplicationLauncher {
 			}
 		}
 
-		View applicationMenu = View.createView(StandardLayout.LEFT, StandardIcon.RADIO_BUTTON_GROUP, getLocalized(Dictionary.APPLICATION_MENU), null);
+		View applicationMenu = View.createView(StandardLayout.LEFT, ApplicationIcons.RADIO_BUTTON_GROUP, getLocalized(Dictionary.APPLICATION_MENU), null);
 		responsiveApplication.addApplicationView(applicationMenu);
 		applicationMenu.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.84f));
 		VerticalLayout verticalLayout = new VerticalLayout();
@@ -347,8 +364,7 @@ public class ApplicationLauncher {
 		Toolbar toolbar = new Toolbar();
 		ToolbarButtonGroup buttonGroup = toolbar.addButtonGroup(new ToolbarButtonGroup());
 		buttonGroup.setShowGroupSeparator(false);
-//		ToolbarButton backButton = ToolbarButton.createSmall(StandardIcon.NAV_LEFT, getLocalized(Dictionary.BACK));
-		ToolbarButton backButton = new ToolbarButton(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, new BaseTemplateRecord(StandardIcon.NAVIGATE_LEFT, getLocalized(Dictionary.BACK), null));
+		ToolbarButton backButton = new ToolbarButton(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, new BaseTemplateRecord(ApplicationIcons.NAVIGATE_LEFT, getLocalized(Dictionary.BACK), null));
 		backButton.setVisible(false);
 		buttonGroup.addButton(backButton);
 		verticalLayout.addComponent(toolbar);

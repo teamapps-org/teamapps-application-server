@@ -1,3 +1,22 @@
+/*-
+ * ========================LICENSE_START=================================
+ * TeamApps Application Server
+ * ---
+ * Copyright (C) 2020 - 2021 TeamApps.org
+ * ---
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
 package org.teamapps.application.server.system.bootstrap;
 
 import org.slf4j.Logger;
@@ -12,12 +31,11 @@ import org.teamapps.application.server.system.machinetranslation.MachineTranslat
 import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
 import org.teamapps.application.server.system.server.ApplicationServer;
 import org.teamapps.application.server.system.server.SessionHandler;
+import org.teamapps.application.server.system.server.SessionIconRegistryHandler;
 import org.teamapps.application.server.system.server.SessionManager;
 import org.teamapps.application.server.system.template.Templates;
 import org.teamapps.application.server.system.utils.ValueConverterUtils;
 import org.teamapps.icon.flags.FlagIcon;
-import org.teamapps.icon.standard.StandardIcon;
-import org.teamapps.icon.standard.StandardIconStyles;
 import org.teamapps.model.ControlCenterSchema;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ApplicationVersion;
@@ -35,11 +53,11 @@ import java.util.stream.Collectors;
 public class BootstrapSessionHandler implements SessionHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+	private final SessionIconRegistryHandler iconRegistryHandler;
 	private SessionManager sessionManager;
 	private UniversalDB universalDB;
 	private File configPath;
 	private SystemRegistry systemRegistry;
-
 
 	private static Class standardIconClass;
 
@@ -48,6 +66,14 @@ public class BootstrapSessionHandler implements SessionHandler {
 			standardIconClass = Class.forName("org.teamapps.icon.standard.StandardIcon");
 		} catch (Exception var1) {
 		}
+	}
+
+	public BootstrapSessionHandler() {
+		this(null);
+	}
+
+	public BootstrapSessionHandler(SessionIconRegistryHandler iconRegistryHandler) {
+		this.iconRegistryHandler = iconRegistryHandler;
 	}
 
 	public void installNewSystem(File applicationJar) throws Exception {
@@ -81,6 +107,7 @@ public class BootstrapSessionHandler implements SessionHandler {
 			machineTranslation.setDeepLKey(systemConfig.getMachineTranslation().getDeepLKey());
 		}
 		systemRegistry = new SystemRegistry(systemConfig, this, universalDB, machineTranslation);
+		systemRegistry.setIconRegistryHandler(iconRegistryHandler);
 
 		systemRegistry.installAndLoadApplication(new ControlCenterAppBuilder());
 		systemRegistry.installAndLoadApplication(new DatabaseExplorerAppBuilder(universalDB));
@@ -105,8 +132,9 @@ public class BootstrapSessionHandler implements SessionHandler {
 		if (standardIconClass != null) {
 			context.getIconProvider().registerIconLibrary(standardIconClass);
 		}
-		//todo remove:
-		context.getIconProvider().setDefaultStyleForIconClass(StandardIcon.class, StandardIconStyles.VIVID_STANDARD_SHADOW_1);
+		if (iconRegistryHandler != null) {
+			iconRegistryHandler.handleNewSession(context);
+		}
 
 		context.getIconProvider().registerIconLibrary(FlagIcon.class);
 		context.registerTemplates(Arrays.stream(Templates.values())
