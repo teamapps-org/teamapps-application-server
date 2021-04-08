@@ -27,8 +27,8 @@ import org.teamapps.application.server.system.application.AbstractManagedApplica
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.Templates;
-import org.teamapps.application.server.ux.IconUtils;
-import org.teamapps.application.server.ux.localize.TranslatableTextUtils;
+import org.teamapps.application.ux.IconUtils;
+import org.teamapps.application.ux.localize.TranslatableTextUtils;
 import org.teamapps.common.format.Color;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.databinding.MutableValue;

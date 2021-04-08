@@ -33,7 +33,7 @@ import org.teamapps.application.server.system.session.ManagedApplicationSessionD
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
-import org.teamapps.application.server.ux.UiUtils;
+import org.teamapps.application.ux.UiUtils;
 import org.teamapps.common.format.Color;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ManagedApplication;

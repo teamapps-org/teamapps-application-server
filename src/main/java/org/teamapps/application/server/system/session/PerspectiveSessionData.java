@@ -27,7 +27,7 @@ import org.teamapps.application.api.desktop.ApplicationDesktop;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.user.SessionUser;
-import org.teamapps.application.server.ux.IconUtils;
+import org.teamapps.application.ux.IconUtils;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.reporting.convert.DocumentConverter;

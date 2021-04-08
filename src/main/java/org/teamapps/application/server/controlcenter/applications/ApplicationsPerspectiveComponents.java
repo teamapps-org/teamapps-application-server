@@ -36,8 +36,8 @@ import org.teamapps.application.server.system.bootstrap.installer.ApplicationIns
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
-import org.teamapps.application.server.ux.UiUtils;
-import org.teamapps.application.server.ux.window.WindowUtils;
+import org.teamapps.application.ux.UiUtils;
+import org.teamapps.application.ux.window.WindowUtils;
 import org.teamapps.databinding.MutableValue;
 import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.icons.Icon;
@@ -54,7 +54,6 @@ import org.teamapps.ux.component.field.upload.simple.SimpleFileField;
 import org.teamapps.ux.component.form.ResponsiveForm;
 import org.teamapps.ux.component.form.ResponsiveFormLayout;
 import org.teamapps.ux.component.format.Spacing;
-import org.teamapps.ux.component.progress.MultiProgressDisplay;
 import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.component.toolbar.ToolbarButton;
 import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;

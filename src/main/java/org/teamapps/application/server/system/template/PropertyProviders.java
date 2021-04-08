@@ -24,9 +24,8 @@ import org.teamapps.application.api.localization.ApplicationLocalizationProvider
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.privilege.PrivilegeObject;
 import org.teamapps.application.api.theme.ApplicationIcons;
-import org.teamapps.application.server.controlcenter.translations.TranslationUtils;
-import org.teamapps.application.server.ux.IconUtils;
-import org.teamapps.application.server.ux.localize.TranslatableTextUtils;
+import org.teamapps.application.ux.IconUtils;
+import org.teamapps.application.ux.localize.TranslatableTextUtils;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.application.server.system.session.UserSessionData;

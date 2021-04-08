@@ -27,9 +27,9 @@ import org.teamapps.application.server.system.application.AbstractManagedApplica
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
-import org.teamapps.application.server.ux.IconUtils;
-import org.teamapps.application.server.ux.UiUtils;
-import org.teamapps.application.server.ux.combo.ComboBoxUtils;
+import org.teamapps.application.ux.IconUtils;
+import org.teamapps.application.ux.UiUtils;
+import org.teamapps.application.ux.combo.ComboBoxUtils;
 import org.teamapps.application.tools.EntityModelBuilder;
 import org.teamapps.common.format.Color;
 import org.teamapps.data.extract.PropertyExtractor;

@@ -22,7 +22,7 @@ package org.teamapps.application.server.system.bootstrap.installer;
 import org.teamapps.application.api.application.ApplicationBuilder;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfoDataElement;
-import org.teamapps.application.server.ux.IconUtils;
+import org.teamapps.application.ux.IconUtils;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ApplicationVersion;
 import org.teamapps.model.controlcenter.ApplicationVersionData;

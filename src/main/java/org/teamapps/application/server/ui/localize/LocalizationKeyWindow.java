@@ -17,15 +17,15 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package org.teamapps.application.server.ux.localize;
+package org.teamapps.application.server.ui.localize;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.localization.Language;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.localization.SystemLocalizationProvider;
-import org.teamapps.application.server.ux.UiUtils;
-import org.teamapps.application.server.ux.form.FormWindow;
+import org.teamapps.application.ux.UiUtils;
+import org.teamapps.application.ux.form.FormWindow;
 import org.teamapps.event.Event;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.enumeration.EnumFilterType;

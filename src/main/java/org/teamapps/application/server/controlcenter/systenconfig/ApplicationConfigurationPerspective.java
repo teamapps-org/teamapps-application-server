@@ -29,7 +29,7 @@ import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
-import org.teamapps.application.server.ux.UiUtils;
+import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.tools.EntityModelBuilder;
 import org.teamapps.databinding.MutableValue;
 import org.teamapps.databinding.TwoWayBindableValue;

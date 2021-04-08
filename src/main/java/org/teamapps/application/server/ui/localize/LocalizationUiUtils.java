@@ -17,11 +17,11 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package org.teamapps.application.server.ux.localize;
+package org.teamapps.application.server.ui.localize;
 
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.theme.ApplicationIcons;
-import org.teamapps.application.server.ux.IconUtils;
+import org.teamapps.application.ux.IconUtils;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.LocalizationKey;

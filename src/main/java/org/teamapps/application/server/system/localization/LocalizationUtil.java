@@ -23,7 +23,7 @@ import org.teamapps.application.api.localization.LocalizationData;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.machinetranslation.TranslationService;
 import org.teamapps.application.server.system.utils.KeyCompare;
-import org.teamapps.application.server.ux.IconUtils;
+import org.teamapps.application.ux.IconUtils;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.enumeration.EnumFilterType;
 import org.teamapps.universaldb.index.numeric.NumericFilter;

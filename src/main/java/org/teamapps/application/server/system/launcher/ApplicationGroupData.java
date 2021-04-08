@@ -20,7 +20,7 @@
 package org.teamapps.application.server.system.launcher;
 
 import org.teamapps.application.server.system.session.UserSessionData;
-import org.teamapps.application.server.ux.IconUtils;
+import org.teamapps.application.ux.IconUtils;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.ManagedApplicationGroup;
 

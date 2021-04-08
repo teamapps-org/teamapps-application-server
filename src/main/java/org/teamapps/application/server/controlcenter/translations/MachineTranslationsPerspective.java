@@ -27,9 +27,8 @@ import org.teamapps.application.server.system.application.AbstractManagedApplica
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
-import org.teamapps.application.server.ux.IconUtils;
-import org.teamapps.application.server.ux.UiUtils;
-import org.teamapps.application.server.ux.combo.ComboBoxUtils;
+import org.teamapps.application.ux.IconUtils;
+import org.teamapps.application.ux.combo.ComboBoxUtils;
 import org.teamapps.application.tools.EntityModelBuilder;
 import org.teamapps.common.format.Color;
 import org.teamapps.data.extract.PropertyExtractor;
@@ -43,14 +42,11 @@ import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.view.View;
 import org.teamapps.ux.component.field.DisplayField;
-import org.teamapps.ux.component.field.FieldMessage;
 import org.teamapps.ux.component.field.MultiLineTextField;
 import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.combobox.ComboBox;
-import org.teamapps.ux.component.flexcontainer.VerticalLayout;
 import org.teamapps.ux.component.form.ResponsiveForm;
 import org.teamapps.ux.component.form.ResponsiveFormLayout;
-import org.teamapps.ux.component.format.Spacing;
 import org.teamapps.ux.component.table.Table;
 import org.teamapps.ux.component.table.TableColumn;
 import org.teamapps.ux.component.template.BaseTemplate;
@@ -58,9 +54,7 @@ import org.teamapps.ux.component.toolbar.ToolbarButton;
 import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class MachineTranslationsPerspective extends AbstractManagedApplicationPerspective {
 

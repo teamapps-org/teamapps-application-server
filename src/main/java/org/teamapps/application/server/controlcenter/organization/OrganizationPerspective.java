@@ -27,11 +27,11 @@ import org.teamapps.application.server.system.application.AbstractManagedApplica
 import org.teamapps.application.server.system.application.PerspectiveMenuPanel;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.template.PropertyProviders;
-import org.teamapps.application.server.ux.IconUtils;
-import org.teamapps.application.server.ux.UiUtils;
-import org.teamapps.application.server.ux.address.AddressForm;
-import org.teamapps.application.server.ux.localize.TranslatableField;
-import org.teamapps.application.server.ux.localize.TranslatableTextUtils;
+import org.teamapps.application.ux.IconUtils;
+import org.teamapps.application.ux.UiUtils;
+import org.teamapps.application.server.ui.address.AddressForm;
+import org.teamapps.application.ux.localize.TranslatableField;
+import org.teamapps.application.ux.localize.TranslatableTextUtils;
 import org.teamapps.application.tools.EntityModelBuilder;
 import org.teamapps.common.format.Color;
 import org.teamapps.data.extract.PropertyProvider;

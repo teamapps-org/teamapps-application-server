@@ -26,10 +26,10 @@ import org.teamapps.application.server.system.application.AbstractManagedApplica
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
-import org.teamapps.application.server.ux.IconUtils;
-import org.teamapps.application.server.ux.localize.LocalizationUiUtils;
-import org.teamapps.application.server.ux.UiUtils;
-import org.teamapps.application.server.ux.form.FormPanel;
+import org.teamapps.application.ux.IconUtils;
+import org.teamapps.application.server.ui.localize.LocalizationUiUtils;
+import org.teamapps.application.ux.UiUtils;
+import org.teamapps.application.ux.form.FormPanel;
 import org.teamapps.application.tools.EntityListModelBuilder;
 import org.teamapps.common.format.Color;
 import org.teamapps.databinding.MutableValue;
