@@ -141,9 +141,35 @@ public class OrganizationUtils {
 		return null;
 	}
 
+	public static ComboBox<UserContainer> createUserContainerComboBox(Template template, Collection<OrganizationUnit> allowedUnits, ApplicationInstanceData applicationInstanceData) {
+		ComboBox<UserContainer> comboBox = new ComboBox<>(template);
+		ComboBoxModel<UserContainer> model = new ComboBoxModel<>() {
+			@Override
+			public List<UserContainer> getRecords(String query) {
+				return queryUserContainer(query, allowedUnits);
+			}
+
+			@Override
+			public TreeNodeInfo getTreeNodeInfo(UserContainer unit) {
+				return new TreeNodeInfoImpl<>(unit.getOrganizationUnit().getParent() != null ? unit.getOrganizationUnit().getParent().getUserContainer() : null);
+			}
+		};
+		comboBox.setModel(model);
+		comboBox.setShowExpanders(true);
+		PropertyProvider<UserContainer> propertyProvider = PropertyProviders.creatUserContainerPropertyProvider(applicationInstanceData);
+		comboBox.setPropertyProvider(propertyProvider);
+		Function<UserContainer, String> recordToStringFunction = unit -> {
+			Map<String, Object> values = propertyProvider.getValues(unit, Collections.singleton(BaseTemplate.PROPERTY_CAPTION));
+			Object result = values.get(BaseTemplate.PROPERTY_CAPTION);
+			return (String) result;
+		};
+		comboBox.setRecordToStringFunction(recordToStringFunction);
+		return comboBox;
+	}
+
 	public static ComboBox<OrganizationUnit> createOrganizationComboBox(Template template, Collection<OrganizationUnit> allowedUnits, ApplicationInstanceData applicationInstanceData) {
 		ComboBox<OrganizationUnit> comboBox = new ComboBox<>(template);
-		ComboBoxModel<OrganizationUnit> model = new ComboBoxModel<OrganizationUnit>() {
+		ComboBoxModel<OrganizationUnit> model = new ComboBoxModel<>() {
 			@Override
 			public List<OrganizationUnit> getRecords(String query) {
 				return queryOrganizationUnits(query, allowedUnits);
@@ -170,7 +196,31 @@ public class OrganizationUtils {
 	public static List<OrganizationUnit> queryOrganizationUnits(String query, Collection<OrganizationUnit> allowedUnits) {
 		return query == null || query.isBlank() ?
 				allowedUnits.stream().limit(50).collect(Collectors.toList()) :
-				OrganizationUnit.filter().parseFullTextFilter(query).execute().stream().filter(allowedUnits::contains).limit(50).collect(Collectors.toList());
+				OrganizationUnit.filter()
+						.parseFullTextFilter(query)
+						.execute()
+						.stream()
+						.filter(allowedUnits::contains)
+						.limit(50)
+						.collect(Collectors.toList());
+	}
+
+	public static List<UserContainer> queryUserContainer(String query, Collection<OrganizationUnit> allowedUnits) {
+		return query == null || query.isBlank() ?
+				allowedUnits.stream()
+						.filter(unit -> unit.getUserContainer() != null)
+						.map(OrganizationUnit::getUserContainer)
+						.limit(50)
+						.collect(Collectors.toList()) :
+				OrganizationUnit.filter()
+						.parseFullTextFilter(query)
+						.execute()
+						.stream()
+						.filter(allowedUnits::contains)
+						.filter(unit -> unit.getUserContainer() != null)
+						.limit(50)
+						.map(OrganizationUnit::getUserContainer)
+						.collect(Collectors.toList());
 	}
 
 	public static TagComboBox<OrganizationUnitType> createOrganizationUnitTypeTagComboBox(int limit, ApplicationInstanceData applicationInstanceData) {

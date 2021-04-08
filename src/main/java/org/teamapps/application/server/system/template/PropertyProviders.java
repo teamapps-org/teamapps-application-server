@@ -185,6 +185,26 @@ public class PropertyProviders {
 		};
 	}
 
+	public static PropertyProvider<UserContainer> creatUserContainerPropertyProvider(ApplicationInstanceData applicationInstanceData) {
+		Function<TranslatableText, String> translatableTextExtractor = TranslatableTextUtils.createTranslatableTextExtractor(applicationInstanceData);
+		return (container, propertyNames) -> {
+			Map<String, Object> map = new HashMap<>();
+			if (container.getOrganizationUnit() == null) {
+				return map;
+			}
+			OrganizationUnit unit = container.getOrganizationUnit();
+			String prefix = "";
+			String abbreviation = translatableTextExtractor.apply(unit.getType().getAbbreviation());
+			if (abbreviation != null) {
+				prefix = abbreviation + "-";
+			}
+			map.put(BaseTemplate.PROPERTY_ICON, unit.getIcon() != null ? IconUtils.decodeIcon(unit.getIcon()) : IconUtils.decodeIcon(unit.getType().getIcon()));
+			map.put(BaseTemplate.PROPERTY_CAPTION, prefix + translatableTextExtractor.apply(unit.getName()));
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, translatableTextExtractor.apply(unit.getType().getName()));
+			return map;
+		};
+	}
+
 	public static PropertyProvider<Role> createRolePropertyProvider(ApplicationInstanceData applicationInstanceData) {
 		return (role, propertyNames) -> {
 			Map<String, Object> map = new HashMap<>();
@@ -227,8 +247,24 @@ public class PropertyProviders {
 				map.put(BaseTemplate.PROPERTY_ICON, IconUtils.decodeIcon(assignment.getRole().getIcon()));
 			}
 			map.put(BaseTemplate.PROPERTY_CAPTION, assignment.getUser().getFirstName() + " " + assignment.getUser().getLastName());
-			map.put(BaseTemplate.PROPERTY_DESCRIPTION, prefix + translatableTextExtractor.apply(assignment.getOrganizationUnit().getName())); //todo abbreviation
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, prefix + translatableTextExtractor.apply(assignment.getOrganizationUnit().getName()));
 			map.put(BaseTemplate.PROPERTY_BADGE, translatableTextExtractor.apply(assignment.getRole().getTitle()));
+			return map;
+		};
+	}
+
+	public static PropertyProvider<UserRoleAssignment> createUserRoleAssignmentPropertyProviderNoUserDisplay(UserSessionData userSessionData) {
+		Function<TranslatableText, String> translatableTextExtractor = TranslatableTextUtils.createTranslatableTextExtractor(userSessionData.getRankedLanguages());
+		return (assignment, propertyNames) -> {
+			String prefix = "";
+			String abbreviation = translatableTextExtractor.apply(assignment.getOrganizationUnit().getType().getAbbreviation());
+			if (abbreviation != null) {
+				prefix = abbreviation + "-";
+			}
+			Map<String, Object> map = new HashMap<>();
+			map.put(BaseTemplate.PROPERTY_ICON, IconUtils.decodeIcon(assignment.getRole().getIcon()));
+			map.put(BaseTemplate.PROPERTY_CAPTION, translatableTextExtractor.apply(assignment.getRole().getTitle()));
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, prefix + translatableTextExtractor.apply(assignment.getOrganizationUnit().getName()));
 			return map;
 		};
 	}
