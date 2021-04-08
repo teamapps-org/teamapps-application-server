@@ -102,7 +102,7 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 	}
 
 	@Override
-	public ApplicationConfig getApplicationConfig() {
+	public ApplicationConfig<?> getApplicationConfig() {
 		return mainApplication.getApplicationBuilder().getApplicationConfig();
 	}
 

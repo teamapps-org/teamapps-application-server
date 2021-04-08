@@ -28,6 +28,7 @@ public class SystemConfig {
 	private AuthenticationConfig authenticationConfig = new AuthenticationConfig();
 	private MachineTranslation machineTranslation = new MachineTranslation();
 	private LocalizationConfig localizationConfig = new LocalizationConfig();
+	private TwilioConfig twilioConfig = new TwilioConfig();
 
 	public MachineTranslation getMachineTranslation() {
 		return machineTranslation;
@@ -59,5 +60,13 @@ public class SystemConfig {
 
 	public void setAuthenticationConfig(AuthenticationConfig authenticationConfig) {
 		this.authenticationConfig = authenticationConfig;
+	}
+
+	public TwilioConfig getTwilioConfig() {
+		return twilioConfig;
+	}
+
+	public void setTwilioConfig(TwilioConfig twilioConfig) {
+		this.twilioConfig = twilioConfig;
 	}
 }

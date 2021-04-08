@@ -31,18 +31,14 @@ import static org.teamapps.application.api.privilege.Privilege.*;
 
 public class Privileges {
 
-
 	private final static ApplicationPrivilegeBuilder PRIVILEGE_BUILDER = new ApplicationPrivilegeBuilder();
 
-	public static SimplePrivilege LAUNCH_APPLICATION = PRIVILEGE_BUILDER.LAUNCH_APPLICATION;
-
-	public static StandardPrivilegeGroup LAUNCH_APPLICATION2 = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("testPriv", ApplicationIcons.OK, "privs.ok", "desc..", CREATE, READ, UPDATE, DELETE, PRINT);
-	public static StandardPrivilegeGroup LAUNCH_APPLICATION3 = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("testPriv2", ApplicationIcons.OK, "privs.ok2", "desc..2", CREATE, READ, UPDATE, DELETE, PRINT, EXECUTE);
-	public static StandardPrivilegeGroup LAUNCH_APPLICATION4 = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("testPriv3", ApplicationIcons.USERS_CROWD, "privs.ok3", "desc..2", CREATE, READ, UPDATE, DELETE, PRINT, EXECUTE, CUSTOM);
-
+	public final static SimplePrivilege LAUNCH_APPLICATION = PRIVILEGE_BUILDER.LAUNCH_APPLICATION;
+	public final static StandardPrivilegeGroup LAUNCH_APPLICATION2 = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("testPriv", ApplicationIcons.OK, "privs.ok", "desc..", CREATE, READ, UPDATE, DELETE, PRINT);
+	public final static StandardPrivilegeGroup LAUNCH_APPLICATION3 = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("testPriv2", ApplicationIcons.OK, "privs.ok2", "desc..2", CREATE, READ, UPDATE, DELETE, PRINT, EXECUTE);
+	public final static StandardPrivilegeGroup LAUNCH_APPLICATION4 = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("testPriv3", ApplicationIcons.USERS_CROWD, "privs.ok3", "desc..2", CREATE, READ, UPDATE, DELETE, PRINT, EXECUTE, CUSTOM);
 
 	public static List<PrivilegeGroup> getPrivileges() {
 		return PRIVILEGE_BUILDER.getPrivileges();
 	}
-
 }

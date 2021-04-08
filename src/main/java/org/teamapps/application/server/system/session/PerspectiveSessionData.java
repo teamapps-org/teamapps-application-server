@@ -137,7 +137,7 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	}
 
 	@Override
-	public ApplicationConfig getApplicationConfig() {
+	public ApplicationConfig<?> getApplicationConfig() {
 		return managedApplicationSessionData.getMainApplication().getApplicationBuilder().getApplicationConfig();
 	}
 
