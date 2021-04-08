@@ -21,6 +21,7 @@ package org.teamapps.application.server.system.bootstrap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.server.controlcenter.ControlCenterAppBuilder;
 import org.teamapps.application.server.controlcenter.dbexplorer.DatabaseExplorerAppBuilder;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
@@ -99,17 +100,19 @@ public class BootstrapSessionHandler implements SessionHandler {
 		universalDB.installAuxiliaryModelClassed(schema, classLoader);
 		DatabaseLogAppender.startLogger();
 
-		SystemConfig systemConfig = new SystemConfig();
+		ControlCenterAppBuilder controlCenterAppBuilder = new ControlCenterAppBuilder();
+		ApplicationConfig applicationConfig = controlCenterAppBuilder.getApplicationConfig();
+		SystemConfig systemConfig = (SystemConfig) applicationConfig.getConfig();
 		MachineTranslation machineTranslation = null;
 		if (systemConfig.getMachineTranslation().isActive()) {
 			machineTranslation = new MachineTranslation();
 			machineTranslation.setGoogleTranslationKey(systemConfig.getMachineTranslation().getGoogleKey());
 			machineTranslation.setDeepLKey(systemConfig.getMachineTranslation().getDeepLKey());
 		}
-		systemRegistry = new SystemRegistry(systemConfig, this, universalDB, machineTranslation);
+		systemRegistry = new SystemRegistry(this, universalDB, applicationConfig, machineTranslation);
 		systemRegistry.setIconRegistryHandler(iconRegistryHandler);
 
-		systemRegistry.installAndLoadApplication(new ControlCenterAppBuilder());
+		systemRegistry.installAndLoadApplication(controlCenterAppBuilder);
 		systemRegistry.installAndLoadApplication(new DatabaseExplorerAppBuilder(universalDB));
 
 		for (Application application : Application.getAll()) {

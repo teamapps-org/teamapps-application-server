@@ -22,6 +22,7 @@ package org.teamapps.application.server.system.bootstrap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.application.ApplicationBuilder;
+import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
@@ -48,9 +49,9 @@ public class SystemRegistry {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private final SystemConfig systemConfig;
 	private final BootstrapSessionHandler bootstrapSessionHandler;
 	private final UniversalDB universalDB;
+	private final ApplicationConfig applicationConfig;
 	private final TranslationService translationService;
 	private final DictionaryLocalizationProvider dictionary;
 	private final SystemLocalizationProvider systemDictionary;
@@ -60,10 +61,11 @@ public class SystemRegistry {
 	private SessionIconRegistryHandler iconRegistryHandler;
 
 
-	public SystemRegistry(SystemConfig systemConfig, BootstrapSessionHandler bootstrapSessionHandler, UniversalDB universalDB, TranslationService translationService) {
-		this.systemConfig = systemConfig;
+	public SystemRegistry(BootstrapSessionHandler bootstrapSessionHandler, UniversalDB universalDB, ApplicationConfig applicationConfig, TranslationService translationService) {
+		SystemConfig systemConfig = (SystemConfig) applicationConfig.getConfig();
 		this.bootstrapSessionHandler = bootstrapSessionHandler;
 		this.universalDB = universalDB;
+		this.applicationConfig = applicationConfig;
 		this.translationService = translationService;
 		this.dictionary = new DictionaryLocalizationProvider(translationService, systemConfig.getLocalizationConfig().getRequiredLanguages());
 		this.systemDictionary = new SystemLocalizationProvider(translationService, systemConfig.getLocalizationConfig().getRequiredLanguages());
@@ -80,11 +82,11 @@ public class SystemRegistry {
 	}
 
 	public ApplicationInstaller createJarInstaller(File jarFile) {
-		return ApplicationInstaller.createJarInstaller(jarFile, universalDB, translationService, systemConfig.getLocalizationConfig());
+		return ApplicationInstaller.createJarInstaller(jarFile, universalDB, translationService, getSystemConfig().getLocalizationConfig());
 	}
 
 	public boolean installAndLoadApplication(ApplicationBuilder applicationBuilder) {
-		ApplicationInstaller applicationInstaller = ApplicationInstaller.createClassInstaller(applicationBuilder, universalDB, translationService, systemConfig.getLocalizationConfig());
+		ApplicationInstaller applicationInstaller = ApplicationInstaller.createClassInstaller(applicationBuilder, universalDB, translationService, getSystemConfig().getLocalizationConfig());
 		return installAndLoadApplication(applicationInstaller);
 	}
 
@@ -149,7 +151,7 @@ public class SystemRegistry {
 	}
 
 	public SystemConfig getSystemConfig() {
-		return systemConfig;
+		return (SystemConfig) applicationConfig.getConfig();
 	}
 
 	public BootstrapSessionHandler getBootstrapSessionHandler() {

@@ -22,6 +22,7 @@ package org.teamapps.application.server.system.session;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.application.PerspectiveBuilder;
+import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.desktop.ApplicationDesktop;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.privilege.*;
@@ -133,6 +134,11 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	public ApplicationDesktop createApplicationDesktop(Icon icon, String title, boolean select, boolean closable) {
 		//todo ...
 		return null;
+	}
+
+	@Override
+	public ApplicationConfig getApplicationConfig() {
+		return managedApplicationSessionData.getMainApplication().getApplicationBuilder().getApplicationConfig();
 	}
 
 	@Override

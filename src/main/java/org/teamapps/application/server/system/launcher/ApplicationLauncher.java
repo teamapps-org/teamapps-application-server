@@ -107,7 +107,7 @@ public class ApplicationLauncher {
 				handleSessionException(e);
 			}
 		}, true);
-		userSessionData.getUser().setLastLogin(Instant.now());
+		userSessionData.getUser().setLastLogin(Instant.now()).save();
 		initApplicationData();
 		createApplicationLauncher();
 		createMainView();

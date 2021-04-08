@@ -21,6 +21,7 @@ package org.teamapps.application.server.system.session;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.teamapps.application.api.application.ApplicationInstanceData;
+import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.desktop.ApplicationDesktop;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 
@@ -98,6 +99,11 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 	public ApplicationDesktop createApplicationDesktop(Icon icon, String title, boolean select, boolean closable) {
 		//todo ...
 		return null;
+	}
+
+	@Override
+	public ApplicationConfig getApplicationConfig() {
+		return mainApplication.getApplicationBuilder().getApplicationConfig();
 	}
 
 	@Override
