@@ -19,6 +19,7 @@
  */
 package org.teamapps.application.server.system.login;
 
+import org.teamapps.application.server.system.bootstrap.LogoutHandler;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.launcher.ApplicationLauncher;
 import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
@@ -35,9 +36,11 @@ import org.teamapps.ux.session.SessionContext;
 public class LoginHandler {
 
 	private final SystemRegistry systemRegistry;
+	private final LogoutHandler logoutHandler;
 
-	public LoginHandler(SystemRegistry systemRegistry) {
+	public LoginHandler(SystemRegistry systemRegistry, LogoutHandler logoutHandler) {
 		this.systemRegistry = systemRegistry;
+		this.logoutHandler = logoutHandler;
 	}
 
 	public void handleNewSession(SessionContext context) {
@@ -78,9 +81,10 @@ public class LoginHandler {
 	}
 
 	private void handleSuccessfulLogin(User user, RootPanel rootPanel, SessionContext context) {
-		if (systemRegistry.getIconRegistryHandler() != null) {
-			systemRegistry.getIconRegistryHandler().handleAuthenticatedUser(user, context);
+		UserSessionData userSessionData = new UserSessionData(user, context, systemRegistry, rootPanel);
+		if (systemRegistry.getSessionRegistryHandler() != null) {
+			systemRegistry.getSessionRegistryHandler().handleAuthenticatedUser(userSessionData, context);
 		}
-		new ApplicationLauncher(new UserSessionData(user, context, systemRegistry, rootPanel));
+		new ApplicationLauncher(userSessionData, logoutHandler);
 	}
 }

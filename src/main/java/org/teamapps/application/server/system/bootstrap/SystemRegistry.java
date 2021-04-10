@@ -30,7 +30,7 @@ import org.teamapps.application.server.system.config.SystemConfig;
 import org.teamapps.application.server.system.localization.DictionaryLocalizationProvider;
 import org.teamapps.application.server.system.localization.SystemLocalizationProvider;
 import org.teamapps.application.server.system.machinetranslation.TranslationService;
-import org.teamapps.application.server.system.server.SessionIconRegistryHandler;
+import org.teamapps.application.server.system.server.SessionRegistryHandler;
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.reporting.convert.DocumentConverter;
@@ -57,7 +57,7 @@ public class SystemRegistry {
 	private final Map<Application, LoadedApplication> loadedApplicationMap = new HashMap<>();
 	private final ManagedApplicationGroup unspecifiedApplicationGroup;
 	private final BaseResourceLinkProvider baseResourceLinkProvider;
-	private SessionIconRegistryHandler iconRegistryHandler;
+	private SessionRegistryHandler sessionRegistryHandler;
 
 
 	public SystemRegistry(BootstrapSessionHandler bootstrapSessionHandler, UniversalDB universalDB, ApplicationConfig applicationConfig, TranslationService translationService) {
@@ -165,11 +165,11 @@ public class SystemRegistry {
 		return baseResourceLinkProvider;
 	}
 
-	public SessionIconRegistryHandler getIconRegistryHandler() {
-		return iconRegistryHandler;
+	public SessionRegistryHandler getSessionRegistryHandler() {
+		return sessionRegistryHandler;
 	}
 
-	public void setIconRegistryHandler(SessionIconRegistryHandler iconRegistryHandler) {
-		this.iconRegistryHandler = iconRegistryHandler;
+	public void setSessionRegistryHandler(SessionRegistryHandler sessionRegistryHandler) {
+		this.sessionRegistryHandler = sessionRegistryHandler;
 	}
 }

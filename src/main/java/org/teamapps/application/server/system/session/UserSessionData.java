@@ -19,6 +19,7 @@
  */
 package org.teamapps.application.server.system.session;
 
+import org.teamapps.application.api.desktop.ApplicationDesktop;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.api.user.SessionUser;
@@ -34,12 +35,16 @@ import org.teamapps.icons.SessionIconProvider;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ManagedApplication;
 import org.teamapps.model.controlcenter.User;
+import org.teamapps.ux.component.Component;
+import org.teamapps.ux.component.flexcontainer.VerticalLayout;
 import org.teamapps.ux.component.rootpanel.RootPanel;
 import org.teamapps.ux.session.SessionContext;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class UserSessionData {
 
@@ -52,6 +57,8 @@ public class UserSessionData {
 	private final SessionIconProvider iconProvider;
 	private final UserLocalizationProvider dictionary;
 	private final Map<Application, ApplicationLocalizationProvider> localizationProviderByApplication = new HashMap<>();
+	private Supplier<ApplicationDesktop> applicationDesktopSupplier;
+	private Function<Component, Component> rootWrapperComponentFunction;
 
 	public UserSessionData(User user, SessionContext context, SystemRegistry registry, RootPanel rootPanel) {
 		this.user = user;
@@ -115,6 +122,19 @@ public class UserSessionData {
 		return rootPanel;
 	}
 
+	public void setRooWrapperComponentFunction(Function<Component, Component> rootWrapperComponentFunction) {
+		this.rootWrapperComponentFunction = rootWrapperComponentFunction;
+		rootPanel.setContent(rootWrapperComponentFunction.apply(rootPanel.getContent()));
+	}
+
+	public void setRootComponent(Component component) {
+		if (rootWrapperComponentFunction != null) {
+			rootPanel.setContent(rootWrapperComponentFunction.apply(component));
+		} else {
+			rootPanel.setContent(component);
+		}
+	}
+
 	public SessionUser getSessionUser() {
 		return sessionUser;
 	}
@@ -137,5 +157,13 @@ public class UserSessionData {
 
 	public List<String> getRankedLanguages() {
 		return sessionUser.getRankedLanguages();
+	}
+
+	public Supplier<ApplicationDesktop> getApplicationDesktopSupplier() {
+		return applicationDesktopSupplier;
+	}
+
+	public void setApplicationDesktopSupplier(Supplier<ApplicationDesktop> applicationDesktopSupplier) {
+		this.applicationDesktopSupplier = applicationDesktopSupplier;
 	}
 }

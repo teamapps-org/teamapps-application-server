@@ -22,10 +22,12 @@ package org.teamapps.application.server.system.launcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.application.ApplicationPerspective;
+import org.teamapps.application.api.desktop.ApplicationDesktop;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
+import org.teamapps.application.server.system.bootstrap.LogoutHandler;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.config.ThemingConfig;
 import org.teamapps.application.server.system.login.LoginHandler;
@@ -35,12 +37,14 @@ import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.common.format.Color;
+import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ManagedApplication;
 import org.teamapps.model.controlcenter.ManagedApplicationGroup;
 import org.teamapps.model.controlcenter.ManagedApplicationPerspective;
 import org.teamapps.universaldb.UniversalDB;
 import org.teamapps.ux.application.ResponsiveApplication;
+import org.teamapps.ux.application.assembler.DesktopApplicationAssembler;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.perspective.Perspective;
 import org.teamapps.ux.application.view.View;
@@ -66,6 +70,7 @@ import org.teamapps.ux.component.toolbar.ToolbarButton;
 import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
 import org.teamapps.ux.component.tree.Tree;
 import org.teamapps.ux.model.ListTreeModel;
+import org.teamapps.ux.session.SessionContext;
 
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
@@ -79,9 +84,9 @@ public class ApplicationLauncher {
 	public static final ThreadLocal<ManagedApplicationPerspective> THREAD_LOCAL_MANAGED_PERSPECTIVE = new ThreadLocal<>();
 
 	private final UserSessionData userSessionData;
+	private final LogoutHandler logoutHandler;
 	private final SystemRegistry registry;
 	private final boolean mobileView;
-	private final RootPanel rootPanel;
 	private List<ApplicationGroupData> sortedApplicationGroups;
 	private Component applicationLauncher;
 	private Set<ApplicationData> openedApplications = new HashSet<>();
@@ -91,11 +96,11 @@ public class ApplicationLauncher {
 	private ManagedApplication currentApplication;
 	private ManagedApplicationPerspective currentPerspective;
 
-	public ApplicationLauncher(UserSessionData userSessionData) {
+	public ApplicationLauncher(UserSessionData userSessionData, LogoutHandler logoutHandler) {
 		this.userSessionData = userSessionData;
-		this.rootPanel = userSessionData.getRootPanel();
 		this.registry = userSessionData.getRegistry();
 		this.mobileView = userSessionData.getContext().getClientInfo().isMobileDevice();
+		this.logoutHandler = logoutHandler;
 		userSessionData.getContext().addExecutionDecorator(runnable -> {
 			UniversalDB.setUserId(userSessionData.getUser().getId());
 			THREAD_LOCAL_APPLICATION.set(currentApplication);
@@ -108,6 +113,7 @@ public class ApplicationLauncher {
 			}
 		}, true);
 		userSessionData.getUser().setLastLogin(Instant.now()).save();
+		userSessionData.setApplicationDesktopSupplier(this::createApplicationDesktop);
 		initApplicationData();
 		createApplicationLauncher();
 		createMainView();
@@ -175,7 +181,7 @@ public class ApplicationLauncher {
 	}
 
 	private void logout() {
-		LoginHandler loginHandler = new LoginHandler(registry);
+		LoginHandler loginHandler = new LoginHandler(registry, logoutHandler);
 		loginHandler.createLoginView(userSessionData.getContext(), userSessionData.getRootPanel());
 		userSessionData.invalidate();
 	}
@@ -190,7 +196,7 @@ public class ApplicationLauncher {
 		}
 
 		if (mobileView) {
-			rootPanel.setContent(applicationLauncher);
+			userSessionData.setRootComponent(applicationLauncher);
 		} else {
 			applicationsTabPanel = new TabPanel();
 			Tab applicationsTab = new Tab(ApplicationIcons.HOME, getLocalized(Dictionary.APPLICATIONS), applicationLauncher);
@@ -201,7 +207,7 @@ public class ApplicationLauncher {
 			logoutTab.setRightSide(true);
 			applicationsTabPanel.addTab(logoutTab, false);
 			logoutTab.onSelected.addListener(this::logout);
-			rootPanel.setContent(applicationsTabPanel);
+			userSessionData.setRootComponent(applicationsTabPanel);
 		}
 	}
 
@@ -238,7 +244,7 @@ public class ApplicationLauncher {
 		if (openedApplications.contains(applicationData)) {
 			if (mobileView) {
 				Component component = mobilAppByApplicationData.get(applicationData);
-				rootPanel.setContent(component);
+				userSessionData.setRootComponent(component);
 				applicationData.getApplicationSessionData().getMobileNavigation().onShowStartViewRequest().fire();
 			} else {
 				Tab tab = tabByApplicationData.get(applicationData);
@@ -247,7 +253,7 @@ public class ApplicationLauncher {
 		} else {
 			if (mobileView) {
 				Component application = createMobileApplication(applicationData);
-				rootPanel.setContent(application);
+				userSessionData.setRootComponent(application);
 				openedApplications.add(applicationData);
 				mobilAppByApplicationData.put(applicationData, application);
 			} else {
@@ -264,6 +270,47 @@ public class ApplicationLauncher {
 				applicationsTabPanel.addTab(tab, true);
 			}
 		}
+	}
+
+	public ApplicationDesktop createApplicationDesktop() {
+		return new ApplicationDesktop() {
+			private ResponsiveApplication application = createResponsiveApplication();
+			private Tab tab;
+
+			@Override
+			public ResponsiveApplication getApplication() {
+				return application;
+			}
+
+			@Override
+			public void showApplication(Icon icon, String title, boolean select, boolean closable) {
+				if (mobileView) {
+					userSessionData.setRootComponent(application.getUi());
+				} else {
+					tab = new Tab(icon, title, application.getUi());
+					tab.setCloseable(closable);
+					applicationsTabPanel.addTab(tab, select);
+				}
+			}
+
+			@Override
+			public void close() {
+				if (mobileView) {
+					userSessionData.setRootComponent(applicationLauncher);
+				} else {
+					applicationsTabPanel.removeTab(tab);
+				}
+			}
+		};
+	}
+
+	public ResponsiveApplication createResponsiveApplication() {
+		MobileApplicationNavigation mobileNavigation = new MobileApplicationNavigation();
+		mobileNavigation.setApplicationLauncher(applicationLauncher);
+		return ResponsiveApplication.createApplication(
+				SessionContext.current().getClientInfo().isMobileDevice() ?
+						new MobileAssembler(mobileNavigation, userSessionData.getDictionary()) :
+						new DesktopApplicationAssembler());
 	}
 
 	private Component createMobileApplication(ApplicationData applicationData) {

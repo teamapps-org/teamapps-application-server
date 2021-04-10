@@ -32,10 +32,11 @@ import org.teamapps.application.server.system.machinetranslation.MachineTranslat
 import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
 import org.teamapps.application.server.system.server.ApplicationServer;
 import org.teamapps.application.server.system.server.SessionHandler;
-import org.teamapps.application.server.system.server.SessionIconRegistryHandler;
+import org.teamapps.application.server.system.server.SessionRegistryHandler;
 import org.teamapps.application.server.system.server.SessionManager;
 import org.teamapps.application.server.system.template.Templates;
 import org.teamapps.application.server.system.utils.ValueConverterUtils;
+import org.teamapps.event.Event;
 import org.teamapps.icon.flags.FlagIcon;
 import org.teamapps.model.ControlCenterSchema;
 import org.teamapps.model.controlcenter.Application;
@@ -51,10 +52,12 @@ import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class BootstrapSessionHandler implements SessionHandler {
+public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private final SessionIconRegistryHandler iconRegistryHandler;
+	public Event<SessionContext> onUserLogout = new Event<>();
+
+	private final SessionRegistryHandler sessionRegistryHandler;
 	private SessionManager sessionManager;
 	private UniversalDB universalDB;
 	private File configPath;
@@ -73,8 +76,8 @@ public class BootstrapSessionHandler implements SessionHandler {
 		this(null);
 	}
 
-	public BootstrapSessionHandler(SessionIconRegistryHandler iconRegistryHandler) {
-		this.iconRegistryHandler = iconRegistryHandler;
+	public BootstrapSessionHandler(SessionRegistryHandler sessionRegistryHandler) {
+		this.sessionRegistryHandler = sessionRegistryHandler;
 	}
 
 	public void installNewSystem(File applicationJar) throws Exception {
@@ -110,7 +113,7 @@ public class BootstrapSessionHandler implements SessionHandler {
 			machineTranslation.setDeepLKey(systemConfig.getMachineTranslation().getDeepLKey());
 		}
 		systemRegistry = new SystemRegistry(this, universalDB, applicationConfig, machineTranslation);
-		systemRegistry.setIconRegistryHandler(iconRegistryHandler);
+		systemRegistry.setSessionRegistryHandler(sessionRegistryHandler);
 
 		systemRegistry.installAndLoadApplication(controlCenterAppBuilder);
 		systemRegistry.installAndLoadApplication(new DatabaseExplorerAppBuilder(universalDB));
@@ -135,15 +138,15 @@ public class BootstrapSessionHandler implements SessionHandler {
 		if (standardIconClass != null) {
 			context.getIconProvider().registerIconLibrary(standardIconClass);
 		}
-		if (iconRegistryHandler != null) {
-			iconRegistryHandler.handleNewSession(context);
+		if (sessionRegistryHandler != null) {
+			sessionRegistryHandler.handleNewSession(context);
 		}
 
 		context.getIconProvider().registerIconLibrary(FlagIcon.class);
 		context.registerTemplates(Arrays.stream(Templates.values())
 				.collect(Collectors.toMap(Enum::name, Templates::getTemplate)));
 
-		new LoginHandler(systemRegistry).handleNewSession(context);
+		new LoginHandler(systemRegistry, this).handleNewSession(context);
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -165,5 +168,18 @@ public class BootstrapSessionHandler implements SessionHandler {
 					.setLanguages(ValueConverterUtils.compressStringList(Arrays.asList("de", "en", "fr")))
 					.save();
 		}
+	}
+
+	@Override
+	public void handleLogout(SessionContext context) {
+
+	}
+
+	public UniversalDB getUniversalDB() {
+		return universalDB;
+	}
+
+	public SystemRegistry getSystemRegistry() {
+		return systemRegistry;
 	}
 }

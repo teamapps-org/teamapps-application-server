@@ -41,9 +41,9 @@ public class SecureResourceHandler implements ResourceProvider {
 	private SecureResourceHandler() {
 	}
 
-	public SecureLinkBuilder registerByteArrayResourceHandler(ByteArrayResourceProvider resourceProvider, String fileSuffix) {
+	public SecureLinkBuilder registerByteArrayResourceHandler(ByteArrayResourceProvider resourceProvider, LastModifiedProvider lastModifiedProvider, String fileSuffix) {
 		String handlerKey = getUUID(12);
-		SecureLinkBuilder secureLinkBuilder = new SecureLinkBuilder(HANDLER_PREFIX + handlerKey, fileSuffix, resourceProvider);
+		SecureLinkBuilder secureLinkBuilder = new SecureLinkBuilder(HANDLER_PREFIX + handlerKey, fileSuffix, resourceProvider, lastModifiedProvider);
 		resourceProviderByHandlerKey.put(handlerKey, secureLinkBuilder);
 		return secureLinkBuilder;
 	}

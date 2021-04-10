@@ -22,6 +22,8 @@ package org.teamapps.application.server.system.server;
 import org.teamapps.ux.resource.ByteArrayResource;
 import org.teamapps.ux.resource.Resource;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,13 +33,15 @@ public class SecureLinkBuilder {
 	private final String linkPrefix;
 	private final String fileSuffix;
 	private final ByteArrayResourceProvider byteArrayResourceProvider;
+	private final LastModifiedProvider lastModifiedProvider;
 	private final Map<String, Integer> idByKey = new ConcurrentHashMap<>();
 	private final Map<Integer, String> keyById = new ConcurrentHashMap<>();
 
-	public SecureLinkBuilder(String linkPrefix, String fileSuffix, ByteArrayResourceProvider byteArrayResourceProvider) {
+	public SecureLinkBuilder(String linkPrefix, String fileSuffix, ByteArrayResourceProvider byteArrayResourceProvider, LastModifiedProvider lastModifiedProvider) {
 		this.linkPrefix = linkPrefix;
 		this.fileSuffix = fileSuffix;
 		this.byteArrayResourceProvider = byteArrayResourceProvider;
+		this.lastModifiedProvider = lastModifiedProvider;
 	}
 
 	public String createLink(int id) {
@@ -58,7 +62,11 @@ public class SecureLinkBuilder {
 
 	public Resource getResource(String key) {
 		Integer id = idByKey.get(key);
-		return id != null ? new ByteArrayResource(byteArrayResourceProvider.getResource(id), key + "." + fileSuffix) : null;
+		return id != null ?
+				new ByteArrayResource(byteArrayResourceProvider.getResource(id), key + "." + fileSuffix)
+						.lastModified(new Date(lastModifiedProvider.getLastModified(id)))
+						.expiring(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 90))
+				: null;
 	}
 
 }

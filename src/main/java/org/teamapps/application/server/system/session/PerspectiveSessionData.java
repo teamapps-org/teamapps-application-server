@@ -131,9 +131,8 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	}
 
 	@Override
-	public ApplicationDesktop createApplicationDesktop(Icon icon, String title, boolean select, boolean closable) {
-		//todo ...
-		return null;
+	public ApplicationDesktop createApplicationDesktop() {
+		return userSessionData.getApplicationDesktopSupplier().get();
 	}
 
 	@Override
