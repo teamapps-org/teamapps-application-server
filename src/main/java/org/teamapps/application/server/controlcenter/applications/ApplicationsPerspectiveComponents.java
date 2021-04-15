@@ -21,6 +21,7 @@ package org.teamapps.application.server.controlcenter.applications;
 
 import org.teamapps.application.api.application.ApplicationBuilder;
 import org.teamapps.application.api.application.ApplicationInstanceData;
+import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.localization.LocalizationEntry;
@@ -91,7 +92,7 @@ public class ApplicationsPerspectiveComponents extends AbstractManagedApplicatio
 				return;
 			}
 			LoadedApplication loadedApplication = userSessionData.getRegistry().getLoadedApplication(application);
-			String schemaDefinition = loadedApplication.getApplicationBuilder().getDatabaseModel() != null ? loadedApplication.getApplicationBuilder().getDatabaseModel().getSchema().createDefinition() : "";
+			String schemaDefinition = loadedApplication.getBaseApplicationBuilder().getDatabaseModel() != null ? loadedApplication.getBaseApplicationBuilder().getDatabaseModel().getSchema().createDefinition() : "";
 			StringBuilder sb = new StringBuilder();
 			for (String line : schemaDefinition.split("[\\r\\n]+")) {
 				sb.append(line.replaceAll("\\t", "&nbsp;&nbsp;&nbsp;&nbsp;")).append("<br>");
@@ -135,8 +136,8 @@ public class ApplicationsPerspectiveComponents extends AbstractManagedApplicatio
 			StringBuilder sb = new StringBuilder();
 			LoadedApplication loadedApplication = userSessionData.getRegistry().getLoadedApplication(application);
 			ApplicationLocalizationProvider localizationProvider = userSessionData.getApplicationLocalizationProvider(application);
-			if (loadedApplication.getApplicationBuilder().getApplicationRoles() != null) {
-				for (ApplicationRole applicationRole : loadedApplication.getApplicationBuilder().getApplicationRoles()) {
+			if (loadedApplication.getBaseApplicationBuilder().getApplicationRoles() != null) {
+				for (ApplicationRole applicationRole : loadedApplication.getBaseApplicationBuilder().getApplicationRoles()) {
 					sb.append("<b>").append(getLocalized(applicationRole.getTitleKey())).append("</b>");
 					if (applicationRole.getDescriptionKey() != null) {
 						sb.append(" (").append(localizationProvider.getLocalized(applicationRole.getDescriptionKey())).append(")");
@@ -170,7 +171,7 @@ public class ApplicationsPerspectiveComponents extends AbstractManagedApplicatio
 			}
 			LoadedApplication loadedApplication = userSessionData.getRegistry().getLoadedApplication(application);
 			StringBuilder sb = new StringBuilder();
-			for (LocalizationEntrySet localizationEntrySet : loadedApplication.getApplicationBuilder().getLocalizationData().getLocalizationEntrySets()) {
+			for (LocalizationEntrySet localizationEntrySet : loadedApplication.getBaseApplicationBuilder().getLocalizationData().getLocalizationEntrySets()) {
 				String language = localizationEntrySet.getLanguage();
 				sb.append("<b>").append(language).append(":</b><br>");
 				for (LocalizationEntry entry : localizationEntrySet.getEntries().stream().sorted(Comparator.comparing(LocalizationEntry::getKey)).collect(Collectors.toList())) {
@@ -189,9 +190,9 @@ public class ApplicationsPerspectiveComponents extends AbstractManagedApplicatio
 			applicationRolesButton.setVisible(false);
 			dataModelButton.setVisible(false);
 			if (loadedApplication != null) {
-				ApplicationBuilder applicationBuilder = loadedApplication.getApplicationBuilder();
-				applicationRolesButton.setVisible(applicationBuilder.getApplicationRoles() != null && !applicationBuilder.getApplicationRoles().isEmpty());
-				dataModelButton.setVisible(applicationBuilder.getDatabaseModel() != null);
+				BaseApplicationBuilder baseApplicationBuilder = loadedApplication.getBaseApplicationBuilder();
+				applicationRolesButton.setVisible(baseApplicationBuilder.getApplicationRoles() != null && !baseApplicationBuilder.getApplicationRoles().isEmpty());
+				dataModelButton.setVisible(baseApplicationBuilder.getDatabaseModel() != null);
 			}
 		});
 
@@ -273,22 +274,22 @@ public class ApplicationsPerspectiveComponents extends AbstractManagedApplicatio
 		Window window = WindowUtils.createWindow(ApplicationIcons.UPLOAD, getLocalized("applications.installApplication"));
 		ResponsiveForm form = new ResponsiveForm(100, 0, 0);
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(400);
-		ApplicationBuilder applicationBuilder = applicationInfo.getApplicationBuilder();
+		BaseApplicationBuilder baseApplicationBuilder = applicationInfo.getBaseApplicationBuilder();
 
 		if (applicationInfo.getApplication() != null) {
 			TemplateField<Application> applicationField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES, PropertyProviders.createApplicationPropertyProvider(userSessionData));
 			applicationField.setValue(applicationInfo.getApplication());
 			formLayout.addLabelAndComponent(null, getLocalized("applications.application"), applicationField);
 		} else {
-			Map<String, String> localizationMap = applicationBuilder.getLocalizationData().createLocalizationMapByLanguage().values().iterator().next();
-			formLayout.addLabelAndComponent(null, getLocalized("applications.application"), UiUtils.createSingleValueTemplateField(applicationBuilder.getApplicationIcon(), applicationBuilder.getApplicationName()));
-			formLayout.addLabelAndComponent(null, getLocalized("applications.appTitle"), UiUtils.createSingleValueTextField(applicationBuilder.getApplicationTitleKey() + " -> " + localizationMap.get(applicationBuilder.getApplicationTitleKey())));
-			formLayout.addLabelAndComponent(null, getLocalized("applications.appDescription"), UiUtils.createSingleValueTextField(applicationBuilder.getApplicationDescriptionKey() + " -> " + localizationMap.get(applicationBuilder.getApplicationDescriptionKey())));
-			formLayout.addLabelAndComponent(null, getLocalized("applications.releaseNotes"), UiUtils.createSingleValueTextField(applicationBuilder.getReleaseNotes()));
+			Map<String, String> localizationMap = baseApplicationBuilder.getLocalizationData().createLocalizationMapByLanguage().values().iterator().next();
+			formLayout.addLabelAndComponent(null, getLocalized("applications.application"), UiUtils.createSingleValueTemplateField(baseApplicationBuilder.getApplicationIcon(), baseApplicationBuilder.getApplicationName()));
+			formLayout.addLabelAndComponent(null, getLocalized("applications.appTitle"), UiUtils.createSingleValueTextField(baseApplicationBuilder.getApplicationTitleKey() + " -> " + localizationMap.get(baseApplicationBuilder.getApplicationTitleKey())));
+			formLayout.addLabelAndComponent(null, getLocalized("applications.appDescription"), UiUtils.createSingleValueTextField(baseApplicationBuilder.getApplicationDescriptionKey() + " -> " + localizationMap.get(baseApplicationBuilder.getApplicationDescriptionKey())));
+			formLayout.addLabelAndComponent(null, getLocalized("applications.releaseNotes"), UiUtils.createSingleValueTextField(baseApplicationBuilder.getReleaseNotes()));
 		}
 
 		formLayout.addLabelAndComponent(null, getLocalized("applications.installationType"), UiUtils.createSingleValueTemplateField(applicationInfo.getApplication() != null ? ApplicationIcons.NAV_REFRESH : ApplicationIcons.INSTALL, applicationInfo.getApplication() != null ? getLocalized("applications.applicationUpdate") : getLocalized("applications.newApplication")));
-		formLayout.addLabelAndComponent(null, getLocalized("applications.appVersion"), UiUtils.createSingleValueTextField(applicationBuilder.getApplicationVersion().getVersion()));
+		formLayout.addLabelAndComponent(null, getLocalized("applications.appVersion"), UiUtils.createSingleValueTextField(baseApplicationBuilder.getApplicationVersion().getVersion()));
 
 		if (!applicationInfo.getWarnings().isEmpty()) {
 			TagComboBox<String> warningsField = UiUtils.createSingleValueTagComboBox(ApplicationIcons.SIGN_WARNING, applicationInfo.getWarnings());
@@ -332,7 +333,7 @@ public class ApplicationsPerspectiveComponents extends AbstractManagedApplicatio
 
 		buttonGroup = window.getToolbar().addButtonGroup(new ToolbarButtonGroup());
 		buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.DATA_CLOUD, getLocalized("applications.dataModel"), getLocalized("applications.showDataModel"))).onClick.addListener(() -> {
-			String schemaDefinition = applicationBuilder.getDatabaseModel() != null ? applicationBuilder.getDatabaseModel().getSchema().createDefinition() : "";
+			String schemaDefinition = baseApplicationBuilder.getDatabaseModel() != null ? baseApplicationBuilder.getDatabaseModel().getSchema().createDefinition() : "";
 			StringBuilder sb = new StringBuilder();
 			for (String line : schemaDefinition.split("[\\r\\n]+")) {
 				sb.append(line.replaceAll("\\t", "&nbsp;&nbsp;&nbsp;&nbsp;")).append("<br>");
@@ -342,7 +343,7 @@ public class ApplicationsPerspectiveComponents extends AbstractManagedApplicatio
 
 		buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.DOCUMENT_TEXT, getLocalized("applications.applicationCaptions"), getLocalized("applications.showApplicationCaptions"))).onClick.addListener(() -> {
 			StringBuilder sb = new StringBuilder();
-			for (LocalizationEntrySet localizationEntrySet : applicationBuilder.getLocalizationData().getLocalizationEntrySets()) {
+			for (LocalizationEntrySet localizationEntrySet : baseApplicationBuilder.getLocalizationData().getLocalizationEntrySets()) {
 				String language = localizationEntrySet.getLanguage();
 				sb.append("<b>").append(language).append(":</b><br>");
 				for (LocalizationEntry entry : localizationEntrySet.getEntries().stream().sorted(Comparator.comparing(LocalizationEntry::getKey)).collect(Collectors.toList())) {

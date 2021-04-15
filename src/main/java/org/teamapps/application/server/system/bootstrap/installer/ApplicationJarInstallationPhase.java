@@ -22,7 +22,6 @@ package org.teamapps.application.server.system.bootstrap.installer;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfoList;
 import org.teamapps.application.api.application.ApplicationBuilder;
-import org.teamapps.application.api.application.ApplicationPerspectiveBuilder;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.universaldb.index.file.FileUtil;
 
@@ -45,7 +44,7 @@ public class ApplicationJarInstallationPhase implements ApplicationInstallationP
 					.overrideClassLoaders(classLoader)
 					.enableAllInfo()
 					.scan()
-					.getClassesImplementing(ApplicationPerspectiveBuilder.class.getName())
+					.getClassesImplementing(ApplicationBuilder.class.getName())
 					.getStandardClasses();
 
 			if (classInfos.size() == 0) {
@@ -69,11 +68,11 @@ public class ApplicationJarInstallationPhase implements ApplicationInstallationP
 
 			Class<?> builder = classInfos.get(0).loadClass();
 			if (unmanagedApplication) {
-				applicationBuilder = (ApplicationPerspectiveBuilder) builder.getDeclaredConstructor().newInstance();
+				applicationBuilder = (ApplicationBuilder) builder.getDeclaredConstructor().newInstance();
 			} else {
 				applicationBuilder = (ApplicationBuilder) builder.getDeclaredConstructor().newInstance();
 			}
-			applicationInfo.setApplicationBuilder(applicationBuilder);
+			applicationInfo.setBaseApplicationBuilder(applicationBuilder);
 			applicationInfo.setUnmanagedPerspectives(unmanagedApplication);
 			applicationInfo.setBinaryHash(fileHash);
 			applicationInfo.setApplicationClassLoader(classLoader);

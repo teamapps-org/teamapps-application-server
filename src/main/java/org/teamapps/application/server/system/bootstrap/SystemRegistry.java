@@ -22,6 +22,7 @@ package org.teamapps.application.server.system.bootstrap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.application.ApplicationBuilder;
+import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
@@ -84,8 +85,8 @@ public class SystemRegistry {
 		return ApplicationInstaller.createJarInstaller(jarFile, universalDB, translationService, getSystemConfig().getLocalizationConfig());
 	}
 
-	public boolean installAndLoadApplication(ApplicationBuilder applicationBuilder) {
-		ApplicationInstaller applicationInstaller = ApplicationInstaller.createClassInstaller(applicationBuilder, universalDB, translationService, getSystemConfig().getLocalizationConfig());
+	public boolean installAndLoadApplication(BaseApplicationBuilder baseApplicationBuilder) {
+		ApplicationInstaller applicationInstaller = ApplicationInstaller.createClassInstaller(baseApplicationBuilder, universalDB, translationService, getSystemConfig().getLocalizationConfig());
 		return installAndLoadApplication(applicationInstaller);
 	}
 

@@ -20,7 +20,7 @@
 package org.teamapps.application.server.system.session;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
-import org.teamapps.application.api.application.PerspectiveBuilder;
+import org.teamapps.application.api.application.perspective.PerspectiveBuilder;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;

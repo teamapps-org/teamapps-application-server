@@ -87,7 +87,7 @@ public class ApplicationConfigurationPerspective extends AbstractManagedApplicat
 			}
 			LoadedApplication loadedApplication = userSessionData.getRegistry().getLoadedApplication(application);
 			try {
-				loadedApplication.getApplicationBuilder().updateConfig(config, loadedApplication.getApplicationClassLoaderOrDefault());
+				loadedApplication.getBaseApplicationBuilder().updateConfig(config, loadedApplication.getApplicationClassLoaderOrDefault());
 				application.setConfig(config).save();
 			} catch (Exception e) {
 				UiUtils.showNotification(ApplicationIcons.ERROR, e.getMessage());
@@ -98,7 +98,7 @@ public class ApplicationConfigurationPerspective extends AbstractManagedApplicat
 
 		selectedApplication.onChanged().addListener(application -> {
 			LoadedApplication loadedApplication = userSessionData.getRegistry().getLoadedApplication(application);
-			String xml = loadedApplication.getApplicationBuilder().getApplicationConfigXml(loadedApplication.getApplicationClassLoaderOrDefault());
+			String xml = loadedApplication.getBaseApplicationBuilder().getApplicationConfigXml(loadedApplication.getApplicationClassLoaderOrDefault());
 			configField.setValue(xml);
 		});
 

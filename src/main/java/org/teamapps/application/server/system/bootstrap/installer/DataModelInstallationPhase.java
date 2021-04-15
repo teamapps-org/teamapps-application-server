@@ -42,7 +42,7 @@ public class DataModelInstallationPhase implements ApplicationInstallationPhase 
 			if (!applicationInfo.getErrors().isEmpty()) {
 				return;
 			}
-			SchemaInfoProvider databaseModel = applicationInfo.getApplicationBuilder().getDatabaseModel();
+			SchemaInfoProvider databaseModel = applicationInfo.getBaseApplicationBuilder().getDatabaseModel();
 			if (databaseModel == null) {
 				applicationInfo.addWarning("No data model!");
 				return;
@@ -103,7 +103,7 @@ public class DataModelInstallationPhase implements ApplicationInstallationPhase 
 
 	@Override
 	public void installApplication(ApplicationInfo applicationInfo) {
-		SchemaInfoProvider databaseModel = applicationInfo.getApplicationBuilder().getDatabaseModel();
+		SchemaInfoProvider databaseModel = applicationInfo.getBaseApplicationBuilder().getDatabaseModel();
 		if (databaseModel == null) {
 			return;
 		}
@@ -120,7 +120,7 @@ public class DataModelInstallationPhase implements ApplicationInstallationPhase 
 
 	@Override
 	public void loadApplication(ApplicationInfo applicationInfo) {
-		SchemaInfoProvider databaseModel = applicationInfo.getApplicationBuilder().getDatabaseModel();
+		SchemaInfoProvider databaseModel = applicationInfo.getBaseApplicationBuilder().getDatabaseModel();
 		if (databaseModel == null) {
 			return;
 		}

@@ -29,7 +29,6 @@ import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.user.SessionUser;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
-import org.teamapps.icons.Icon;
 import org.teamapps.reporting.convert.DocumentConverter;
 import org.teamapps.universaldb.index.translation.TranslatableText;
 import org.teamapps.ux.application.ResponsiveApplication;
@@ -102,7 +101,7 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 
 	@Override
 	public ApplicationConfig<?> getApplicationConfig() {
-		return mainApplication.getApplicationBuilder().getApplicationConfig();
+		return mainApplication.getBaseApplicationBuilder().getApplicationConfig();
 	}
 
 	@Override

@@ -20,7 +20,7 @@
 package org.teamapps.application.server.system.bootstrap;
 
 import org.teamapps.application.api.application.ApplicationBuilder;
-import org.teamapps.application.api.application.ApplicationPerspectiveBuilder;
+import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ApplicationVersion;
 import org.teamapps.universaldb.index.text.TextFilter;
@@ -28,12 +28,11 @@ import org.teamapps.universaldb.index.text.TextFilter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ApplicationInfo {
 
 
-	private ApplicationBuilder applicationBuilder;
+	private BaseApplicationBuilder baseApplicationBuilder;
 	private File applicationJar;
 	private ClassLoader applicationClassLoader;
 	private boolean unmanagedPerspectives;
@@ -53,9 +52,9 @@ public class ApplicationInfo {
 	private ApplicationVersion applicationVersion;
 	private LoadedApplication loadedApplication;
 
-	public ApplicationInfo(ApplicationBuilder applicationBuilder) {
-		this.applicationBuilder = applicationBuilder;
-		if (!(applicationBuilder instanceof ApplicationPerspectiveBuilder)) {
+	public ApplicationInfo(BaseApplicationBuilder baseApplicationBuilder) {
+		this.baseApplicationBuilder = baseApplicationBuilder;
+		if (!(baseApplicationBuilder instanceof ApplicationBuilder)) {
 			unmanagedPerspectives = true;
 		}
 	}
@@ -82,19 +81,19 @@ public class ApplicationInfo {
 	}
 
 	public void createLoadedApplication() {
-		loadedApplication = new LoadedApplication(getApplication(), applicationBuilder, applicationClassLoader, unmanagedPerspectives);
+		loadedApplication = new LoadedApplication(getApplication(), baseApplicationBuilder, applicationClassLoader, unmanagedPerspectives);
 	}
 
 	public LoadedApplication getLoadedApplication() {
 		return loadedApplication;
 	}
 
-	public ApplicationBuilder getApplicationBuilder() {
-		return applicationBuilder;
+	public BaseApplicationBuilder getBaseApplicationBuilder() {
+		return baseApplicationBuilder;
 	}
 
-	public void setApplicationBuilder(ApplicationBuilder applicationBuilder) {
-		this.applicationBuilder = applicationBuilder;
+	public void setBaseApplicationBuilder(ApplicationBuilder baseApplicationBuilder) {
+		this.baseApplicationBuilder = baseApplicationBuilder;
 	}
 
 	public File getApplicationJar() {
@@ -228,7 +227,7 @@ public class ApplicationInfo {
 	@Override
 	public String toString() {
 		return "ApplicationInfo{" +
-				"applicationBuilder=" + applicationBuilder +
+				"applicationBuilder=" + baseApplicationBuilder +
 				", applicationJar=" + applicationJar +
 				", applicationClassLoader=" + applicationClassLoader +
 				", unmanagedPerspectives=" + unmanagedPerspectives +

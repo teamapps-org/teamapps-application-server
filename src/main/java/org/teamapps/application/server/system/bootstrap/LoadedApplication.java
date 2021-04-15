@@ -20,8 +20,8 @@
 package org.teamapps.application.server.system.bootstrap;
 
 import org.teamapps.application.api.application.ApplicationBuilder;
-import org.teamapps.application.api.application.ApplicationPerspectiveBuilder;
-import org.teamapps.application.api.application.PerspectiveBuilder;
+import org.teamapps.application.api.application.BaseApplicationBuilder;
+import org.teamapps.application.api.application.perspective.PerspectiveBuilder;
 import org.teamapps.application.server.system.localization.ApplicationScopeLocalizationProvider;
 import org.teamapps.application.server.system.privilege.ApplicationScopePrivilegeProvider;
 import org.teamapps.model.controlcenter.Application;
@@ -32,15 +32,15 @@ import java.util.List;
 public class LoadedApplication {
 
 	private final Application application;
-	private final ApplicationBuilder applicationBuilder;
+	private final BaseApplicationBuilder baseApplicationBuilder;
 	private final ClassLoader applicationClassLoader;
 	private final boolean unmanagedPerspectives;
 	private ApplicationScopeLocalizationProvider applicationScopeLocalizationProvider;
 	private ApplicationScopePrivilegeProvider applicationScopePrivilegeProvider;
 
-	public LoadedApplication(Application application, ApplicationBuilder applicationBuilder, ClassLoader applicationClassLoader, boolean unmanagedPerspectives) {
+	public LoadedApplication(Application application, BaseApplicationBuilder applicationBuilder, ClassLoader applicationClassLoader, boolean unmanagedPerspectives) {
 		this.application = application;
-		this.applicationBuilder = applicationBuilder;
+		this.baseApplicationBuilder = applicationBuilder;
 		this.applicationClassLoader = applicationClassLoader;
 		this.unmanagedPerspectives = unmanagedPerspectives;
 	}
@@ -49,7 +49,7 @@ public class LoadedApplication {
 		if (unmanagedPerspectives) {
 			return Collections.emptyList();
 		} else {
-			ApplicationPerspectiveBuilder applicationPerspectiveBuilder = (ApplicationPerspectiveBuilder) applicationBuilder;
+			ApplicationBuilder applicationPerspectiveBuilder = (ApplicationBuilder) baseApplicationBuilder;
 			return applicationPerspectiveBuilder.getPerspectiveBuilders();
 		}
 	}
@@ -81,8 +81,8 @@ public class LoadedApplication {
 		return application;
 	}
 
-	public ApplicationBuilder getApplicationBuilder() {
-		return applicationBuilder;
+	public BaseApplicationBuilder getBaseApplicationBuilder() {
+		return baseApplicationBuilder;
 	}
 
 	public ClassLoader getApplicationClassLoader() {

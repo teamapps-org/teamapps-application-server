@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,8 +19,7 @@
  */
 package org.teamapps.application.server.system.bootstrap.installer;
 
-import org.teamapps.application.api.application.ApplicationBuilder;
-import org.teamapps.application.api.config.ApplicationConfig;
+import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.config.LocalizationConfig;
@@ -47,8 +46,8 @@ public class ApplicationInstaller {
 		return new ApplicationInstaller(new ApplicationInfo(applicationJar), universalDB, translationService, localizationConfig);
 	}
 
-	public static ApplicationInstaller createClassInstaller(ApplicationBuilder applicationBuilder, UniversalDB universalDB, TranslationService translationService, LocalizationConfig localizationConfig) {
-		return new ApplicationInstaller(new ApplicationInfo(applicationBuilder), universalDB, translationService, localizationConfig);
+	public static ApplicationInstaller createClassInstaller(BaseApplicationBuilder baseApplicationBuilder, UniversalDB universalDB, TranslationService translationService, LocalizationConfig localizationConfig) {
+		return new ApplicationInstaller(new ApplicationInfo(baseApplicationBuilder), universalDB, translationService, localizationConfig);
 	}
 
 	private ApplicationInstaller(ApplicationInfo applicationInfo, UniversalDB universalDB, TranslationService translationService, LocalizationConfig localizationConfig) {
@@ -73,7 +72,7 @@ public class ApplicationInstaller {
 		if (application == null) {
 			return false;
 		}
-		String version = applicationInfo.getApplicationBuilder().getApplicationVersion().getVersion();
+		String version = applicationInfo.getBaseApplicationBuilder().getApplicationVersion().getVersion();
 		ApplicationVersion matchingVersion = application.getVersions().stream().filter(v -> v.getVersion().equals(version)).findFirst().orElse(null);
 		return matchingVersion != null;
 	}
@@ -89,6 +88,7 @@ public class ApplicationInstaller {
 			applicationInstallationPhases.forEach(phase -> phase.installApplication(applicationInfo));
 			applicationInfo.getApplication().setInstalledVersion(applicationInfo.getApplicationVersion()).save();
 			LocalizationUtil.translateAllApplicationValues(translationService, applicationInfo.getApplication());
+			applicationInfo.getBaseApplicationBuilder().getOnApplicationInstalled().fire();
 			return true;
 		} else {
 			return false;
@@ -103,16 +103,16 @@ public class ApplicationInstaller {
 			if (classLoader == null) {
 				classLoader = this.getClass().getClassLoader();
 			}
-			String applicationConfig = applicationInfo.getApplicationBuilder().getApplicationConfigXml(classLoader);
+			String applicationConfig = applicationInfo.getBaseApplicationBuilder().getApplicationConfigXml(classLoader);
 			Application application = applicationInfo.getApplication();
 			if (applicationConfig != null && application.getConfig() != null) {
 				try {
-					applicationInfo.getApplicationBuilder().updateConfig(application.getConfig(), classLoader);
+					applicationInfo.getBaseApplicationBuilder().updateConfig(application.getConfig(), classLoader);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-			applicationInfo.getApplicationBuilder().bootstrapApplicationBuilder();
+			applicationInfo.getBaseApplicationBuilder().getOnApplicationLoaded().fire();
 			return applicationInfo.getLoadedApplication();
 		}
 		return null;

@@ -21,12 +21,12 @@ package org.teamapps.application.server.controlcenter.users;
 
 import org.apache.commons.io.IOUtils;
 import org.teamapps.application.api.application.ApplicationInstanceData;
+import org.teamapps.application.api.application.perspective.PerspectiveMenuPanel;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.localization.Language;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.controlcenter.roles.UserRoleAssignmentPerspectiveBuilder;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
-import org.teamapps.application.server.system.application.PerspectiveMenuPanel;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;

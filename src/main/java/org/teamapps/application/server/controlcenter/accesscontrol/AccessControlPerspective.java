@@ -229,7 +229,7 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 		if (privilegeGroup == null || loadedApplication == null) {
 			return Collections.emptyList();
 		}
-		PrivilegeGroup group = loadedApplication.getApplicationBuilder().getPrivilegeGroups()
+		PrivilegeGroup group = loadedApplication.getBaseApplicationBuilder().getPrivilegeGroups()
 				.stream()
 				.filter(g -> g.getName().equals(privilegeGroup.getName()))
 				.findAny()

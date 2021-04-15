@@ -43,10 +43,10 @@ public class ApplicationData {
 		this.managedApplication = managedApplication;
 		this.loadedApplication = loadedApplication;
 		this.applicationSessionData = applicationSessionData;
-		this.icon = managedApplication.getIcon() != null ? IconUtils.decodeIcon(managedApplication.getIcon()) : loadedApplication.getApplicationBuilder().getApplicationIcon();
+		this.icon = managedApplication.getIcon() != null ? IconUtils.decodeIcon(managedApplication.getIcon()) : loadedApplication.getBaseApplicationBuilder().getApplicationIcon();
 		ApplicationLocalizationProvider localizationProvider = applicationSessionData.getMainApplicationLocalizationProvider();
-		this.title = managedApplication.getTitleKey() != null ? localizationProvider.getLocalized(managedApplication.getTitleKey()) : localizationProvider.getLocalized(loadedApplication.getApplicationBuilder().getApplicationTitleKey());
-		this.description = managedApplication.getDescriptionKey() != null ? localizationProvider.getLocalized(managedApplication.getDescriptionKey()) : localizationProvider.getLocalized(loadedApplication.getApplicationBuilder().getApplicationDescriptionKey());
+		this.title = managedApplication.getTitleKey() != null ? localizationProvider.getLocalized(managedApplication.getTitleKey()) : localizationProvider.getLocalized(loadedApplication.getBaseApplicationBuilder().getApplicationTitleKey());
+		this.description = managedApplication.getDescriptionKey() != null ? localizationProvider.getLocalized(managedApplication.getDescriptionKey()) : localizationProvider.getLocalized(loadedApplication.getBaseApplicationBuilder().getApplicationDescriptionKey());
 		this.applicationPosition = managedApplication.getListingPosition();
 	}
 

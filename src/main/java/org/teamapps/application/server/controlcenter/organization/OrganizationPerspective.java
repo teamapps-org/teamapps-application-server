@@ -20,11 +20,11 @@
 package org.teamapps.application.server.controlcenter.organization;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
+import org.teamapps.application.api.application.perspective.PerspectiveMenuPanel;
 import org.teamapps.application.api.localization.Country;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
-import org.teamapps.application.server.system.application.PerspectiveMenuPanel;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.ux.IconUtils;

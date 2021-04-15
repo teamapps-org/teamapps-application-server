@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,7 @@
  */
 package org.teamapps.application.server.controlcenter.dbexplorer;
 
-import org.teamapps.application.api.application.ApplicationBuilder;
+import org.teamapps.application.api.application.AbstractBaseApplicationBuilder;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.localization.Dictionary;
@@ -31,7 +31,6 @@ import org.teamapps.application.api.privilege.ApplicationRole;
 import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.api.versioning.ApplicationVersion;
-import org.teamapps.icons.Icon;
 import org.teamapps.universaldb.UniversalDB;
 import org.teamapps.universaldb.schema.SchemaInfoProvider;
 import org.teamapps.ux.application.ResponsiveApplication;
@@ -40,11 +39,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class DatabaseExplorerAppBuilder implements ApplicationBuilder {
+public class DatabaseExplorerAppBuilder extends AbstractBaseApplicationBuilder {
 
 	private final UniversalDB universalDB;
 
 	public DatabaseExplorerAppBuilder(UniversalDB universalDB) {
+		super("databaseExplorer", ApplicationIcons.DATA, Dictionary.DATABASE, Dictionary.APPLICATION_LAUNCHER);
 		this.universalDB = universalDB;
 	}
 
@@ -54,33 +54,13 @@ public class DatabaseExplorerAppBuilder implements ApplicationBuilder {
 	}
 
 	@Override
-	public Icon getApplicationIcon() {
-		return ApplicationIcons.DATA;
-	}
-
-	@Override
-	public String getApplicationName() {
-		return "databaseExplorer";
-	}
-
-	@Override
-	public String getApplicationTitleKey() {
-		return Dictionary.DATABASE;
-	}
-
-	@Override
-	public String getApplicationDescriptionKey() {
-		return Dictionary.APPLICATION_LAUNCHER;
-	}
-
-	@Override
 	public List<ApplicationRole> getApplicationRoles() {
 		return null;
 	}
 
 	@Override
 	public List<PrivilegeGroup> getPrivilegeGroups() {
-		return Collections.emptyList(); //DatabasePrivileges.getPrivileges();
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -107,13 +87,7 @@ public class DatabaseExplorerAppBuilder implements ApplicationBuilder {
 	public ApplicationConfig getApplicationConfig() {
 		return null;
 	}
-
-
-	@Override
-	public void bootstrapApplicationBuilder() {
-
-	}
-
+	
 	@Override
 	public boolean isApplicationAccessible(ApplicationPrivilegeProvider applicationPrivilegeProvider) {
 		return true;

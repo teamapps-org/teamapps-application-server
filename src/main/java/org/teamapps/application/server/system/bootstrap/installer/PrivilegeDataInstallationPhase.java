@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,16 +19,16 @@
  */
 package org.teamapps.application.server.system.bootstrap.installer;
 
-import org.teamapps.application.api.application.ApplicationBuilder;
+import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.api.privilege.Privilege;
 import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.api.privilege.PrivilegeGroupType;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfoDataElement;
 import org.teamapps.application.server.system.privilege.ApplicationScopePrivilegeProvider;
-import org.teamapps.application.ux.IconUtils;
 import org.teamapps.application.server.system.utils.KeyCompare;
 import org.teamapps.application.server.system.utils.ValueCompare;
+import org.teamapps.application.ux.IconUtils;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ApplicationPrivilege;
 import org.teamapps.model.controlcenter.ApplicationPrivilegeGroup;
@@ -49,8 +49,8 @@ public class PrivilegeDataInstallationPhase implements ApplicationInstallationPh
 			if (!applicationInfo.getErrors().isEmpty()) {
 				return;
 			}
-			ApplicationBuilder applicationBuilder = applicationInfo.getApplicationBuilder();
-			List<PrivilegeGroup> privilegeGroups = applicationBuilder.getPrivilegeGroups();
+			BaseApplicationBuilder baseApplicationBuilder = applicationInfo.getBaseApplicationBuilder();
+			List<PrivilegeGroup> privilegeGroups = baseApplicationBuilder.getPrivilegeGroups();
 			if (privilegeGroups == null) {
 				applicationInfo.addError("Missing privileges");
 				return;
@@ -87,8 +87,8 @@ public class PrivilegeDataInstallationPhase implements ApplicationInstallationPh
 
 	@Override
 	public void installApplication(ApplicationInfo applicationInfo) {
-		ApplicationBuilder applicationBuilder = applicationInfo.getApplicationBuilder();
-		List<PrivilegeGroup> privilegeGroups = applicationBuilder.getPrivilegeGroups();
+		BaseApplicationBuilder baseApplicationBuilder = applicationInfo.getBaseApplicationBuilder();
+		List<PrivilegeGroup> privilegeGroups = baseApplicationBuilder.getPrivilegeGroups();
 		Application application = applicationInfo.getApplication();
 		List<ApplicationPrivilegeGroup> applicationPrivilegeGroups = getApplicationPrivilegeGroups(application);
 
@@ -141,7 +141,7 @@ public class PrivilegeDataInstallationPhase implements ApplicationInstallationPh
 
 	@Override
 	public void loadApplication(ApplicationInfo applicationInfo) {
-		applicationInfo.getLoadedApplication().setAppPrivilegeProvider(new ApplicationScopePrivilegeProvider(applicationInfo.getApplicationBuilder()));
+		applicationInfo.getLoadedApplication().setAppPrivilegeProvider(new ApplicationScopePrivilegeProvider(applicationInfo.getBaseApplicationBuilder()));
 	}
 
 	private List<ApplicationPrivilegeGroup> getApplicationPrivilegeGroups(Application application) {

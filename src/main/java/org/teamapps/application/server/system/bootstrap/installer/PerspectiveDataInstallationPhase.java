@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,13 +20,13 @@
 package org.teamapps.application.server.system.bootstrap.installer;
 
 import org.teamapps.application.api.application.ApplicationBuilder;
-import org.teamapps.application.api.application.ApplicationPerspectiveBuilder;
-import org.teamapps.application.api.application.PerspectiveBuilder;
+import org.teamapps.application.api.application.BaseApplicationBuilder;
+import org.teamapps.application.api.application.perspective.PerspectiveBuilder;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfoDataElement;
-import org.teamapps.application.ux.IconUtils;
 import org.teamapps.application.server.system.utils.KeyCompare;
 import org.teamapps.application.server.system.utils.ValueCompare;
+import org.teamapps.application.ux.IconUtils;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ApplicationPerspective;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
@@ -45,13 +45,13 @@ public class PerspectiveDataInstallationPhase implements ApplicationInstallation
 			if (!applicationInfo.getErrors().isEmpty()) {
 				return;
 			}
-			ApplicationBuilder applicationBuilder = applicationInfo.getApplicationBuilder();
-			if (!(applicationBuilder instanceof ApplicationPerspectiveBuilder)) {
+			BaseApplicationBuilder baseApplicationBuilder = applicationInfo.getBaseApplicationBuilder();
+			if (!(baseApplicationBuilder instanceof ApplicationBuilder)) {
 				applicationInfo.setPerspectiveData(new ApplicationInfoDataElement());
 				return;
 			}
-			ApplicationPerspectiveBuilder applicationPerspectiveBuilder = (ApplicationPerspectiveBuilder) applicationBuilder;
-			List<PerspectiveBuilder> perspectives = applicationPerspectiveBuilder.getPerspectiveBuilders();
+			ApplicationBuilder applicationBuilder = (ApplicationBuilder) baseApplicationBuilder;
+			List<PerspectiveBuilder> perspectives = applicationBuilder.getPerspectiveBuilders();
 			if (perspectives == null || perspectives.isEmpty()) {
 				applicationInfo.addError("Missing perspectives");
 				return;
@@ -83,12 +83,12 @@ public class PerspectiveDataInstallationPhase implements ApplicationInstallation
 
 	@Override
 	public void installApplication(ApplicationInfo applicationInfo) {
-		ApplicationBuilder applicationBuilder = applicationInfo.getApplicationBuilder();
-		if (!(applicationBuilder instanceof ApplicationPerspectiveBuilder)) {
+		BaseApplicationBuilder baseApplicationBuilder = applicationInfo.getBaseApplicationBuilder();
+		if (!(baseApplicationBuilder instanceof ApplicationBuilder)) {
 			return;
 		}
-		ApplicationPerspectiveBuilder applicationPerspectiveBuilder = (ApplicationPerspectiveBuilder) applicationBuilder;
-		List<PerspectiveBuilder> perspectives = applicationPerspectiveBuilder.getPerspectiveBuilders();
+		ApplicationBuilder applicationBuilder = (ApplicationBuilder) baseApplicationBuilder;
+		List<PerspectiveBuilder> perspectives = applicationBuilder.getPerspectiveBuilders();
 		Application application = applicationInfo.getApplication();
 		List<ApplicationPerspective> applicationPerspectives = ApplicationPerspective.filter()
 				.application(NumericFilter.equalsFilter(application.getId()))

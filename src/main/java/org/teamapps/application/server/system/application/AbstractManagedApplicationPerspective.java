@@ -19,8 +19,8 @@
  */
 package org.teamapps.application.server.system.application;
 
-import org.teamapps.application.api.application.AbstractApplicationPerspective;
 import org.teamapps.application.api.application.ApplicationInstanceData;
+import org.teamapps.application.api.application.perspective.AbstractApplicationPerspective;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ManagedApplication;
 import org.teamapps.model.controlcenter.OrganizationField;
@@ -44,9 +44,7 @@ public abstract class AbstractManagedApplicationPerspective extends AbstractAppl
 		organizationField = OrganizationUtils.convert(getApplicationInstanceData().getOrganizationField());
 	}
 
-	public void handleOnAfterLoad() {
 
-	}
 
 	public boolean isAppFilter() {
 		return isOrgFieldFilterApplied() && getMainApplication() != null;

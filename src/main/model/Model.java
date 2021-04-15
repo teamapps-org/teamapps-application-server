@@ -131,6 +131,7 @@ public class Model implements SchemaInfoProvider {
 				.addText("titleKey")
 				.addText("descriptionKey")
 				.addBoolean("autoProvision")
+				.addBoolean("toolbarPerspectiveMenu")
 				.addReference("managedPerspectives", managedApplicationPerspective, true, "applicationPerspective", true)
 		;
 
@@ -194,6 +195,7 @@ public class Model implements SchemaInfoProvider {
 				.addBoolean("singleApplication")
 				.addReference("perspectives", managedApplicationPerspective, true, "managedApplication", true)
 				.addInteger("listingPosition")
+				.addBoolean("toolbarApplicationMenu")
 				.addReference("applicationGroup", managedApplicationGroup, false, "applications")
 				.addBoolean("hidden")
 		;
@@ -204,6 +206,7 @@ public class Model implements SchemaInfoProvider {
 				.addText("iconOverride")
 				.addText("titleKeyOverride")
 				.addText("descriptionKeyOverride")
+				.addBoolean("toolbarPerspectiveMenu")
 				.addInteger("listingPosition")
 		;
 

@@ -20,6 +20,7 @@
 package org.teamapps.application.server.system.privilege;
 
 import org.teamapps.application.api.application.ApplicationBuilder;
+import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.api.privilege.ApplicationRole;
 import org.teamapps.application.api.privilege.Privilege;
 import org.teamapps.application.api.privilege.PrivilegeGroup;
@@ -30,14 +31,14 @@ import java.util.stream.Collectors;
 
 public class ApplicationScopePrivilegeProvider {
 
-	private final ApplicationBuilder applicationBuilder;
+	private final BaseApplicationBuilder applicationBuilder;
 	private List<PrivilegeGroup> privilegeGroups;
 	private List<ApplicationRole> applicationRoles;
 	private Map<String, ApplicationRole> applicationRoleByName;
 	private Map<String, PrivilegeGroup> privilegeGroupByName;
 	private Map<String, Privilege> privilegeByName;
 
-	public ApplicationScopePrivilegeProvider(ApplicationBuilder applicationBuilder) {
+	public ApplicationScopePrivilegeProvider(BaseApplicationBuilder applicationBuilder) {
 		this.applicationBuilder = applicationBuilder;
 		loadPrivileges();
 	}

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,7 @@
  */
 package org.teamapps.application.server.system.bootstrap.installer;
 
-import org.teamapps.application.api.application.ApplicationBuilder;
+import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfoDataElement;
 import org.teamapps.application.ux.IconUtils;
@@ -39,8 +39,8 @@ public class ApplicationArtifactInstallationPhase implements ApplicationInstalla
 				String binaryHash = applicationInfo.getBinaryHash();
 				applicationInfo.setBinaryHash(binaryHash);
 			}
-			ApplicationBuilder applicationBuilder = applicationInfo.getApplicationBuilder();
-			String applicationName = applicationBuilder.getApplicationName();
+			BaseApplicationBuilder baseApplicationBuilder = applicationInfo.getBaseApplicationBuilder();
+			String applicationName = baseApplicationBuilder.getApplicationName();
 			if (
 					applicationName == null ||
 							applicationName.isEmpty() ||
@@ -49,18 +49,18 @@ public class ApplicationArtifactInstallationPhase implements ApplicationInstalla
 				applicationInfo.addError("Invalid application name: " + applicationName);
 				return;
 			}
-			org.teamapps.application.api.versioning.ApplicationVersion applicationVersion = applicationBuilder.getApplicationVersion();
+			org.teamapps.application.api.versioning.ApplicationVersion applicationVersion = baseApplicationBuilder.getApplicationVersion();
 			if (applicationVersion == null) {
 				applicationInfo.addError("Missing application version");
 				return;
 			}
-			if (applicationBuilder.getApplicationTitleKey() == null) {
+			if (baseApplicationBuilder.getApplicationTitleKey() == null) {
 				applicationInfo.addError("Missing application title");
 				return;
 			}
 			String versionString = applicationVersion.getVersion();
 			applicationInfo.setName(applicationName);
-			applicationInfo.setReleaseNotes(applicationInfo.getApplicationBuilder().getReleaseNotes());
+			applicationInfo.setReleaseNotes(applicationInfo.getBaseApplicationBuilder().getReleaseNotes());
 			applicationInfo.setVersion(versionString);
 			Application application = applicationInfo.getApplication();
 			if (application != null) {
@@ -84,15 +84,15 @@ public class ApplicationArtifactInstallationPhase implements ApplicationInstalla
 	@Override
 	public void installApplication(ApplicationInfo applicationInfo) {
 		Application application = applicationInfo.getApplication();
-		ApplicationBuilder applicationBuilder = applicationInfo.getApplicationBuilder();
+		BaseApplicationBuilder baseApplicationBuilder = applicationInfo.getBaseApplicationBuilder();
 		if (application == null) {
 			application = Application.create()
 					.setName(applicationInfo.getName());
 		}
 		application
-				.setIcon(IconUtils.encodeNoStyle(applicationBuilder.getApplicationIcon()))
-				.setTitleKey(applicationBuilder.getApplicationTitleKey())
-				.setDescriptionKey(applicationBuilder.getApplicationDescriptionKey())
+				.setIcon(IconUtils.encodeNoStyle(baseApplicationBuilder.getApplicationIcon()))
+				.setTitleKey(baseApplicationBuilder.getApplicationTitleKey())
+				.setDescriptionKey(baseApplicationBuilder.getApplicationDescriptionKey())
 				.setUnmanagedApplication(applicationInfo.isUnmanagedPerspectives())
 				.save();
 		ApplicationVersion applicationVersion = ApplicationVersion.create()

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,8 +19,8 @@
  */
 package org.teamapps.application.server.controlcenter;
 
-import org.teamapps.application.api.application.ApplicationPerspectiveBuilder;
-import org.teamapps.application.api.application.PerspectiveBuilder;
+import org.teamapps.application.api.application.AbstractApplicationBuilder;
+import org.teamapps.application.api.application.perspective.PerspectiveBuilder;
 import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.localization.LocalizationData;
 import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
@@ -46,7 +46,6 @@ import org.teamapps.application.server.controlcenter.systenconfig.ApplicationCon
 import org.teamapps.application.server.controlcenter.translations.TranslationsPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.users.UsersPerspectiveBuilder;
 import org.teamapps.application.server.system.config.SystemConfig;
-import org.teamapps.icons.Icon;
 import org.teamapps.model.ControlCenterSchema;
 import org.teamapps.universaldb.schema.SchemaInfoProvider;
 
@@ -54,11 +53,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
+public class ControlCenterAppBuilder extends AbstractApplicationBuilder {
 
 	private ApplicationConfig<SystemConfig> applicationConfig;
 
 	public ControlCenterAppBuilder() {
+		super("controlCenter", ApplicationIcons.WINDOW_KEY, "application.title", "application.desc");
 		SystemConfig config = new SystemConfig();
 		applicationConfig = new ApplicationConfig<>();
 		applicationConfig.setConfig(config);
@@ -85,34 +85,12 @@ public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 				new OrganizationFieldPerspectiveBuilder(),
 				new OrganizationUnitTypePerspectiveBuilder(),
 				new UserRoleAssignmentPerspectiveBuilder()
-
-
 		);
 	}
 
 	@Override
 	public ApplicationVersion getApplicationVersion() {
 		return ApplicationVersion.create(0, 34);
-	}
-
-	@Override
-	public Icon getApplicationIcon() {
-		return ApplicationIcons.WINDOW_KEY;
-	}
-
-	@Override
-	public String getApplicationName() {
-		return "controlCenter";
-	}
-
-	@Override
-	public String getApplicationTitleKey() {
-		return "application.title";
-	}
-
-	@Override
-	public String getApplicationDescriptionKey() {
-		return "application.desc";
 	}
 
 	@Override
@@ -140,12 +118,6 @@ public class ControlCenterAppBuilder implements ApplicationPerspectiveBuilder {
 	@Override
 	public ApplicationConfig getApplicationConfig() {
 		return applicationConfig;
-	}
-
-
-	@Override
-	public void bootstrapApplicationBuilder() {
-
 	}
 
 	@Override
