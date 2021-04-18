@@ -101,6 +101,7 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 		ControlCenterSchema schema = new ControlCenterSchema();
 		universalDB.addAuxiliaryModel(schema, classLoader);
 		universalDB.installAuxiliaryModelClassed(schema, classLoader);
+		universalDB.installTableViews(schema, classLoader);
 		DatabaseLogAppender.startLogger();
 
 		ControlCenterAppBuilder controlCenterAppBuilder = new ControlCenterAppBuilder();

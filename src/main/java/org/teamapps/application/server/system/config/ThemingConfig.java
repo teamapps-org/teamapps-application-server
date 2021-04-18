@@ -21,18 +21,11 @@ package org.teamapps.application.server.system.config;
 
 public class ThemingConfig {
 
-	private boolean customApplicationBackground;
-
 	private String loginBackgroundUrl = "/resources/backgrounds/login.jpg";
-	private String defaultApplicationBackgroundUrl = "/static/backgrounds/default.jpg";
-
-	public boolean isCustomApplicationBackground() {
-		return customApplicationBackground;
-	}
-
-	public void setCustomApplicationBackground(boolean customApplicationBackground) {
-		this.customApplicationBackground = customApplicationBackground;
-	}
+	private String applicationBackgroundUrl = "/resources/backgrounds/default-bl.jpg";
+	private String applicationSecondaryBackgroundUrl = "/resources/backgrounds/default-bl.jpg";
+	private String applicationDarkBackgroundUrl = "/resources/backgrounds/dark.jpg";
+	private String applicationDarkSecondaryBackgroundUrl = "/resources/backgrounds/dark.jpg";
 
 	public String getLoginBackgroundUrl() {
 		return loginBackgroundUrl;
@@ -42,11 +35,35 @@ public class ThemingConfig {
 		this.loginBackgroundUrl = loginBackgroundUrl;
 	}
 
-	public String getDefaultApplicationBackgroundUrl() {
-		return defaultApplicationBackgroundUrl;
+	public String getApplicationBackgroundUrl() {
+		return applicationBackgroundUrl;
 	}
 
-	public void setDefaultApplicationBackgroundUrl(String defaultApplicationBackgroundUrl) {
-		this.defaultApplicationBackgroundUrl = defaultApplicationBackgroundUrl;
+	public void setApplicationBackgroundUrl(String applicationBackgroundUrl) {
+		this.applicationBackgroundUrl = applicationBackgroundUrl;
+	}
+
+	public String getApplicationSecondaryBackgroundUrl() {
+		return applicationSecondaryBackgroundUrl != null ? applicationSecondaryBackgroundUrl : applicationBackgroundUrl;
+	}
+
+	public void setApplicationSecondaryBackgroundUrl(String applicationSecondaryBackgroundUrl) {
+		this.applicationSecondaryBackgroundUrl = applicationSecondaryBackgroundUrl;
+	}
+
+	public String getApplicationDarkBackgroundUrl() {
+		return applicationDarkBackgroundUrl;
+	}
+
+	public void setApplicationDarkBackgroundUrl(String applicationDarkBackgroundUrl) {
+		this.applicationDarkBackgroundUrl = applicationDarkBackgroundUrl;
+	}
+
+	public String getApplicationDarkSecondaryBackgroundUrl() {
+		return applicationDarkSecondaryBackgroundUrl != null ? applicationDarkSecondaryBackgroundUrl : applicationDarkBackgroundUrl;
+	}
+
+	public void setApplicationDarkSecondaryBackgroundUrl(String applicationDarkSecondaryBackgroundUrl) {
+		this.applicationDarkSecondaryBackgroundUrl = applicationDarkSecondaryBackgroundUrl;
 	}
 }

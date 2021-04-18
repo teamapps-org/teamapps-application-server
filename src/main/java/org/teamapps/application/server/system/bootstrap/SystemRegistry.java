@@ -99,6 +99,7 @@ public class SystemRegistry {
 					ManagedApplication managedApplication = ManagedApplication.create()
 							.setMainApplication(application)
 							.setApplicationGroup(unspecifiedApplicationGroup)
+							.setSingleApplication(applicationInfo.isUnmanagedPerspectives())
 							.save();
 					List<ApplicationPerspective> perspectives = application.getPerspectives().stream().filter(perspective -> perspective.getAutoProvision()).collect(Collectors.toList());
 					for (ApplicationPerspective perspective : perspectives) {

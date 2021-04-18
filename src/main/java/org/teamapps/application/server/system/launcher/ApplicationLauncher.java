@@ -38,6 +38,7 @@ import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.common.format.Color;
+import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ManagedApplication;
@@ -71,7 +72,9 @@ import org.teamapps.ux.component.toolbar.ToolbarButton;
 import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
 import org.teamapps.ux.component.tree.Tree;
 import org.teamapps.ux.model.ListTreeModel;
+import org.teamapps.ux.session.SessionConfiguration;
 import org.teamapps.ux.session.SessionContext;
+import org.teamapps.ux.session.StylingTheme;
 
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
@@ -94,8 +97,9 @@ public class ApplicationLauncher {
 	private Map<ApplicationData, Tab> tabByApplicationData = new HashMap<>();
 	private Map<ApplicationData, Component> mobilAppByApplicationData = new HashMap<>();
 	private TabPanel applicationsTabPanel;
-	private ManagedApplication currentApplication;
 	private ManagedApplicationPerspective currentPerspective;
+	private TwoWayBindableValue<ManagedApplication> selectedApplication = TwoWayBindableValue.create();
+	private boolean selectedThemeIsDarkTheme;
 
 	public ApplicationLauncher(UserSessionData userSessionData, LogoutHandler logoutHandler) {
 		this.userSessionData = userSessionData;
@@ -104,7 +108,7 @@ public class ApplicationLauncher {
 		this.logoutHandler = logoutHandler;
 		userSessionData.getContext().addExecutionDecorator(runnable -> {
 			UniversalDB.setUserId(userSessionData.getUser().getId());
-			THREAD_LOCAL_APPLICATION.set(currentApplication);
+			THREAD_LOCAL_APPLICATION.set(selectedApplication.get());
 			THREAD_LOCAL_MANAGED_PERSPECTIVE.set(currentPerspective);
 			try {
 				runnable.run();
@@ -113,6 +117,7 @@ public class ApplicationLauncher {
 				handleSessionException(e);
 			}
 		}, true);
+		selectedApplication.onChanged().addListener(this::handleApplicationSelection);
 		userSessionData.getUser().setLastLogin(Instant.now()).save();
 		userSessionData.setApplicationDesktopSupplier(this::createApplicationDesktop);
 		initApplicationData();
@@ -121,7 +126,7 @@ public class ApplicationLauncher {
 	}
 
 	private void handleSessionException(Throwable e) {
-		ManagedApplication managedApplication = currentApplication;
+		ManagedApplication managedApplication = selectedApplication.get();
 		ManagedApplicationPerspective perspective = THREAD_LOCAL_MANAGED_PERSPECTIVE.get();
 		closeApplication(managedApplication);
 		FormDialogue dialogue = FormDialogue.create(ApplicationIcons.SIGN_WARNING, getLocalized(Dictionary.ERROR), getLocalized(Dictionary.SENTENCE_ERROR_THE_ACTIVE_APPLICATION_CAUSED__));
@@ -140,6 +145,24 @@ public class ApplicationLauncher {
 		dialogue.setAutoCloseOnOk(true);
 		dialogue.setCloseable(true);
 		dialogue.show();
+	}
+
+	private void handleApplicationSelection(ManagedApplication application) {
+		THREAD_LOCAL_APPLICATION.set(application);
+		System.out.println("dark:" + application.isDarkTheme() + ", app:" + application.getMainApplication().getTitleKey());
+		if (application.isDarkTheme()) {
+			userSessionData.getContext().setBackgroundImage("defaultDarkBackground", 0);
+			SessionConfiguration configuration = SessionContext.current().getConfiguration();
+			configuration.setTheme(StylingTheme.DARK);
+			SessionContext.current().setConfiguration(configuration);
+
+		} else {
+			userSessionData.getContext().setBackgroundImage("defaultBackground", 0);
+			SessionConfiguration configuration = SessionContext.current().getConfiguration();
+			configuration.setTheme(StylingTheme.DEFAULT);
+			SessionContext.current().setConfiguration(configuration);
+		}
+		selectedThemeIsDarkTheme = application.getDarkTheme();
 	}
 
 	private void initApplicationData() {
@@ -189,17 +212,22 @@ public class ApplicationLauncher {
 
 	private void createMainView() {
 		ThemingConfig themingConfig = registry.getSystemConfig().getThemingConfig();
-		if (themingConfig.isCustomApplicationBackground() && themingConfig.getDefaultApplicationBackgroundUrl() != null) {
-			userSessionData.getContext().registerBackgroundImage("defaultBackground", themingConfig.getDefaultApplicationBackgroundUrl(), themingConfig.getDefaultApplicationBackgroundUrl());
-			userSessionData.getContext().setBackgroundImage("defaultBackground", 0);
-		} else {
-			userSessionData.getContext().showDefaultBackground(500);
-		}
+		//todo user prefs/system prefs default dark theme
+		userSessionData.getContext().registerBackgroundImage("defaultBackground", themingConfig.getApplicationBackgroundUrl(), themingConfig.getApplicationSecondaryBackgroundUrl());
+		userSessionData.getContext().registerBackgroundImage("defaultDarkBackground", themingConfig.getApplicationDarkBackgroundUrl(), themingConfig.getApplicationDarkSecondaryBackgroundUrl());
+		userSessionData.getContext().setBackgroundImage("defaultBackground", 0);
 
 		if (mobileView) {
 			userSessionData.setRootComponent(applicationLauncher);
 		} else {
 			applicationsTabPanel = new TabPanel();
+			applicationsTabPanel.onTabSelected.addListener(tab -> {
+				tabByApplicationData.entrySet()
+						.stream()
+						.filter(entry -> entry.getValue().equals(tab))
+						.map(Map.Entry::getKey).findAny()
+						.ifPresent(applicationData -> selectedApplication.set(applicationData.getManagedApplication()));
+			});
 			Tab applicationsTab = new Tab(ApplicationIcons.HOME, getLocalized(Dictionary.APPLICATIONS), applicationLauncher);
 			applicationsTabPanel.addTab(applicationsTab, true);
 
@@ -239,8 +267,8 @@ public class ApplicationLauncher {
 	}
 
 	private void openApplication(ApplicationData applicationData) {
-		currentApplication = applicationData.getManagedApplication();
-		THREAD_LOCAL_APPLICATION.set(currentApplication);
+		selectedApplication.set(applicationData.getManagedApplication());
+		THREAD_LOCAL_APPLICATION.set(selectedApplication.get());
 		LOGGER.info("Open app");
 		if (openedApplications.contains(applicationData)) {
 			if (mobileView) {

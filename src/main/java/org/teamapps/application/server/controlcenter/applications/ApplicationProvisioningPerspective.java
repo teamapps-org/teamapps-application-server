@@ -179,7 +179,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 			if (application == null) {
 				return;
 			}
-			if (Fields.validateAll(applicationComboBox, iconComboBox, titleKeyCombo, descriptionKeyCombo, applicationGroupComboBox) && !perspectiveModelBuilder.getRecords().isEmpty()) {
+			if (Fields.validateAll(applicationComboBox, iconComboBox, titleKeyCombo, descriptionKeyCombo, applicationGroupComboBox) && (!perspectiveModelBuilder.getRecords().isEmpty() || application.isSingleApplication() || application.getMainApplication().isUnmanagedApplication())) {
 				Application mainApplication = applicationComboBox.getValue();
 				application.setMainApplication(mainApplication);
 				application.setHidden(hideApplicationCheckBox.getValue());
