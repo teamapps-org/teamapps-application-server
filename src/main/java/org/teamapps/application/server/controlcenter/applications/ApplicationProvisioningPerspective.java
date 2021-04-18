@@ -93,7 +93,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		getPerspective().addView(applicationsView);
 		getPerspective().addView(applicationDetailsView);
 
-		ResponsiveForm applicationForm = new ResponsiveForm(100, 150, 0);
+		ResponsiveForm<?> applicationForm = new ResponsiveForm<>(100, 150, 0);
 		ResponsiveFormLayout formLayout = applicationForm.addResponsiveFormLayout(400);
 
 		ComboBox<Application> applicationComboBox = ApplicationUiUtils.createApplicationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, userSessionData);
@@ -106,6 +106,8 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		ComboBox<String> descriptionKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData());
 		descriptionKeyCombo.setShowClearButton(true);
 		LinkButton createDescriptionKeyButton = new LinkButton(getLocalized("applications.createNewDescription"));
+		CheckBox darkThemeCheckBox = new CheckBox(getLocalized("applications.darkTheme"));
+		CheckBox toolbarAppMenuCheckbox = new CheckBox(getLocalized("applications.useToolbarApplicationMenu"));
 
 		EntityListModelBuilder<ManagedApplicationPerspective> perspectiveModelBuilder = new EntityListModelBuilder<>(getApplicationInstanceData());
 		Table<ManagedApplicationPerspective> perspectivesList = perspectiveModelBuilder.createTable();
@@ -115,8 +117,8 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		TemplateField<ManagedApplicationPerspective> perspectiveColumnField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationPerspectivePropertyProvider(userSessionData));
 		TemplateField<Application> applicationColumnField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createApplicationPropertyProvider(userSessionData));
 
-		perspectivesList.addColumn(new TableColumn("perspective", getLocalized("applications.perspective"), perspectiveColumnField));
-		perspectivesList.addColumn(new TableColumn("application", getLocalized("applications.application"), applicationColumnField));
+		perspectivesList.addColumn(new TableColumn<>("perspective", getLocalized("applications.perspective"), perspectiveColumnField));
+		perspectivesList.addColumn(new TableColumn<>("application", getLocalized("applications.application"), applicationColumnField));
 		perspectivesList.setPropertyExtractor((record, propertyName) -> switch (propertyName){
 			case "perspective" -> record;
 			case "application" -> record.getApplicationPerspective() != null ? record.getApplicationPerspective().getApplication() : null;
@@ -144,6 +146,8 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		formLayout.addLabelAndComponent(null, null, crateTitleKeyButton);
 		formLayout.addLabelAndComponent(null, getLocalized("applications.appDescription"), descriptionKeyCombo);
 		formLayout.addLabelAndComponent(null, null, createDescriptionKeyButton);
+		formLayout.addLabelAndComponent(null, getLocalized("applications.darkTheme"), darkThemeCheckBox);
+		formLayout.addLabelAndComponent(null, getLocalized("applications.toolbarAppMenu"), toolbarAppMenuCheckbox);
 		formLayout.addLabelAndComponent(null, getLocalized("applications.perspectives"), formPanel.getPanel());
 		formLayout.addLabelAndComponent(null, getLocalized("applications.applicationGroup"), applicationGroupComboBox);
 
@@ -183,6 +187,8 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 				application.setIcon(mainApplication.getIcon().equals(IconUtils.encodeNoStyle(iconComboBox.getValue())) ? null : IconUtils.encodeNoStyle(iconComboBox.getValue()));
 				application.setTitleKey(mainApplication.getTitleKey().equals(titleKeyCombo.getValue()) ? null : titleKeyCombo.getValue());
 				application.setDescriptionKey(mainApplication.getDescriptionKey().equals(descriptionKeyCombo.getValue()) ? null : descriptionKeyCombo.getValue());
+				application.setDarkTheme(darkThemeCheckBox.getValue());
+				application.setToolbarApplicationMenu(toolbarAppMenuCheckbox.getValue());
 				application.setPerspectives(perspectiveModelBuilder.getRecords());
 				application.setApplicationGroup(applicationGroupComboBox.getValue());
 				application.save();
@@ -217,9 +223,10 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 			iconComboBox.setValue(app.getIcon() != null ? IconUtils.decodeIcon(app.getIcon()) : app.getMainApplication() != null ? IconUtils.decodeIcon(app.getMainApplication().getIcon()) : null);
 			titleKeyCombo.setValue(app.getTitleKey() != null ? app.getTitleKey() : app.getMainApplication() != null ? app.getMainApplication().getTitleKey() : null);
 			descriptionKeyCombo.setValue(app.getDescriptionKey() != null ? app.getDescriptionKey() : app.getMainApplication() != null ? app.getMainApplication().getDescriptionKey() : null);
+			darkThemeCheckBox.setValue(app.getDarkTheme());
+			toolbarAppMenuCheckbox.setValue(app.getToolbarApplicationMenu());
 			perspectiveModelBuilder.setRecords(app.getPerspectives().stream().filter(perspective -> perspective.getApplicationPerspective() != null).sorted((Comparator.comparingInt(ManagedApplicationPerspective::getListingPosition))).collect(Collectors.toList()));
 			applicationGroupComboBox.setValue(app.getApplicationGroup());
-
 		});
 		applicationDetailsView.setComponent(applicationForm);
 		selectedApplication.set(ManagedApplication.create());
@@ -240,7 +247,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		LinkButton crateTitleKeyButton = new LinkButton(getLocalized("applications.createNewTitle"));
 		ComboBox<String> descriptionKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData());
 		LinkButton createDescriptionKeyButton = new LinkButton(getLocalized("applications.createNewDescription"));
-
+		CheckBox toolbarPerspectiveMenuCheckBox = new CheckBox(getLocalized("applications.useToolbarPerspectiveMenu"));
 
 
 		formWindow.addField(getLocalized("applications.application"), applicationComboBox);
@@ -250,6 +257,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		formWindow.addField(null, crateTitleKeyButton);
 		formWindow.addField(getLocalized("applications.perspectiveDescription"), descriptionKeyCombo);
 		formWindow.addField(null, createDescriptionKeyButton);
+		formWindow.addField(getLocalized("applications.toolbarPerspectiveMenu"), toolbarPerspectiveMenuCheckBox);
 
 		if (managedApplicationPerspective != null) {
 			applicationComboBox.setValue(perspective.getApplicationPerspective().getApplication());
@@ -257,6 +265,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 			iconComboBox.setValue(perspective.getIconOverride() != null ? IconUtils.decodeIcon(perspective.getIconOverride()) : IconUtils.decodeIcon(perspective.getApplicationPerspective().getIcon()));
 			titleKeyCombo.setValue(perspective.getTitleKeyOverride() != null ? perspective.getTitleKeyOverride() : perspective.getApplicationPerspective().getTitleKey());
 			descriptionKeyCombo.setValue(perspective.getDescriptionKeyOverride() != null ? perspective.getDescriptionKeyOverride() : perspective.getApplicationPerspective().getDescriptionKey());
+			toolbarPerspectiveMenuCheckBox.setValue(perspective.getToolbarPerspectiveMenu());
 		}
 
 		Arrays.asList(applicationsPerspectiveCombo, iconComboBox, titleKeyCombo, descriptionKeyCombo, applicationsPerspectiveCombo).forEach(f -> f.setRequired(true));
@@ -275,6 +284,8 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 				perspective.setIconOverride(applicationPerspective.getIcon().equals(iconComboBox.getValue()) ? null : IconUtils.encodeNoStyle(iconComboBox.getValue()));
 				perspective.setTitleKeyOverride(applicationPerspective.getTitleKey().equals(titleKeyCombo.getValue()) ? null : titleKeyCombo.getValue());
 				perspective.setDescriptionKeyOverride(applicationPerspective.getDescriptionKey().equals(descriptionKeyCombo.getValue()) ? null : descriptionKeyCombo.getValue());
+				perspective.setToolbarPerspectiveMenu(toolbarPerspectiveMenuCheckBox.getValue());
+				perspective.save();
 				if (managedApplicationPerspective == null) {
 					perspectiveModelBuilder.addRecord(perspective);
 				}

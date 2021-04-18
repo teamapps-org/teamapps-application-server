@@ -21,6 +21,7 @@ package org.teamapps.application.server.controlcenter.applocal;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.application.perspective.PerspectiveMenuPanel;
+import org.teamapps.application.server.controlcenter.accesscontrol.AccessControlAppRolePerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.accesscontrol.AccessControlPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.applications.ApplicationUpdatesPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.roles.RolesPerspectiveBuilder;
@@ -48,6 +49,7 @@ public class AppLocalAdministrationPerspective extends AbstractManagedApplicatio
 				new UserRoleAssignmentPerspectiveBuilder(),
 				new RolesPerspectiveBuilder(),
 				new AccessControlPerspectiveBuilder(),
+				new AccessControlAppRolePerspectiveBuilder(),
 				new ApplicationUpdatesPerspectiveBuilder(),
 				new SystemLogPerspectiveBuilder(),
 				new ApplicationConfigurationPerspectiveBuilder()

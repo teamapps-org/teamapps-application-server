@@ -137,7 +137,9 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 		formLayout.addLabelAndField(null, getLocalized("roles.icon"), iconComboBox);
 		formLayout.addLabelAndField(null, getLocalized("roles.parentRole"), parentRoleComboBox);
 		formLayout.addLabelAndField(null, getLocalized("roles.allowedOrganizationUnitTypes"), allowedOrganizationUnitTypesTagCombo);
-		formLayout.addLabelAndField(null, getLocalized("roles.organizationField"), organizationFieldComboBox);
+		if (!isOrgFieldFilterApplied()) {
+			formLayout.addLabelAndField(null, getLocalized("roles.organizationField"), organizationFieldComboBox);
+		}
 		formLayout.addLabelAndField(null, getLocalized("roles.generalizationRoles"), generalizationRolesTagCombo);
 		formLayout.addLabelAndField(null, getLocalized("roles.specializationRoles"), specializationRolesTagCombo);
 		formLayout.addLabelAndField(null, getLocalized("roles.privilegesReceivingRoles"), privilegesReceivingRolesTagCombo);
@@ -151,12 +153,13 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 		saveButton.onClick.addListener(() -> {
 			Role role = selectedRole.get();
 			if (role != null && titleField.getValue() != null && iconComboBox.getValue() != null) {
+				OrganizationField organizationField = isOrgFieldFilterApplied() ? getOrganizationField() : organizationFieldComboBox.getValue();
 				role
 						.setTitle(titleField.getValue())
 						.setIcon(IconUtils.encodeNoStyle(iconComboBox.getValue()))
 						.setParent(parentRoleComboBox.getValue())
 						.setAllowedOrganizationUnitTypes(allowedOrganizationUnitTypesTagCombo.getValue())
-						.setOrganizationField(organizationFieldComboBox.getValue())
+						.setOrganizationField(organizationField)
 						.setGeneralizationRoles(generalizationRolesTagCombo.getValue())
 						.setSpecializationRoles(specializationRolesTagCombo.getValue())
 						.setPrivilegesReceivingRoles(privilegesReceivingRolesTagCombo.getValue())

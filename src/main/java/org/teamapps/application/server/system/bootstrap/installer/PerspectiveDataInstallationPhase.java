@@ -103,6 +103,7 @@ public class PerspectiveDataInstallationPhase implements ApplicationInstallation
 				.setTitleKey(perspective.getTitleKey())
 				.setDescriptionKey(perspective.getDescriptionKey())
 				.setAutoProvision(perspective.autoProvisionPerspective())
+				.setToolbarPerspectiveMenu(perspective.useToolbarPerspectiveMenu())
 				.save());
 
 		List<ApplicationPerspective> removedPerspectives = keyCompare.getNotInA();
@@ -116,6 +117,7 @@ public class PerspectiveDataInstallationPhase implements ApplicationInstallation
 					.check(perspective.getDescriptionKey(), applicationPerspective.getDescriptionKey())
 					.check(IconUtils.encodeNoStyle(perspective.getIcon()), applicationPerspective.getIcon())
 					.check(perspective.autoProvisionPerspective(), applicationPerspective.getAutoProvision())
+					.check(perspective.useToolbarPerspectiveMenu(), applicationPerspective.getToolbarPerspectiveMenu())
 					.isDifferent()
 			) {
 				applicationPerspective
@@ -123,6 +125,7 @@ public class PerspectiveDataInstallationPhase implements ApplicationInstallation
 						.setDescriptionKey(perspective.getDescriptionKey())
 						.setIcon(IconUtils.encodeNoStyle(perspective.getIcon()))
 						.setAutoProvision(perspective.autoProvisionPerspective())
+						.setToolbarPerspectiveMenu(perspective.useToolbarPerspectiveMenu())
 						.save();
 			}
 

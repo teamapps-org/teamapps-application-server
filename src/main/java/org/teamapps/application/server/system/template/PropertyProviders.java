@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,14 +22,15 @@ package org.teamapps.application.server.system.template;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.localization.Dictionary;
+import org.teamapps.application.api.privilege.ApplicationRole;
 import org.teamapps.application.api.privilege.PrivilegeObject;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.application.ux.localize.TranslatableTextUtils;
+import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.*;
-import org.teamapps.application.server.system.session.UserSessionData;
-import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.universaldb.index.translation.TranslatableText;
 import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.session.SessionContext;
@@ -115,6 +116,27 @@ public class PropertyProviders {
 		};
 	}
 
+	public static PropertyProvider<ApplicationRole> createApplicationRolePropertyProvider(UserSessionData userSessionData, Application application) {
+		return (applicationRole, propertyNames) -> {
+			ApplicationLocalizationProvider localizationProvider = userSessionData.getApplicationLocalizationProvider(application);
+			Map<String, Object> map = new HashMap<>();
+			map.put(BaseTemplate.PROPERTY_ICON, applicationRole.getIcon());
+			map.put(BaseTemplate.PROPERTY_CAPTION, localizationProvider.getLocalized(applicationRole.getTitleKey()));
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, localizationProvider.getLocalized(applicationRole.getDescriptionKey()));
+			return map;
+		};
+	}
+
+	public static PropertyProvider<ApplicationRole> createApplicationRolePropertyProvider(ApplicationInstanceData applicationInstanceData) {
+		return (applicationRole, propertyNames) -> {
+			Map<String, Object> map = new HashMap<>();
+			map.put(BaseTemplate.PROPERTY_ICON, applicationRole.getIcon());
+			map.put(BaseTemplate.PROPERTY_CAPTION, applicationInstanceData.getLocalized(applicationRole.getTitleKey()));
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, applicationInstanceData.getLocalized(applicationRole.getDescriptionKey()));
+			return map;
+		};
+	}
+
 	public static PropertyProvider<ManagedApplication> createManagedApplicationPropertyProvider(UserSessionData userSessionData) {
 		return (managedApplication, propertyNames) -> {
 			ApplicationLocalizationProvider localizationProvider = userSessionData.getApplicationLocalizationProvider(managedApplication.getMainApplication());
@@ -131,7 +153,7 @@ public class PropertyProviders {
 		return (managedApplicationPerspective, propertyNames) -> {
 			ApplicationLocalizationProvider localizationProvider = userSessionData.getApplicationLocalizationProvider(managedApplicationPerspective.getApplicationPerspective().getApplication());
 			Map<String, Object> map = new HashMap<>();
-			map.put(BaseTemplate.PROPERTY_ICON, managedApplicationPerspective.getIconOverride() != null ? userSessionData.decodeIcon(managedApplicationPerspective.getIconOverride()): userSessionData.decodeIcon(managedApplicationPerspective.getApplicationPerspective().getIcon()));
+			map.put(BaseTemplate.PROPERTY_ICON, managedApplicationPerspective.getIconOverride() != null ? userSessionData.decodeIcon(managedApplicationPerspective.getIconOverride()) : userSessionData.decodeIcon(managedApplicationPerspective.getApplicationPerspective().getIcon()));
 			map.put(BaseTemplate.PROPERTY_CAPTION, managedApplicationPerspective.getTitleKeyOverride() != null ? localizationProvider.getLocalized(managedApplicationPerspective.getTitleKeyOverride()) : localizationProvider.getLocalized(managedApplicationPerspective.getApplicationPerspective().getTitleKey()));
 			map.put(BaseTemplate.PROPERTY_DESCRIPTION, managedApplicationPerspective.getDescriptionKeyOverride() != null ? localizationProvider.getLocalized(managedApplicationPerspective.getDescriptionKeyOverride()) : localizationProvider.getLocalized(managedApplicationPerspective.getApplicationPerspective().getDescriptionKey()));
 			return map;

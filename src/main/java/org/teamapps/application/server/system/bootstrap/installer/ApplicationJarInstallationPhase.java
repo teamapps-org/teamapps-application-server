@@ -20,8 +20,13 @@
 package org.teamapps.application.server.system.bootstrap.installer;
 
 import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
+import io.github.classgraph.ScanResult;
+import org.teamapps.application.api.application.AbstractApplicationBuilder;
+import org.teamapps.application.api.application.AbstractBaseApplicationBuilder;
 import org.teamapps.application.api.application.ApplicationBuilder;
+import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.universaldb.index.file.FileUtil;
 
@@ -37,42 +42,43 @@ public class ApplicationJarInstallationPhase implements ApplicationInstallationP
 				return;
 			}
 			boolean unmanagedApplication = false;
-			ApplicationBuilder applicationBuilder = null;
+			BaseApplicationBuilder baseApplicationBuilder = null;
 			String fileHash = FileUtil.createFileHash(applicationInfo.getApplicationJar());
 			URLClassLoader classLoader = new URLClassLoader(new URL[]{applicationInfo.getApplicationJar().toURI().toURL()});
-			ClassInfoList classInfos = new ClassGraph()
+			ScanResult scanResult = new ClassGraph()
 					.overrideClassLoaders(classLoader)
 					.enableAllInfo()
-					.scan()
-					.getClassesImplementing(ApplicationBuilder.class.getName())
-					.getStandardClasses();
-
-			if (classInfos.size() == 0) {
-				classInfos = new ClassGraph()
-						.overrideClassLoaders(classLoader)
-						.enableAllInfo()
-						.scan()
-						.getClassesImplementing(ApplicationBuilder.class.getName())
-						.getStandardClasses();
+					.scan();
+			ClassInfoList classes = scanResult.getClassesImplementing(ApplicationBuilder.class.getName()).getStandardClasses();
+			if (classes.isEmpty()) {
+				classes = scanResult.getSubclasses(AbstractApplicationBuilder.class.getName()).getStandardClasses();
+			}
+			if (classes.isEmpty()) {
+				classes = scanResult.getClassesImplementing(AbstractApplicationBuilder.class.getName()).getStandardClasses();
+				unmanagedApplication = true;
+			}
+			if (classes.isEmpty()) {
+				classes = scanResult.getSubclasses(AbstractBaseApplicationBuilder.class.getName()).getStandardClasses();
 				unmanagedApplication = true;
 			}
 
-			if (classInfos.isEmpty()) {
+			if (classes.isEmpty()) {
 				applicationInfo.addError("Could not find application in jar file");
 				return;
 			}
-			if (classInfos.size() > 1) {
+			if (classes.size() > 1) {
 				applicationInfo.addError("Too many application classes in jar file");
 				return;
 			}
 
-			Class<?> builder = classInfos.get(0).loadClass();
+			Class<?> builder = classes.get(0).loadClass();
+			scanResult.close();
 			if (unmanagedApplication) {
-				applicationBuilder = (ApplicationBuilder) builder.getDeclaredConstructor().newInstance();
+				baseApplicationBuilder = (ApplicationBuilder) builder.getDeclaredConstructor().newInstance();
 			} else {
-				applicationBuilder = (ApplicationBuilder) builder.getDeclaredConstructor().newInstance();
+				baseApplicationBuilder = (ApplicationBuilder) builder.getDeclaredConstructor().newInstance();
 			}
-			applicationInfo.setBaseApplicationBuilder(applicationBuilder);
+			applicationInfo.setBaseApplicationBuilder(baseApplicationBuilder);
 			applicationInfo.setUnmanagedPerspectives(unmanagedApplication);
 			applicationInfo.setBinaryHash(fileHash);
 			applicationInfo.setApplicationClassLoader(classLoader);

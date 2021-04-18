@@ -238,6 +238,19 @@ public class ApplicationsPerspectiveComponents extends AbstractManagedApplicatio
 		ApplicationInstaller installer = userSessionData.getRegistry().createJarInstaller(jarFile);
 		ApplicationInfo applicationInfo = installer.checkApplication();
 
+		if (!applicationInfo.getErrors().isEmpty()) {
+			FormDialogue dialogue = FormDialogue.create(ApplicationIcons.SIGN_WARNING, getLocalized("applications.cannotInstallApplication"), getLocalized("applications.cannotInstallApplication.error"));
+			DisplayField displayField = new DisplayField(false, true);
+			displayField.setValue(String.join("<br>", applicationInfo.getErrors()));
+			dialogue.addField(null, getLocalized("applications.errors"), displayField);
+			dialogue.addOkButton(ApplicationIcons.CHECK, getLocalized(Dictionary.O_K));
+			dialogue.setCloseable(true);
+			dialogue.setAutoCloseOnOk(true);
+			dialogue.setCloseOnEscape(true);
+			dialogue.show();
+			return;
+		}
+
 		if (fixedApplication != null && !applicationInfo.getName().equals(fixedApplication.getName())) {
 			FormDialogue dialogue = FormDialogue.create(ApplicationIcons.SIGN_WARNING, getLocalized("applications.wrongApplication"), getLocalized("applications.wrongApplication.error"));
 			dialogue.addOkButton(ApplicationIcons.CHECK, getLocalized(Dictionary.O_K));
@@ -258,18 +271,7 @@ public class ApplicationsPerspectiveComponents extends AbstractManagedApplicatio
 			return;
 		}
 
-		if (!applicationInfo.getErrors().isEmpty()) {
-			FormDialogue dialogue = FormDialogue.create(ApplicationIcons.SIGN_WARNING, getLocalized("applications.cannotInstallApplication"), getLocalized("applications.cannotInstallApplication.error"));
-			DisplayField displayField = new DisplayField(false, true);
-			displayField.setValue(String.join("<br>", applicationInfo.getErrors()));
-			dialogue.addField(null, getLocalized("applications.errors"), displayField);
-			dialogue.addOkButton(ApplicationIcons.CHECK, getLocalized(Dictionary.O_K));
-			dialogue.setCloseable(true);
-			dialogue.setAutoCloseOnOk(true);
-			dialogue.setCloseOnEscape(true);
-			dialogue.show();
-			return;
-		}
+
 
 		Window window = WindowUtils.createWindow(ApplicationIcons.UPLOAD, getLocalized("applications.installApplication"));
 		ResponsiveForm form = new ResponsiveForm(100, 0, 0);

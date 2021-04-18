@@ -50,6 +50,7 @@ import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.perspective.Perspective;
 import org.teamapps.ux.application.view.View;
 import org.teamapps.ux.component.Component;
+import org.teamapps.ux.component.absolutelayout.Length;
 import org.teamapps.ux.component.animation.PageTransition;
 import org.teamapps.ux.component.dialogue.FormDialogue;
 import org.teamapps.ux.component.field.FieldEditingMode;
@@ -410,12 +411,10 @@ public class ApplicationLauncher {
 		ToolbarButton backButton = toolbarApplicationMenu ? null : new ToolbarButton(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, new BaseTemplateRecord(ApplicationIcons.NAVIGATE_LEFT, getLocalized(Dictionary.BACK), null));
 		MobileLayout mobileLayout = toolbarApplicationMenu ? null : new MobileLayout();
 		if (toolbarApplicationMenu) {
-			ToolbarButtonGroup buttonGroup = responsiveApplication.addApplicationButtonGroup(new ToolbarButtonGroup());
-			ToolbarButton applicationMenuButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.RADIO_BUTTON_GROUP, getLocalized(Dictionary.APPLICATION_MENU), getLocalized(Dictionary.APPLICATION_MENU)));
-			applicationMenuButton.setDropDownComponent(tree);
-			applicationMenuButton.setDroDownPanelWidth(400);
+			tree.setCssStyle("height","500px");
+			applicationSessionData.setApplicationToolbarMenuComponent(tree);
 		} else {
-			View applicationMenu = View.createView(StandardLayout.LEFT, ApplicationIcons.RADIO_BUTTON_GROUP, getLocalized(Dictionary.APPLICATION_MENU), null);
+			View applicationMenu = View.createView(StandardLayout.LEFT, ApplicationIcons.RADIO_BUTTON_GROUP, getLocalized(Dictionary.MENU), null);
 			responsiveApplication.addApplicationView(applicationMenu);
 			applicationMenu.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.84f));
 			VerticalLayout verticalLayout = new VerticalLayout();
@@ -482,21 +481,30 @@ public class ApplicationLauncher {
 
 			if (applicationPerspective.getPerspectiveMenuPanel() != null) {
 				if (perspectiveSessionData.getManagedApplicationPerspective().getToolbarPerspectiveMenu()) {
-					ToolbarButtonGroup buttonGroup = responsiveApplication.addApplicationButtonGroup(new ToolbarButtonGroup());
-					//todo change title
-					ToolbarButton applicationMenuButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.RADIO_BUTTON_GROUP, getLocalized(Dictionary.APPLICATION_MENU), getLocalized(Dictionary.APPLICATION_MENU)));
-					applicationMenuButton.setDropDownComponent(applicationPerspective.getPerspectiveMenuPanel());
-					applicationMenuButton.setDroDownPanelWidth(400);
+					Component perspectiveMenuPanel = applicationPerspective.getPerspectiveMenuPanel();
+					perspectiveMenuPanel.setCssStyle("height","300px");
+					if (perspectiveMenuPanel instanceof Tree) {
+						Tree menu = (Tree) perspectiveMenuPanel;
+						menu.onNodeSelected.addListener(() -> {
 
+						});
+					}
 				} else if (mobileLayout == null) {
 					View perspectiveMenuView = View.createView(StandardLayout.LEFT, ApplicationIcons.RADIO_BUTTON_GROUP, getLocalized(Dictionary.APPLICATION_MENU), null);
 					applicationPerspective.getPerspective().addView(perspectiveMenuView);
+					perspectiveMenuView.setComponent(applicationPerspective.getPerspectiveMenuPanel());
 				}
 			}
 		} else {
 			applicationPerspective.getOnPerspectiveRefreshRequested().fire();
 		}
+		if (applicationPerspective.getPerspectiveMenuPanel() != null && perspectiveSessionData.getManagedApplicationPerspective().getToolbarPerspectiveMenu()) {
+			perspectiveSessionData.getManagedApplicationSessionData().setPerspectiveToolbarMenuComponent(applicationPerspective.getPerspectiveMenuPanel());
+		} else {
+			perspectiveSessionData.getManagedApplicationSessionData().setPerspectiveToolbarMenuComponent(null);
+		}
 		responsiveApplication.showPerspective(applicationPerspective.getPerspective());
+
 		if (mobileLayout != null && applicationPerspective.getPerspectiveMenuPanel() != null && !perspectiveSessionData.getManagedApplicationPerspective().getToolbarPerspectiveMenu()) {
 			backButton.setVisible(true);
 			mobileLayout.setContent(applicationPerspective.getPerspectiveMenuPanel(), PageTransition.MOVE_TO_LEFT_VS_MOVE_FROM_RIGHT, 500);

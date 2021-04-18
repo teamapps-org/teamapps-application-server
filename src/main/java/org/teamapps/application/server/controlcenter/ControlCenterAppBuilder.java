@@ -28,6 +28,7 @@ import org.teamapps.application.api.privilege.ApplicationRole;
 import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.api.versioning.ApplicationVersion;
+import org.teamapps.application.server.controlcenter.accesscontrol.AccessControlAppRolePerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.accesscontrol.AccessControlPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.applications.ApplicationGroupsPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.applications.ApplicationProvisioningPerspectiveBuilder;
@@ -71,6 +72,7 @@ public class ControlCenterAppBuilder extends AbstractApplicationBuilder {
 				new OrganizationPerspectiveBuilder(),
 				new RolesPerspectiveBuilder(),
 				new AccessControlPerspectiveBuilder(),
+				new AccessControlAppRolePerspectiveBuilder(),
 				new ApplicationsPerspectiveBuilder(),
 				new TranslationsPerspectiveBuilder(),
 				new ApplicationConfigurationPerspectiveBuilder(),

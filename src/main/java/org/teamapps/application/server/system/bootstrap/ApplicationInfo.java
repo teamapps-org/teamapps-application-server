@@ -92,7 +92,7 @@ public class ApplicationInfo {
 		return baseApplicationBuilder;
 	}
 
-	public void setBaseApplicationBuilder(ApplicationBuilder baseApplicationBuilder) {
+	public void setBaseApplicationBuilder(BaseApplicationBuilder baseApplicationBuilder) {
 		this.baseApplicationBuilder = baseApplicationBuilder;
 	}
 

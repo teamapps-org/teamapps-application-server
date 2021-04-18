@@ -134,6 +134,11 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	public ApplicationDesktop createApplicationDesktop() {
 		return userSessionData.getApplicationDesktopSupplier().get();
 	}
+	@Override
+	public boolean isDarkTheme() {
+		return managedApplication.getDarkTheme();
+	}
+
 
 	@Override
 	public ApplicationConfig<?> getApplicationConfig() {

@@ -100,6 +100,11 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 	}
 
 	@Override
+	public boolean isDarkTheme() {
+		return managedApplication.getDarkTheme();
+	}
+
+	@Override
 	public ApplicationConfig<?> getApplicationConfig() {
 		return mainApplication.getBaseApplicationBuilder().getApplicationConfig();
 	}

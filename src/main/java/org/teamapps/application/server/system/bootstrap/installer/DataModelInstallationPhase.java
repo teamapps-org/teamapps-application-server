@@ -131,6 +131,7 @@ public class DataModelInstallationPhase implements ApplicationInstallationPhase 
 			}
 			universalDB.addAuxiliaryModel(databaseModel, classLoader);
 			universalDB.installAuxiliaryModelClassed(databaseModel, classLoader);
+			universalDB.installTableViews(databaseModel, classLoader);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -94,6 +94,7 @@ public class ApplicationArtifactInstallationPhase implements ApplicationInstalla
 				.setTitleKey(baseApplicationBuilder.getApplicationTitleKey())
 				.setDescriptionKey(baseApplicationBuilder.getApplicationDescriptionKey())
 				.setUnmanagedApplication(applicationInfo.isUnmanagedPerspectives())
+				.setDarkTheme(baseApplicationBuilder.isDarkTheme())
 				.save();
 		ApplicationVersion applicationVersion = ApplicationVersion.create()
 				.setApplication(application)

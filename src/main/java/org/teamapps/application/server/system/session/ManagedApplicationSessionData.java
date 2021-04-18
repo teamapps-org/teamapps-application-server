@@ -22,7 +22,9 @@ package org.teamapps.application.server.system.session;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.application.perspective.PerspectiveBuilder;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
+import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
+import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.launcher.MobileApplicationNavigation;
@@ -36,6 +38,9 @@ import org.teamapps.model.controlcenter.OrganizationFieldView;
 import org.teamapps.model.controlcenter.UserAccountStatus;
 import org.teamapps.ux.application.ResponsiveApplication;
 import org.teamapps.ux.application.assembler.DesktopApplicationAssembler;
+import org.teamapps.ux.component.Component;
+import org.teamapps.ux.component.toolbar.ToolbarButton;
+import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
 import org.teamapps.ux.session.SessionContext;
 
 public class ManagedApplicationSessionData {
@@ -49,6 +54,8 @@ public class ManagedApplicationSessionData {
 	private final ResponsiveApplication responsiveApplication;
 	private final SystemRegistry registry;
 	private final ApplicationLocalizationProvider mainApplicationLocalizationProvider;
+	private ToolbarButton applicationMenuToolbarButton;
+	private ToolbarButton perspectiveMenuToolbarButton;
 
 	public ManagedApplicationSessionData(UserSessionData userSessionData, ManagedApplication managedApplication, MobileApplicationNavigation mobileNavigation) {
 		this.userSessionData = userSessionData;
@@ -56,10 +63,21 @@ public class ManagedApplicationSessionData {
 		this.organizationFieldView = managedApplication.getOrganizationField() != null ? OrganizationFieldView.getById(managedApplication.getOrganizationField().getId()) : null;
 		this.mobileNavigation = mobileNavigation;
 
+		boolean mobileDevice = SessionContext.current().getClientInfo().isMobileDevice();
 		this.responsiveApplication = ResponsiveApplication.createApplication(
-				SessionContext.current().getClientInfo().isMobileDevice() ?
+				mobileDevice ?
 						new MobileAssembler(mobileNavigation, userSessionData.getDictionary()) :
 						new DesktopApplicationAssembler());
+		if (!mobileDevice) {
+			ToolbarButtonGroup buttonGroup = responsiveApplication.addApplicationButtonGroup(new ToolbarButtonGroup());
+			applicationMenuToolbarButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.WINDOWS, userSessionData.getDictionary().getLocalized(Dictionary.MENU), userSessionData.getDictionary().getLocalized(Dictionary.APPLICATION_MENU)));
+			applicationMenuToolbarButton.setDroDownPanelWidth(350);
+			applicationMenuToolbarButton.setVisible(false);
+			//todo change title
+			perspectiveMenuToolbarButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.WINDOW_EXPLORER, userSessionData.getDictionary().getLocalized(Dictionary.MENU), userSessionData.getDictionary().getLocalized(Dictionary.APPLICATION_MENU)));
+			perspectiveMenuToolbarButton.setDroDownPanelWidth(350);
+			perspectiveMenuToolbarButton.setVisible(false);
+		}
 		registry = userSessionData.getRegistry();
 		this.mainApplication = registry.getLoadedApplication(managedApplication.getMainApplication());
 		this.mainApplicationLocalizationProvider = new UserLocalizationProvider(
@@ -121,5 +139,23 @@ public class ManagedApplicationSessionData {
 
 	public ResponsiveApplication getResponsiveApplication() {
 		return responsiveApplication;
+	}
+
+	public void setApplicationToolbarMenuComponent(Component component) {
+		if (component == null) {
+			applicationMenuToolbarButton.setVisible(false);
+		} else {
+			applicationMenuToolbarButton.updateDropDownComponent(component);
+			applicationMenuToolbarButton.setVisible(true);
+		}
+	}
+
+	public void setPerspectiveToolbarMenuComponent(Component component) {
+		if (component == null) {
+			perspectiveMenuToolbarButton.setVisible(false);
+		} else {
+			perspectiveMenuToolbarButton.updateDropDownComponent(component);
+			perspectiveMenuToolbarButton.setVisible(true);
+		}
 	}
 }
