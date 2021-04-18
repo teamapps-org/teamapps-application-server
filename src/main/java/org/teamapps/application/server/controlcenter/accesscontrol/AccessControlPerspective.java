@@ -144,7 +144,9 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 		formLayout.addLabelAndField(null, getLocalized("accessControl.privileges"), privilegesTagComboBox);
 		formLayout.addLabelAndField(null, getLocalized("accessControl.privilegeObjects"), privilegeObjectTagComboBox);
 		formLayout.addLabelAndField(null, getLocalized("accessControl.privilegeObjectInheritance"), privilegeObjectInheritanceCheckBox);
-		formLayout.addLabelAndField(null, getLocalized("accessControl.organizationFieldFilter"), organizationFieldFilterComboBox);
+		if (!isOrgFieldFilterApplied()) {
+			formLayout.addLabelAndField(null, getLocalized("accessControl.organizationFieldFilter"), organizationFieldFilterComboBox);
+		}
 		formLayout.addLabelAndField(null, getLocalized("accessControl.customOrganizationUnit"), organizationFilterComboBox);
 		formLayout.addLabelAndField(null, getLocalized("accessControl.organizationUnitTypeFilter"), organizationUnitTypeFilterTagComboBox);
 
@@ -165,7 +167,7 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 
 		saveButton.onClick.addListener(() -> {
 			RolePrivilegeAssignment rolePrivilegeAssignment = selectedRolePrivilegeAssignment.get();
-			OrganizationField organizationField = isAppFilter() ? getOrganizationField() : organizationFieldFilterComboBox.getValue();
+			OrganizationField organizationField = isOrgFieldFilterApplied() ? getOrganizationField() : organizationFieldFilterComboBox.getValue();
 			if (rolePrivilegeAssignment != null && roleComboBox.getValue() != null && applicationComboBox.getValue() != null && privilegeGroupComboBox.getValue() != null) {
 				rolePrivilegeAssignment
 						.setRole(roleComboBox.getValue())
