@@ -24,6 +24,7 @@ import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.application.perspective.ApplicationPerspective;
 import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.databinding.MutableValue;
 import org.teamapps.icons.Icon;
 
@@ -35,7 +36,7 @@ public class DataBasePerspectiveBuilder extends AbstractPerspectiveBuilder {
 
 	@Override
 	public boolean isPerspectiveAccessible(ApplicationPrivilegeProvider applicationPrivilegeProvider) {
-		return true;
+		return applicationPrivilegeProvider.isAllowed(Privileges.LAUNCH_PERSPECTIVE_DATABASE);
 	}
 
 	@Override

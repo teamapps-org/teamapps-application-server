@@ -237,6 +237,7 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 			loginField.setValue(user.getLogin());
 			passwordField.setValue(user.getPassword());
 			accountStatusComboBox.setValue(user.getUserAccountStatus());
+			userRoleAssignmentTagCombo.setValue(user.getRoleAssignments());
 			orgUnitComboBox.setValue(user.getContainer() != null ? user.getContainer().getOrganizationUnit() : null);
 
 			addressForm.setAddress(user.getAddress());

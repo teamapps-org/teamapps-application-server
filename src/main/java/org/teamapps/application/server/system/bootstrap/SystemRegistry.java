@@ -27,6 +27,7 @@ import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
+import org.teamapps.application.server.system.config.DocumentConversionConfig;
 import org.teamapps.application.server.system.config.SystemConfig;
 import org.teamapps.application.server.system.localization.DictionaryLocalizationProvider;
 import org.teamapps.application.server.system.localization.SystemLocalizationProvider;
@@ -51,7 +52,7 @@ public class SystemRegistry {
 
 	private final BootstrapSessionHandler bootstrapSessionHandler;
 	private final UniversalDB universalDB;
-	private final ApplicationConfig applicationConfig;
+	private final ApplicationConfig<SystemConfig> applicationConfig;
 	private final TranslationService translationService;
 	private final DictionaryLocalizationProvider dictionary;
 	private final SystemLocalizationProvider systemDictionary;
@@ -59,10 +60,11 @@ public class SystemRegistry {
 	private final ManagedApplicationGroup unspecifiedApplicationGroup;
 	private final BaseResourceLinkProvider baseResourceLinkProvider;
 	private SessionRegistryHandler sessionRegistryHandler;
+	private DocumentConverter documentConverter;
 
 
-	public SystemRegistry(BootstrapSessionHandler bootstrapSessionHandler, UniversalDB universalDB, ApplicationConfig applicationConfig, TranslationService translationService) {
-		SystemConfig systemConfig = (SystemConfig) applicationConfig.getConfig();
+	public SystemRegistry(BootstrapSessionHandler bootstrapSessionHandler, UniversalDB universalDB, ApplicationConfig<SystemConfig> applicationConfig, TranslationService translationService) {
+		SystemConfig systemConfig = applicationConfig.getConfig();
 		this.bootstrapSessionHandler = bootstrapSessionHandler;
 		this.universalDB = universalDB;
 		this.applicationConfig = applicationConfig;
@@ -70,7 +72,16 @@ public class SystemRegistry {
 		this.dictionary = new DictionaryLocalizationProvider(translationService, systemConfig.getLocalizationConfig().getRequiredLanguages());
 		this.systemDictionary = new SystemLocalizationProvider(translationService, systemConfig.getLocalizationConfig().getRequiredLanguages());
 		this.baseResourceLinkProvider = new BaseResourceLinkProvider();
-		unspecifiedApplicationGroup = getOrCreateUnspecifiedApplicationGroup();
+		this.unspecifiedApplicationGroup = getOrCreateUnspecifiedApplicationGroup();
+		handleConfigUpdate();
+		applicationConfig.onConfigUpdate.addListener(this::handleConfigUpdate);
+	}
+
+	private void handleConfigUpdate() {
+		DocumentConversionConfig documentConversionConfig = applicationConfig.getConfig().getDocumentConversionConfig();
+		if (documentConversionConfig.isActive()) {
+			documentConverter = DocumentConverter.createRemoteConverter(documentConversionConfig.getHost(), documentConversionConfig.getUser(), documentConversionConfig.getPassword());
+		}
 	}
 
 	private ManagedApplicationGroup getOrCreateUnspecifiedApplicationGroup() {
@@ -148,7 +159,7 @@ public class SystemRegistry {
 	}
 
 	public Supplier<DocumentConverter> getDocumentConverterSupplier() {
-		return null;
+		return () -> documentConverter;
 	}
 
 	public SystemConfig getSystemConfig() {

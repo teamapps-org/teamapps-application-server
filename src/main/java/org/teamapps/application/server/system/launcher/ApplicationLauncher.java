@@ -205,6 +205,7 @@ public class ApplicationLauncher {
 	}
 
 	private void logout() {
+		registry.getBootstrapSessionHandler().onUserLogout.fire(userSessionData.getContext());
 		LoginHandler loginHandler = new LoginHandler(registry, logoutHandler);
 		loginHandler.createLoginView(userSessionData.getContext(), userSessionData.getRootPanel());
 		userSessionData.invalidate();

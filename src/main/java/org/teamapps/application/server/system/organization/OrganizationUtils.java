@@ -71,7 +71,7 @@ public class OrganizationUtils {
 	public static Set<OrganizationUnit> getAllUnits(OrganizationUnit unit, Collection<OrganizationUnitType> unitTypesFilter) {
 		Set<OrganizationUnit> result = new HashSet<>();
 		Set<OrganizationUnit> traversedNodes = new HashSet<>();
-		Set<OrganizationUnitType> filter = unitTypesFilter != null ? new HashSet<>(unitTypesFilter) : null;
+		Set<OrganizationUnitType> filter = unitTypesFilter != null && !unitTypesFilter.isEmpty() ? new HashSet<>(unitTypesFilter) : null;
 		calculateAllUnits(unit, filter, traversedNodes, result);
 		return result;
 	}

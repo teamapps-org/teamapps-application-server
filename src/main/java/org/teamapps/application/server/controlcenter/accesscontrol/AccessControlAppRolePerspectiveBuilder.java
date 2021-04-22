@@ -24,6 +24,7 @@ import org.teamapps.application.api.application.perspective.AbstractPerspectiveB
 import org.teamapps.application.api.application.perspective.ApplicationPerspective;
 import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.databinding.MutableValue;
 import org.teamapps.icons.composite.CompositeIcon;
 
@@ -35,7 +36,7 @@ public class AccessControlAppRolePerspectiveBuilder extends AbstractPerspectiveB
 
 	@Override
 	public boolean isPerspectiveAccessible(ApplicationPrivilegeProvider applicationPrivilegeProvider) {
-		return true;
+		return applicationPrivilegeProvider.isAllowed(Privileges.LAUNCH_PERSPECTIVE_ACCESS_CONTROL_APP_ROLE);
 	}
 
 	@Override

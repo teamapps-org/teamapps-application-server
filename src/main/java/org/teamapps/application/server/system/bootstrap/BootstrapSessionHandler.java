@@ -55,6 +55,14 @@ import java.util.stream.Collectors;
 public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+	private static Class standardIconClass;
+	static {
+		try {
+			standardIconClass = Class.forName("org.teamapps.icon.standard.StandardIcon");
+		} catch (Exception var1) {
+		}
+	}
+
 	public Event<SessionContext> onUserLogout = new Event<>();
 
 	private final SessionRegistryHandler sessionRegistryHandler;
@@ -62,15 +70,8 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 	private UniversalDB universalDB;
 	private File configPath;
 	private SystemRegistry systemRegistry;
+	private ControlCenterAppBuilder controlCenterAppBuilder;
 
-	private static Class standardIconClass;
-
-	static {
-		try {
-			standardIconClass = Class.forName("org.teamapps.icon.standard.StandardIcon");
-		} catch (Exception var1) {
-		}
-	}
 
 	public BootstrapSessionHandler() {
 		this(null);
@@ -104,8 +105,8 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 		universalDB.installTableViews(schema, classLoader);
 		DatabaseLogAppender.startLogger();
 
-		ControlCenterAppBuilder controlCenterAppBuilder = new ControlCenterAppBuilder();
-		ApplicationConfig applicationConfig = controlCenterAppBuilder.getApplicationConfig();
+		controlCenterAppBuilder = new ControlCenterAppBuilder();
+		ApplicationConfig<SystemConfig> applicationConfig = controlCenterAppBuilder.getApplicationConfig();
 		SystemConfig systemConfig = (SystemConfig) applicationConfig.getConfig();
 		MachineTranslation machineTranslation = null;
 		if (systemConfig.getMachineTranslation().isActive()) {
@@ -182,5 +183,9 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 
 	public SystemRegistry getSystemRegistry() {
 		return systemRegistry;
+	}
+
+	public ControlCenterAppBuilder getControlCenterAppBuilder() {
+		return controlCenterAppBuilder;
 	}
 }

@@ -31,6 +31,7 @@ import org.teamapps.application.api.privilege.ApplicationRole;
 import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.api.versioning.ApplicationVersion;
+import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.universaldb.UniversalDB;
 import org.teamapps.universaldb.schema.SchemaInfoProvider;
 import org.teamapps.ux.application.ResponsiveApplication;
@@ -89,8 +90,8 @@ public class DatabaseExplorerAppBuilder extends AbstractBaseApplicationBuilder {
 	}
 	
 	@Override
-	public boolean isApplicationAccessible(ApplicationPrivilegeProvider applicationPrivilegeProvider) {
-		return true;
+	public boolean isApplicationAccessible(ApplicationPrivilegeProvider privilegeProvider) {
+		return privilegeProvider.isAllowed(Privileges.LAUNCH_APPLICATION);
 	}
 
 	@Override

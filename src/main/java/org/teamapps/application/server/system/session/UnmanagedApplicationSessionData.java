@@ -77,11 +77,7 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 
 	@Override
 	public DocumentConverter getDocumentConverter() {
-		if (documentConverterSupplier == null) {
-			return null;
-		} else {
-			return documentConverterSupplier.get();
-		}
+		return documentConverterSupplier != null ? documentConverterSupplier.get() : null;
 	}
 
 	@Override
