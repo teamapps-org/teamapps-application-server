@@ -132,6 +132,8 @@ public class ApplicationServer implements WebController, SessionManager {
 		sessionHandler.init(this, universalDb, configPath);
 		TeamAppsUndertowEmbeddedServer server = new TeamAppsUndertowEmbeddedServer(this, teamAppsConfiguration, port);
 
+		addClassPathResourceProvider("org.teamapps.application.server.media", "/ta-media/");
+
 		File staticResourcesPath = new File(basePath, "static");
 		staticResourcesPath.mkdir();
 		addServletRegistration(new ServletRegistration(new ResourceProviderServlet((servletPath, relativeResourcePath, httpSessionId) -> {

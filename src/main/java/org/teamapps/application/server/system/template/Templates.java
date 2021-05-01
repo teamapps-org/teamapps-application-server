@@ -32,6 +32,7 @@ import java.util.List;
 
 public enum Templates implements Template {
 
+	LOGIN_TEMPLATE(createLoginTemplate()),
 	LIST_4_LINES_TEMPLATE(create4LinesTemplate()),
 	NODE_TEMPLATE(createNodeTemplate()),
 	ORGANIZATION_GRAPH_TEMPLATE(createOrganizationGraphTreeNodeTpl()),
@@ -59,6 +60,51 @@ public enum Templates implements Template {
 						"<div style=\"white-space: nowrap;\">{{" + PROPERTY_DESCRIPTION + "}}</div>\n" +
 						"<div style=\"white-space: nowrap;\">{{" + PROPERTY_LINE3 + "}}</div>\n" +
 						"<div style=\"white-space: nowrap; width: fit-content; border-radius: 1000px; color:rgba(66,66,66,1);background-color:rgba(238,238,238,1);font-size:60%; padding: 1px 5px;\">{{" + PROPERTY_BADGE + "}}</div>\n" +
+						"</div>";
+		return new MustacheTemplate(tpl);
+	}
+
+	public static MustacheTemplate createLoginTemplate() {
+		String tpl =
+				"<div class=\"token-login-entry\">\n" +
+						"    <style>\n" +
+						"        .token-login-entry {\n" +
+						"            background: transparent !important;\n" +
+						"            border: none !important;\n" +
+						"            box-shadow: none !important;\n" +
+						"            font-family: \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n" +
+						"            display: flex;\n" +
+						"            flex-direction: column;\n" +
+						"            align-items: center;\n" +
+						"            transform: scale(1);\n" +
+						"        }\n" +
+						"        .token-login-entry:hover {\n" +
+						"            transform: scale(1.2);\n" +
+						"        }\n" +
+						"        .token-login-entry, .token-login-entry:hover {\n" +
+						"            transition: transform .3s !important;\n" +
+						"        }\n" +
+						"        .token-login-entry > .img {\n" +
+						"            width: 100px;\n" +
+						"            height: 100px;\n" +
+						"            background-size: cover;\n" +
+						"            background-position: center center;\n" +
+						"            margin-bottom: 6px;\n" +
+						"            border-radius: 50%;\n" +
+						"            border: 1px solid #fff;\n" +
+						"            box-shadow: 0 3px 10px 0 #000000a1;\n" +
+						"        }\n" +
+						"        .token-login-entry > .line1,\n" +
+						"        .token-login-entry > .line2 {\n" +
+						"            text-align: center;\n" +
+						"            font-size: 105%;\n" +
+						"            text-overflow: ellipsis;\n" +
+						"            overflow: hidden;\n" +
+						"        }\n" +
+						"    </style>\n" +
+						"    <div class=\"img\" style=\"background-image: url('{{" + PROPERTY_IMAGE + "}}');\"></div>\n" +
+						"    <div class=\"line1\">{{" + PROPERTY_CAPTION + "}}</div>\n" +
+						"    <div class=\"line2\">{{#description}}{{description}}{{/description}}{{^description}}&nbsp;{{/description}}</div>\n" +
 						"</div>";
 		return new MustacheTemplate(tpl);
 	}

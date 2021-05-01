@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@ import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.privilege.ApplicationRole;
 import org.teamapps.application.api.privilege.PrivilegeObject;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.application.ux.localize.TranslatableTextUtils;
@@ -36,6 +37,7 @@ import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.session.SessionContext;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -248,6 +250,21 @@ public class PropertyProviders {
 			}
 			map.put(BaseTemplate.PROPERTY_CAPTION, user.getFirstName() + " " + user.getLastName());
 			map.put(BaseTemplate.PROPERTY_DESCRIPTION, user.getContainer() != null ? translatableTextExtractor.apply(user.getContainer().getOrganizationUnit().getName()) : null);
+			return map;
+		};
+	}
+
+	public static PropertyProvider<User> createSimpleUserPropertyProvider(SystemRegistry registry) {
+		return (user, propertyNames) -> {
+			Map<String, Object> map = new HashMap<>();
+			String userProfilePictureLink = registry.getBaseResourceLinkProvider().getUserProfilePictureLink(user);
+			if (userProfilePictureLink != null) {
+				map.put(BaseTemplate.PROPERTY_IMAGE, userProfilePictureLink);
+			} else {
+				map.put(BaseTemplate.PROPERTY_IMAGE, "/ta-media/user-silhouette.png");
+			}
+			map.put(BaseTemplate.PROPERTY_CAPTION, user.getFirstName());
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, user.getLastName());
 			return map;
 		};
 	}
