@@ -26,18 +26,12 @@ public class SystemConfig {
 
 	private ThemingConfig themingConfig = new ThemingConfig();
 	private AuthenticationConfig authenticationConfig = new AuthenticationConfig();
-	private MachineTranslation machineTranslation = new MachineTranslation();
+	private NotificationMailConfig notificationMailConfig = new NotificationMailConfig();
+	private MachineTranslationConfig machineTranslationConfig = new MachineTranslationConfig();
 	private LocalizationConfig localizationConfig = new LocalizationConfig();
 	private TwilioConfig twilioConfig = new TwilioConfig();
 	private DocumentConversionConfig documentConversionConfig = new DocumentConversionConfig();
-
-	public MachineTranslation getMachineTranslation() {
-		return machineTranslation;
-	}
-
-	public void setMachineTranslation(MachineTranslation machineTranslation) {
-		this.machineTranslation = machineTranslation;
-	}
+	private MonitoringDashboardConfig monitoringDashboardConfig = new MonitoringDashboardConfig();
 
 	public LocalizationConfig getLocalizationConfig() {
 		return localizationConfig;
@@ -77,5 +71,29 @@ public class SystemConfig {
 
 	public void setDocumentConversionConfig(DocumentConversionConfig documentConversionConfig) {
 		this.documentConversionConfig = documentConversionConfig;
+	}
+
+	public NotificationMailConfig getNotificationMailConfig() {
+		return notificationMailConfig;
+	}
+
+	public void setNotificationMailConfig(NotificationMailConfig notificationMailConfig) {
+		this.notificationMailConfig = notificationMailConfig;
+	}
+
+	public MachineTranslationConfig getMachineTranslationConfig() {
+		return machineTranslationConfig;
+	}
+
+	public void setMachineTranslationConfig(MachineTranslationConfig machineTranslationConfig) {
+		this.machineTranslationConfig = machineTranslationConfig;
+	}
+
+	public MonitoringDashboardConfig getServerMonitoringDashboardConfig() {
+		return monitoringDashboardConfig;
+	}
+
+	public void setServerMonitoringDashboardConfig(MonitoringDashboardConfig monitoringDashboardConfig) {
+		this.monitoringDashboardConfig = monitoringDashboardConfig;
 	}
 }
