@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,11 +23,9 @@ import org.teamapps.application.api.desktop.ApplicationDesktop;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.api.user.SessionUser;
-import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.launcher.MobileApplicationNavigation;
-import org.teamapps.application.server.system.localization.ApplicationScopeLocalizationProvider;
-import org.teamapps.application.server.system.localization.UserLocalizationProvider;
+import org.teamapps.application.server.system.localization.SessionLocalizationProvider;
 import org.teamapps.application.server.system.privilege.PrivilegeApplicationKey;
 import org.teamapps.application.server.system.privilege.UserPrivileges;
 import org.teamapps.icons.Icon;
@@ -36,7 +34,6 @@ import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ManagedApplication;
 import org.teamapps.model.controlcenter.User;
 import org.teamapps.ux.component.Component;
-import org.teamapps.ux.component.flexcontainer.VerticalLayout;
 import org.teamapps.ux.component.rootpanel.RootPanel;
 import org.teamapps.ux.session.SessionContext;
 
@@ -55,7 +52,7 @@ public class UserSessionData {
 	private UserPrivileges userPrivileges;
 	private final SessionUser sessionUser;
 	private final SessionIconProvider iconProvider;
-	private final UserLocalizationProvider dictionary;
+	private final SessionLocalizationProvider sessionLocalizationProvider;
 	private final Map<Application, ApplicationLocalizationProvider> localizationProviderByApplication = new HashMap<>();
 	private Supplier<ApplicationDesktop> applicationDesktopSupplier;
 	private Function<Component, Component> rootWrapperComponentFunction;
@@ -67,7 +64,7 @@ public class UserSessionData {
 		this.rootPanel = rootPanel;
 		this.userPrivileges = new UserPrivileges(user, registry);
 		this.sessionUser = new SessionUserImpl(user, context);
-		this.dictionary = new UserLocalizationProvider(sessionUser.getRankedLanguages(), registry.getDictionary(), registry.getSystemDictionary());
+		this.sessionLocalizationProvider = new SessionLocalizationProvider(sessionUser.getRankedLanguages(), registry.getDictionary(), registry.getSystemDictionary());
 		this.iconProvider = context.getIconProvider();
 	}
 
@@ -88,10 +85,7 @@ public class UserSessionData {
 	}
 
 	private ApplicationLocalizationProvider createApplicationLocalizationProvider(Application application) {
-		List<String> rankedLanguages = sessionUser.getRankedLanguages();
-		LoadedApplication loadedApplication = registry.getLoadedApplication(application);
-		ApplicationScopeLocalizationProvider applicationLocalizationProvider = loadedApplication != null ? loadedApplication.getApplicationLocalizationProvider() : null;
-		return new UserLocalizationProvider(rankedLanguages, registry.getDictionary(), registry.getSystemDictionary(), applicationLocalizationProvider);
+		return sessionLocalizationProvider.createApplicationLocalizationProvider(application);
 	}
 
 	public Icon<?, ?> decodeIcon(String name) {
@@ -143,8 +137,8 @@ public class UserSessionData {
 		return iconProvider;
 	}
 
-	public ApplicationLocalizationProvider getDictionary() {
-		return dictionary;
+	public SessionLocalizationProvider getLocalizationProvider() {
+		return sessionLocalizationProvider;
 	}
 
 	public UserPrivileges getUserPrivileges() {

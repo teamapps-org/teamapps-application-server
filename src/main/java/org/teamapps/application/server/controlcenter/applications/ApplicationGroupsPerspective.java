@@ -86,7 +86,7 @@ public class ApplicationGroupsPerspective extends AbstractManagedApplicationPers
 
 		EntityListModelBuilder<ManagedApplicationGroup> groupModelBuilder = new EntityListModelBuilder<>(getApplicationInstanceData(), group -> getLocalized(group.getTitleKey()));
 		groupModelBuilder.setRecords(ManagedApplicationGroup.getAll().stream().sorted((Comparator.comparingInt(ManagedApplicationGroup::getListingPosition))).collect(Collectors.toList()));
-		Table<ManagedApplicationGroup> groupTable = groupModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationGroupPropertyProvider(userSessionData), 40);
+		Table<ManagedApplicationGroup> groupTable = groupModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationGroupPropertyProvider(getApplicationInstanceData()), 40);
 		groupTable.setStripedRows(false);
 		groupsView.setComponent(groupTable);
 		groupModelBuilder.onDataChanged.fire();
@@ -101,7 +101,7 @@ public class ApplicationGroupsPerspective extends AbstractManagedApplicationPers
 		ResponsiveFormLayout formLayout = groupForm.addResponsiveFormLayout(400);
 
 		ComboBox<Icon> iconComboBox = ApplicationIcons.createIconComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, true);
-		ComboBox<String> titleKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData());
+		ComboBox<String> titleKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData(), this::getMainApplication);
 		LinkButton crateTitleKeyButton = new LinkButton(getLocalized("applications.createNewTitle"));
 
 		EntityListModelBuilder<ManagedApplication> applicationModelBuilder = new EntityListModelBuilder<>(getApplicationInstanceData());

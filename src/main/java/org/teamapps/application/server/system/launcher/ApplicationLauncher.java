@@ -206,7 +206,7 @@ public class ApplicationLauncher {
 
 	private void logout() {
 		registry.getBootstrapSessionHandler().onUserLogout.fire(userSessionData.getContext());
-		LoginHandler loginHandler = new LoginHandler(registry, logoutHandler);
+		LoginHandler loginHandler = new LoginHandler(registry, logoutHandler, userSessionData);
 		loginHandler.createLoginView(userSessionData.getContext(), userSessionData.getRootPanel());
 		userSessionData.invalidate();
 	}
@@ -339,7 +339,7 @@ public class ApplicationLauncher {
 		mobileNavigation.setApplicationLauncher(applicationLauncher);
 		return ResponsiveApplication.createApplication(
 				SessionContext.current().getClientInfo().isMobileDevice() ?
-						new MobileAssembler(mobileNavigation, userSessionData.getDictionary()) :
+						new MobileAssembler(mobileNavigation, userSessionData.getLocalizationProvider()) :
 						new DesktopApplicationAssembler());
 	}
 
@@ -566,6 +566,6 @@ public class ApplicationLauncher {
 	}
 
 	public String getLocalized(String key, Object... objects) {
-		return userSessionData.getDictionary().getLocalized(key, objects);
+		return userSessionData.getLocalizationProvider().getLocalized(key, objects);
 	}
 }

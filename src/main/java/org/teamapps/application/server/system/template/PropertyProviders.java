@@ -162,12 +162,11 @@ public class PropertyProviders {
 		};
 	}
 
-	public static PropertyProvider<ManagedApplicationGroup> createManagedApplicationGroupPropertyProvider(UserSessionData userSessionData) {
+	public static PropertyProvider<ManagedApplicationGroup> createManagedApplicationGroupPropertyProvider(ApplicationInstanceData applicationInstanceData) {
 		return (managedApplicationGroup, propertyNames) -> {
-			ApplicationLocalizationProvider localizationProvider = userSessionData.getDictionary();
 			Map<String, Object> map = new HashMap<>();
-			map.put(BaseTemplate.PROPERTY_ICON, userSessionData.decodeIcon(managedApplicationGroup.getIcon()));
-			map.put(BaseTemplate.PROPERTY_CAPTION, localizationProvider.getLocalized(managedApplicationGroup.getTitleKey()));
+			map.put(BaseTemplate.PROPERTY_ICON, IconUtils.decodeIcon(managedApplicationGroup.getIcon()));
+			map.put(BaseTemplate.PROPERTY_CAPTION, applicationInstanceData.getLocalized(managedApplicationGroup.getTitleKey()));
 			return map;
 		};
 	}

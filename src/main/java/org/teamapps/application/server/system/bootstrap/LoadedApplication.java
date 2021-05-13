@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,6 @@ package org.teamapps.application.server.system.bootstrap;
 import org.teamapps.application.api.application.ApplicationBuilder;
 import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.api.application.perspective.PerspectiveBuilder;
-import org.teamapps.application.server.system.localization.ApplicationScopeLocalizationProvider;
 import org.teamapps.application.server.system.privilege.ApplicationScopePrivilegeProvider;
 import org.teamapps.model.controlcenter.Application;
 
@@ -35,7 +34,6 @@ public class LoadedApplication {
 	private final BaseApplicationBuilder baseApplicationBuilder;
 	private final ClassLoader applicationClassLoader;
 	private final boolean unmanagedPerspectives;
-	private ApplicationScopeLocalizationProvider applicationScopeLocalizationProvider;
 	private ApplicationScopePrivilegeProvider applicationScopePrivilegeProvider;
 
 	public LoadedApplication(Application application, BaseApplicationBuilder applicationBuilder, ClassLoader applicationClassLoader, boolean unmanagedPerspectives) {
@@ -59,14 +57,6 @@ public class LoadedApplication {
 				.filter(perspective -> perspective.getName().equals(name))
 				.findFirst()
 				.orElse(null);
-	}
-
-	public ApplicationScopeLocalizationProvider getApplicationLocalizationProvider() {
-		return applicationScopeLocalizationProvider;
-	}
-
-	public void setApplicationLocalizationProvider(ApplicationScopeLocalizationProvider applicationScopeLocalizationProvider) {
-		this.applicationScopeLocalizationProvider = applicationScopeLocalizationProvider;
 	}
 
 	public ApplicationScopePrivilegeProvider getAppPrivilegeProvider() {

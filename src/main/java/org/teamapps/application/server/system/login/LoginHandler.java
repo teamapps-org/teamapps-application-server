@@ -64,6 +64,12 @@ public class LoginHandler {
 		this.logoutHandler = logoutHandler;
 	}
 
+	public LoginHandler(SystemRegistry systemRegistry, LogoutHandler logoutHandler, UserSessionData userSessionData) {
+		this.systemRegistry = systemRegistry;
+		this.logoutHandler = logoutHandler;
+		this.rankedLanguages = userSessionData.getRankedLanguages();
+	}
+
 	public void handleNewSession(SessionContext context) {
 		if (rankedLanguages == null) {
 			rankedLanguages = new ArrayList<>();

@@ -22,6 +22,7 @@ package org.teamapps.application.server.system.bootstrap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.config.ApplicationConfig;
+import org.teamapps.application.server.chat.ChatApplication;
 import org.teamapps.application.server.controlcenter.ControlCenterAppBuilder;
 import org.teamapps.application.server.controlcenter.dbexplorer.DatabaseExplorerAppBuilder;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
@@ -37,12 +38,12 @@ import org.teamapps.application.server.system.server.SessionManager;
 import org.teamapps.application.server.system.template.Templates;
 import org.teamapps.application.server.system.utils.ValueConverterUtils;
 import org.teamapps.event.Event;
+import org.teamapps.icon.antu.AntuIcon;
 import org.teamapps.icon.flags.FlagIcon;
+import org.teamapps.icon.fontawesome.FontAwesomeIcon;
+import org.teamapps.icon.material.MaterialIcon;
 import org.teamapps.model.ControlCenterSchema;
-import org.teamapps.model.controlcenter.Application;
-import org.teamapps.model.controlcenter.ApplicationVersion;
-import org.teamapps.model.controlcenter.User;
-import org.teamapps.model.controlcenter.UserAccountStatus;
+import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.UniversalDB;
 import org.teamapps.universaldb.index.file.FileValue;
 import org.teamapps.ux.session.SessionContext;
@@ -68,7 +69,6 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 	private final SessionRegistryHandler sessionRegistryHandler;
 	private SessionManager sessionManager;
 	private UniversalDB universalDB;
-	private File configPath;
 	private SystemRegistry systemRegistry;
 	private ControlCenterAppBuilder controlCenterAppBuilder;
 
@@ -86,11 +86,10 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 	}
 
 	@Override
-	public void init(SessionManager sessionManager, UniversalDB universalDB, File configPath) {
+	public void init(SessionManager sessionManager, UniversalDB universalDB) {
 		try {
 			this.sessionManager = sessionManager;
 			this.universalDB = universalDB;
-			this.configPath = configPath;
 			startSystem();
 		} catch (Exception e) {
 			LOGGER.error("Error initializing system:", e);
@@ -107,18 +106,12 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 
 		controlCenterAppBuilder = new ControlCenterAppBuilder();
 		ApplicationConfig<SystemConfig> applicationConfig = controlCenterAppBuilder.getApplicationConfig();
-		SystemConfig systemConfig = (SystemConfig) applicationConfig.getConfig();
-		MachineTranslation machineTranslation = null;
-		if (systemConfig.getMachineTranslation().isActive()) {
-			machineTranslation = new MachineTranslation();
-			machineTranslation.setGoogleTranslationKey(systemConfig.getMachineTranslation().getGoogleKey());
-			machineTranslation.setDeepLKey(systemConfig.getMachineTranslation().getDeepLKey());
-		}
-		systemRegistry = new SystemRegistry(this, universalDB, applicationConfig, machineTranslation);
+		systemRegistry = new SystemRegistry(this, universalDB, applicationConfig);
 		systemRegistry.setSessionRegistryHandler(sessionRegistryHandler);
 
 		systemRegistry.installAndLoadApplication(controlCenterAppBuilder);
 		systemRegistry.installAndLoadApplication(new DatabaseExplorerAppBuilder(universalDB));
+		systemRegistry.installAndLoadApplication(new ChatApplication());
 
 		for (Application application : Application.getAll()) {
 			ApplicationVersion installedVersion = application.getInstalledVersion();
@@ -145,6 +138,9 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 		}
 
 		context.getIconProvider().registerIconLibrary(FlagIcon.class);
+		context.getIconProvider().registerIconLibrary(MaterialIcon.class);
+		context.getIconProvider().registerIconLibrary(FontAwesomeIcon.class);
+		context.getIconProvider().registerIconLibrary(AntuIcon.class);
 		context.registerTemplates(Arrays.stream(Templates.values())
 				.collect(Collectors.toMap(Enum::name, Templates::getTemplate)));
 

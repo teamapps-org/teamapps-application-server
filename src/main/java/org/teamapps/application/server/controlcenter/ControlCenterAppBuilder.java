@@ -36,6 +36,7 @@ import org.teamapps.application.server.controlcenter.applications.ApplicationUpd
 import org.teamapps.application.server.controlcenter.applications.ApplicationsPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.applocal.AppLocalAdministrationPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.database.DataBasePerspectiveBuilder;
+import org.teamapps.application.server.controlcenter.monitoring.MonitoringPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.organization.OrganizationChartPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.organization.OrganizationFieldPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.organization.OrganizationPerspectiveBuilder;
@@ -77,6 +78,7 @@ public class ControlCenterAppBuilder extends AbstractApplicationBuilder {
 				new TranslationsPerspectiveBuilder(),
 				new ApplicationConfigurationPerspectiveBuilder(),
 				new SystemLogPerspectiveBuilder(),
+				new MonitoringPerspectiveBuilder(),
 				new DataBasePerspectiveBuilder(),
 
 				new AppLocalAdministrationPerspectiveBuilder(),
@@ -92,23 +94,47 @@ public class ControlCenterAppBuilder extends AbstractApplicationBuilder {
 
 	@Override
 	public ApplicationVersion getApplicationVersion() {
-		return ApplicationVersion.create(0, 34);
+		return ApplicationVersion.create(0, 39);
 	}
 
 	@Override
 	public List<ApplicationRole> getApplicationRoles() {
-		return null;
+		return Privileges.getRoles();
 	}
 
 	@Override
 	public List<PrivilegeGroup> getPrivilegeGroups() {
-//		new Privileges();
 		return Privileges.getPrivileges();
 	}
 
 	@Override
 	public LocalizationData getLocalizationData() {
-		return LocalizationData.createFromPropertyFiles("org.teamapps.application.server.i18n.controlCenter", getClass().getClassLoader(), Locale.ENGLISH);
+		return LocalizationData.createFromPropertyFiles("org.teamapps.application.server.i18n.controlCenter", getClass().getClassLoader(),
+				Locale.ENGLISH,
+				Locale.GERMAN,
+				Locale.FRENCH,
+				Locale.ITALIAN,
+				Locale.JAPANESE,
+				Locale.CHINESE,
+				Locale.forLanguageTag("bg"),
+				Locale.forLanguageTag("cs"),
+				Locale.forLanguageTag("da"),
+				Locale.forLanguageTag("el"),
+				Locale.forLanguageTag("es"),
+				Locale.forLanguageTag("et"),
+				Locale.forLanguageTag("fi"),
+				Locale.forLanguageTag("hu"),
+				Locale.forLanguageTag("lt"),
+				Locale.forLanguageTag("lv"),
+				Locale.forLanguageTag("nl"),
+				Locale.forLanguageTag("pl"),
+				Locale.forLanguageTag("pt"),
+				Locale.forLanguageTag("ro"),
+				Locale.forLanguageTag("ru"),
+				Locale.forLanguageTag("sk"),
+				Locale.forLanguageTag("sl"),
+				Locale.forLanguageTag("sv")
+		);
 	}
 
 	@Override
@@ -118,7 +144,7 @@ public class ControlCenterAppBuilder extends AbstractApplicationBuilder {
 	}
 
 	@Override
-	public ApplicationConfig getApplicationConfig() {
+	public ApplicationConfig<SystemConfig> getApplicationConfig() {
 		return applicationConfig;
 	}
 

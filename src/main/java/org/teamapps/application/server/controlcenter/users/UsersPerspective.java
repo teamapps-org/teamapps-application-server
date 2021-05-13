@@ -51,6 +51,7 @@ import org.teamapps.ux.component.field.PasswordField;
 import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.TextField;
 import org.teamapps.ux.component.field.combobox.ComboBox;
+import org.teamapps.ux.component.field.combobox.TagBoxWrappingMode;
 import org.teamapps.ux.component.field.combobox.TagComboBox;
 import org.teamapps.ux.component.field.datetime.InstantDateTimeField;
 import org.teamapps.ux.component.field.upload.PictureChooser;
@@ -150,6 +151,8 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		TextField firstNameField = new TextField();
 		TextField lastNameField = new TextField();
 		TagComboBox<Language> languagesField = Language.createTagComboBox(getApplicationInstanceData());
+		languagesField.setWrappingMode(TagBoxWrappingMode.SINGLE_TAG_PER_LINE);
+		languagesField.setShowClearButton(true);
 		TextField emailField = new TextField();
 		TextField mobileField = new TextField();
 		TextField loginField = new TextField();

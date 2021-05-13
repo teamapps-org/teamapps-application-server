@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,10 +19,7 @@
  */
 package org.teamapps.application.server.controlcenter;
 
-import org.teamapps.application.api.privilege.ApplicationPrivilegeBuilder;
-import org.teamapps.application.api.privilege.PrivilegeGroup;
-import org.teamapps.application.api.privilege.SimplePrivilege;
-import org.teamapps.application.api.privilege.StandardPrivilegeGroup;
+import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.icons.composite.CompositeIcon;
 
@@ -34,10 +31,12 @@ public class Privileges {
 
 	private final static ApplicationPrivilegeBuilder PRIVILEGE_BUILDER = new ApplicationPrivilegeBuilder();
 
+	private final static ApplicationRoleBuilder ROLE_BUILDER = new ApplicationRoleBuilder();
+
 	public final static SimplePrivilege LAUNCH_APPLICATION = PRIVILEGE_BUILDER.LAUNCH_APPLICATION;
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_ACCESS_CONTROL_APP_ROLE = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveAccessControlAppRole", CompositeIcon.of(ApplicationIcons.KEY, ApplicationIcons.WORKER), "accessControlAppRole.launch", "accessControlAppRole.desc");
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_ACCESS_CONTROL = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveAccessControl", ApplicationIcons.KEYS, "accessControl.launch", "accessControl.desc");
-	public final static SimplePrivilege LAUNCH_PERSPECTIVE_APPLICATION_GROUPS= PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveApplicationGroups", ApplicationIcons.WINDOWS, "applicationGroups.launch", "applicationGroups.desc");
+	public final static SimplePrivilege LAUNCH_PERSPECTIVE_APPLICATION_GROUPS = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveApplicationGroups", ApplicationIcons.WINDOWS, "applicationGroups.launch", "applicationGroups.desc");
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_APPLICATION_PROVISIONING = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveApplicationProvisioning", ApplicationIcons.INSTALL, "applicationProvisioning.launch", "applicationProvisioning.desc");
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_APPLICATIONS = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveApplications", ApplicationIcons.BOX_SOFTWARE, "applications.launch", "applications.desc");
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_APPLICATION_UPDATES = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveApplicationUpdates", ApplicationIcons.BOX_SOFTWARE, "applicationUpdates.launch", "applicationUpdates.desc");
@@ -54,7 +53,20 @@ public class Privileges {
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_MACHINE_TRANSLATION = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveMachineTranslation", ApplicationIcons.EARTH_LINK, "machineTranslation.launch", "machineTranslation.desc");
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_TRANSLATIONS = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveTranslations", ApplicationIcons.SPELL_CHECK, "translations.launch", "translations.desc");
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_USERS = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveUsers", ApplicationIcons.USERS_CROWD, "users.launch", "users.desc");
+	public final static SimplePrivilege LAUNCH_PERSPECTIVE_MONITORING = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveMonitoring", ApplicationIcons.CHART_LINE, "monitoring.launch", "monitoring.desc");
 
+
+	public final static StandardPrivilegeGroup ABC = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("test", null, null, null, CREATE, READ, UPDATE, DELETE, RESTORE, SHOW_RECYCLE_BIN, EXECUTE, PRINT);
+
+
+	public final static ApplicationRole role1 = ROLE_BUILDER.addRole("role", ApplicationIcons.PILOT, "title", "test",
+			ABC.createCopyWithPrivileges(CREATE, READ),
+			LAUNCH_PERSPECTIVE_ACCESS_CONTROL
+	);
+
+	public static List<ApplicationRole> getRoles() {
+		return ROLE_BUILDER.getRoles();
+	}
 
 	public static List<PrivilegeGroup> getPrivileges() {
 		return PRIVILEGE_BUILDER.getPrivileges();

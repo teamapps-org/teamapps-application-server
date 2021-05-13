@@ -19,6 +19,7 @@
  */
 package org.teamapps.application.server.system.utils;
 
+import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.data.extract.PropertyProvider;
@@ -45,10 +46,10 @@ public class ApplicationUiUtils {
 		return comboBox;
 	}
 
-	public static ComboBox<ManagedApplicationGroup> createApplicationGroupComboBox(Template template, UserSessionData userSessionData) {
+	public static ComboBox<ManagedApplicationGroup> createApplicationGroupComboBox(Template template, ApplicationInstanceData applicationInstanceData) {
 		ComboBox<ManagedApplicationGroup> comboBox = new ComboBox<>(template);
 		comboBox.setDropDownTemplate(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
-		PropertyProvider<ManagedApplicationGroup> propertyProvider = PropertyProviders.createManagedApplicationGroupPropertyProvider(userSessionData);
+		PropertyProvider<ManagedApplicationGroup> propertyProvider = PropertyProviders.createManagedApplicationGroupPropertyProvider(applicationInstanceData);
 		comboBox.setPropertyProvider(propertyProvider);
 		Function<ManagedApplicationGroup, String> recordToStringFunction = group -> (String) propertyProvider.getValues(group, null).get(BaseTemplate.PROPERTY_CAPTION);
 		comboBox.setRecordToStringFunction(recordToStringFunction);

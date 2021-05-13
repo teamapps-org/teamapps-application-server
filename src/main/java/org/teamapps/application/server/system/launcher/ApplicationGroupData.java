@@ -39,7 +39,7 @@ public class ApplicationGroupData {
 
 	public ApplicationGroupData(ManagedApplicationGroup applicationGroup, UserSessionData userSessionData) {
 		this.icon = applicationGroup.getIcon() != null ? IconUtils.decodeIcon(applicationGroup.getIcon()) : null;
-		this.title = userSessionData.getDictionary().getLocalized(applicationGroup.getTitleKey());
+		this.title = userSessionData.getLocalizationProvider().getLocalized(applicationGroup.getTitleKey());
 		this.groupPosition = applicationGroup.getListingPosition();
 	}
 

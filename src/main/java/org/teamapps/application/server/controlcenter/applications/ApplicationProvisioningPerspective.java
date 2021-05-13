@@ -100,10 +100,10 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		ComboBox<OrganizationField> organizationFieldCombo = OrganizationUtils.createOrganizationFieldCombo(getApplicationInstanceData());
 		ComboBox<Icon> iconComboBox = ApplicationIcons.createIconComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, true);
 		iconComboBox.setShowClearButton(true);
-		ComboBox<String> titleKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData());
+		ComboBox<String> titleKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData(), applicationComboBox::getValue);
 		titleKeyCombo.setShowClearButton(true);
 		LinkButton crateTitleKeyButton = new LinkButton(getLocalized("applications.createNewTitle"));
-		ComboBox<String> descriptionKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData());
+		ComboBox<String> descriptionKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData(), applicationComboBox::getValue);
 		descriptionKeyCombo.setShowClearButton(true);
 		LinkButton createDescriptionKeyButton = new LinkButton(getLocalized("applications.createNewDescription"));
 		CheckBox darkThemeCheckBox = new CheckBox(getLocalized("applications.darkTheme"));
@@ -133,7 +133,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		ToolbarButton moveDownButton = formPanel.addButton(ApplicationIcons.NAVIGATE_DOWN, getLocalized("applications.moveDown"));
 
 		CheckBox hideApplicationCheckBox = new CheckBox(getLocalized(Dictionary.HIDE));
-		ComboBox<ManagedApplicationGroup> applicationGroupComboBox = ApplicationUiUtils.createApplicationGroupComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, userSessionData);
+		ComboBox<ManagedApplicationGroup> applicationGroupComboBox = ApplicationUiUtils.createApplicationGroupComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData());
 
 		Arrays.asList(applicationComboBox, iconComboBox, titleKeyCombo, descriptionKeyCombo, applicationGroupComboBox).forEach(f -> f.setRequired(true));
 
@@ -243,9 +243,9 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		RecordComboBox<ApplicationPerspective> applicationsPerspectiveCombo = new RecordComboBox<>(PropertyProviders.createApplicationPerspectivePropertyProvider(userSessionData), BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
 
 		ComboBox<Icon> iconComboBox = ApplicationIcons.createIconComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, true);
-		ComboBox<String> titleKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData());
+		ComboBox<String> titleKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData(), applicationComboBox::getValue);
 		LinkButton crateTitleKeyButton = new LinkButton(getLocalized("applications.createNewTitle"));
-		ComboBox<String> descriptionKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData());
+		ComboBox<String> descriptionKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData(), applicationComboBox::getValue);
 		LinkButton createDescriptionKeyButton = new LinkButton(getLocalized("applications.createNewDescription"));
 		CheckBox toolbarPerspectiveMenuCheckBox = new CheckBox(getLocalized("applications.useToolbarPerspectiveMenu"));
 

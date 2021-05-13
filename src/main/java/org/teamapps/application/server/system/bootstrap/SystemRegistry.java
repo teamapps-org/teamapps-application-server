@@ -21,16 +21,17 @@ package org.teamapps.application.server.system.bootstrap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.teamapps.application.api.application.ApplicationBuilder;
 import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
 import org.teamapps.application.server.system.config.DocumentConversionConfig;
+import org.teamapps.application.server.system.config.MachineTranslationConfig;
 import org.teamapps.application.server.system.config.SystemConfig;
 import org.teamapps.application.server.system.localization.DictionaryLocalizationProvider;
 import org.teamapps.application.server.system.localization.SystemLocalizationProvider;
+import org.teamapps.application.server.system.machinetranslation.MachineTranslation;
 import org.teamapps.application.server.system.machinetranslation.TranslationService;
 import org.teamapps.application.server.system.server.SessionRegistryHandler;
 import org.teamapps.application.ux.IconUtils;
@@ -53,7 +54,7 @@ public class SystemRegistry {
 	private final BootstrapSessionHandler bootstrapSessionHandler;
 	private final UniversalDB universalDB;
 	private final ApplicationConfig<SystemConfig> applicationConfig;
-	private final TranslationService translationService;
+	private TranslationService translationService;
 	private final DictionaryLocalizationProvider dictionary;
 	private final SystemLocalizationProvider systemDictionary;
 	private final Map<Application, LoadedApplication> loadedApplicationMap = new HashMap<>();
@@ -63,12 +64,11 @@ public class SystemRegistry {
 	private DocumentConverter documentConverter;
 
 
-	public SystemRegistry(BootstrapSessionHandler bootstrapSessionHandler, UniversalDB universalDB, ApplicationConfig<SystemConfig> applicationConfig, TranslationService translationService) {
+	public SystemRegistry(BootstrapSessionHandler bootstrapSessionHandler, UniversalDB universalDB, ApplicationConfig<SystemConfig> applicationConfig) {
 		SystemConfig systemConfig = applicationConfig.getConfig();
 		this.bootstrapSessionHandler = bootstrapSessionHandler;
 		this.universalDB = universalDB;
 		this.applicationConfig = applicationConfig;
-		this.translationService = translationService;
 		this.dictionary = new DictionaryLocalizationProvider(translationService, systemConfig.getLocalizationConfig().getRequiredLanguages());
 		this.systemDictionary = new SystemLocalizationProvider(translationService, systemConfig.getLocalizationConfig().getRequiredLanguages());
 		this.baseResourceLinkProvider = new BaseResourceLinkProvider();
@@ -78,9 +78,17 @@ public class SystemRegistry {
 	}
 
 	private void handleConfigUpdate() {
-		DocumentConversionConfig documentConversionConfig = applicationConfig.getConfig().getDocumentConversionConfig();
+		SystemConfig config = applicationConfig.getConfig();
+		DocumentConversionConfig documentConversionConfig = config.getDocumentConversionConfig();
 		if (documentConversionConfig.isActive()) {
 			documentConverter = DocumentConverter.createRemoteConverter(documentConversionConfig.getHost(), documentConversionConfig.getUser(), documentConversionConfig.getPassword());
+		}
+		MachineTranslationConfig machineTranslationConfig = config.getMachineTranslationConfig();
+		if (machineTranslationConfig.isActive()) {
+			MachineTranslation machineTranslation = new MachineTranslation();
+			machineTranslation.setGoogleTranslationKey(machineTranslationConfig.getGoogleKey());
+			machineTranslation.setDeepLKey(machineTranslationConfig.getDeepLKey(), machineTranslationConfig.isDeepLFreeApi());
+			this.translationService = machineTranslation;
 		}
 	}
 

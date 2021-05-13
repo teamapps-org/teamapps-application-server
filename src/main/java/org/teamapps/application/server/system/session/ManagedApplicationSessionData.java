@@ -29,7 +29,6 @@ import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.launcher.MobileApplicationNavigation;
 import org.teamapps.application.server.system.launcher.MobileAssembler;
-import org.teamapps.application.server.system.localization.UserLocalizationProvider;
 import org.teamapps.application.server.system.privilege.AllowAllPrivilegeProvider;
 import org.teamapps.application.server.system.privilege.PrivilegeApplicationKey;
 import org.teamapps.model.controlcenter.ManagedApplication;
@@ -64,28 +63,24 @@ public class ManagedApplicationSessionData {
 		this.mobileNavigation = mobileNavigation;
 
 		boolean mobileDevice = SessionContext.current().getClientInfo().isMobileDevice();
+		ApplicationLocalizationProvider dictionary = userSessionData.getLocalizationProvider();
 		this.responsiveApplication = ResponsiveApplication.createApplication(
 				mobileDevice ?
-						new MobileAssembler(mobileNavigation, userSessionData.getDictionary()) :
+						new MobileAssembler(mobileNavigation, dictionary) :
 						new DesktopApplicationAssembler());
 		if (!mobileDevice) {
 			ToolbarButtonGroup buttonGroup = responsiveApplication.addApplicationButtonGroup(new ToolbarButtonGroup());
-			applicationMenuToolbarButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.WINDOWS, userSessionData.getDictionary().getLocalized(Dictionary.MENU), userSessionData.getDictionary().getLocalized(Dictionary.APPLICATION_MENU)));
+			applicationMenuToolbarButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.WINDOWS, dictionary.getLocalized(Dictionary.MENU), dictionary.getLocalized(Dictionary.APPLICATION_MENU)));
 			applicationMenuToolbarButton.setDroDownPanelWidth(350);
 			applicationMenuToolbarButton.setVisible(false);
 			//todo change title
-			perspectiveMenuToolbarButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.WINDOW_EXPLORER, userSessionData.getDictionary().getLocalized(Dictionary.MENU), userSessionData.getDictionary().getLocalized(Dictionary.APPLICATION_MENU)));
+			perspectiveMenuToolbarButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.WINDOW_EXPLORER, dictionary.getLocalized(Dictionary.MENU), dictionary.getLocalized(Dictionary.APPLICATION_MENU)));
 			perspectiveMenuToolbarButton.setDroDownPanelWidth(350);
 			perspectiveMenuToolbarButton.setVisible(false);
 		}
 		registry = userSessionData.getRegistry();
 		this.mainApplication = registry.getLoadedApplication(managedApplication.getMainApplication());
-		this.mainApplicationLocalizationProvider = new UserLocalizationProvider(
-				userSessionData.getSessionUser().getRankedLanguages(),
-				registry.getDictionary(),
-				registry.getSystemDictionary(),
-				registry.getLoadedApplication(managedApplication.getMainApplication()).getApplicationLocalizationProvider()
-		);
+		this.mainApplicationLocalizationProvider = userSessionData.getLocalizationProvider().createApplicationLocalizationProvider(managedApplication.getMainApplication());
 	}
 
 	public PerspectiveSessionData createPerspectiveSessionData(ManagedApplicationPerspective managedApplicationPerspective) {

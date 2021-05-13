@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,8 @@
  */
 package org.teamapps.application.server.system.localization;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.localization.LocalizationData;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.machinetranslation.TranslationService;
@@ -29,14 +31,26 @@ import org.teamapps.universaldb.index.enumeration.EnumFilterType;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.index.text.TextFilter;
 
-import java.util.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class LocalizationUtil {
 
-	private static List<String> allowedSourceTranslationLanguages = Arrays.asList("en", "de", "fr", "es", "pt", "nl", "it", "pl", "ru");
+	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+	private static List<String> allowedSourceTranslationLanguages = Arrays.asList("bg", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr", "hu", "it", "ja", "lt", "lv", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "zh");
 
 	public static void synchronizeLocalizationData(LocalizationData localizationData, Application application, LocalizationKeyType localizationKeyType, List<String> requiredLanguages) {
 		Map<String, Map<String, String>> localizationMapByKey = localizationData.createLocalizationMapByKey();
@@ -180,49 +194,54 @@ public class LocalizationUtil {
 		if (translationService == null) {
 			return;
 		}
-		List<LocalizationValue> translationRequests = LocalizationValue.filter().machineTranslationState(EnumFilterType.EQUALS, MachineTranslationState.TRANSLATION_REQUESTED).execute();
+		List<LocalizationValue> translationRequests = LocalizationValue.filter()
+				.machineTranslationState(EnumFilterType.EQUALS, MachineTranslationState.TRANSLATION_REQUESTED)
+				.execute();
 		ExecutorService executor = Executors.newFixedThreadPool(10);
 		translationRequests.forEach(localizationValue -> executor.submit(() -> translateLocalizationValue(localizationValue, translationService)));
 		executor.shutdown();
 	}
 
-	public static void translateLocalizationValue(LocalizationValue localizationValue, TranslationService translationService) {
-		LocalizationValue adminValue = localizationValue.getLocalizationKey().getLocalizationValues().stream()
+	public static void translateLocalizationValue(LocalizationValue missingTranslationValue, TranslationService translationService) {
+		LocalizationValue adminValue = missingTranslationValue.getLocalizationKey().getLocalizationValues().stream()
 				.filter(value -> value.getAdminKeyOverride() != null)
 				.filter(value -> allowedSourceTranslationLanguages.contains(value.getLanguage()))
 				.findFirst()
 				.orElse(null);
-		if (adminValue != null && translationService.canTranslate(adminValue.getLanguage(), localizationValue.getLanguage())) {
-			String translation = translationService.translate(adminValue.getAdminKeyOverride(), adminValue.getLanguage(), localizationValue.getLanguage());
+		if (adminValue != null && translationService.canTranslate(adminValue.getLanguage(), missingTranslationValue.getLanguage())) {
+			String translation = translationService.translate(adminValue.getAdminKeyOverride(), adminValue.getLanguage(), missingTranslationValue.getLanguage());
 			if (translation != null) {
 				translation = firstUpperIfSourceUpper(adminValue.getAdminKeyOverride(), translation);
-				localizationValue
-						.setTranslation(translation)
+				missingTranslationValue
+						.setMachineTranslation(translation)
 						.setMachineTranslationState(MachineTranslationState.OK)
-						.setCurrentDisplayValue(getDisplayValue(localizationValue))
+						.setCurrentDisplayValue(getDisplayValue(missingTranslationValue))
 						.save();
 				return;
 			}
 		}
 
-		Map<String, LocalizationValue> localizationValueByLanguage = localizationValue.getLocalizationKey().getLocalizationValues().stream()
-				.filter(value -> !value.equals(localizationValue))
+		Map<String, LocalizationValue> localizationValueByLanguage = missingTranslationValue.getLocalizationKey().getLocalizationValues().stream()
+				.filter(value -> !value.equals(missingTranslationValue))
 				.filter(value -> value.getOriginal() != null)
 				.collect(Collectors.toMap(LocalizationValue::getLanguage, v -> v));
 
 		for (String language : allowedSourceTranslationLanguages) {
-			LocalizationValue value = localizationValueByLanguage.get(language);
-			if (value != null && translationService.canTranslate(language, localizationValue.getLanguage())) {
-				String translationSourceText = getTranslationSourceText(localizationValue);
-				String translation = translationService.translate(translationSourceText, language, localizationValue.getLanguage());
-				if (translation != null) {
-					translation = firstUpperIfSourceUpper(translationSourceText, translation);
-					localizationValue
-							.setTranslation(translation)
-							.setMachineTranslationState(MachineTranslationState.OK)
-							.setCurrentDisplayValue(getDisplayValue(localizationValue))
-							.save();
-					return;
+			LocalizationValue sourceValue = localizationValueByLanguage.get(language);
+			if (sourceValue != null && translationService.canTranslate(language, missingTranslationValue.getLanguage())) {
+				String translationSourceText = getTranslationSourceText(sourceValue);
+				if (translationSourceText != null && !translationSourceText.isBlank()) {
+					String translation = translationService.translate(translationSourceText, language, missingTranslationValue.getLanguage());
+					if (translation != null) {
+						translation = firstUpperIfSourceUpper(translationSourceText, translation);
+						System.out.println("Translate (" + language + "->" + missingTranslationValue.getLanguage() + "): " + translationSourceText + " -> " + translation);
+						missingTranslationValue
+								.setMachineTranslation(translation)
+								.setMachineTranslationState(MachineTranslationState.OK)
+								.setCurrentDisplayValue(getDisplayValue(missingTranslationValue))
+								.save();
+						return;
+					}
 				}
 			}
 		}
@@ -287,6 +306,48 @@ public class LocalizationUtil {
 					.save();
 		}
 		return topic;
+	}
+
+	public static File createTranslationResourceFiles() throws IOException {
+		Map<String, List<LocalizationValue>> valuesByDomain = LocalizationValue.getAll().stream().filter(value -> value.getCurrentDisplayValue() != null).collect(Collectors.groupingBy(value -> {
+			if (value.getLocalizationKey().getApplication() != null) {
+				return value.getLocalizationKey().getApplication().getName();
+			} else {
+				return value.getLocalizationKey().getLocalizationKeyType().name();
+			}
+		}));
+
+		File zipFile = File.createTempFile("temp", ".zip");
+		FileOutputStream fos = new FileOutputStream(zipFile);
+		ZipOutputStream zos = new ZipOutputStream(fos);
+
+		for (Map.Entry<String, List<LocalizationValue>> domainEntry : valuesByDomain.entrySet()) {
+			String applicationOrType = domainEntry.getKey();
+			zos.putNextEntry(new ZipEntry(applicationOrType + "/"));
+			zos.closeEntry();
+
+			Map<String, List<LocalizationValue>> valueMap = domainEntry.getValue().stream().collect(Collectors.groupingBy(LocalizationValue::getLanguage));
+			for (Map.Entry<String, List<LocalizationValue>> entry : valueMap.entrySet()) {
+				String language = entry.getKey();
+				String fileName = applicationOrType;
+				if (applicationOrType.equals("DICTIONARY_KEY")) {
+					fileName = "dictionary";
+				}
+				zos.putNextEntry(new ZipEntry(applicationOrType + "/" + fileName + "_" + language + ".properties"));
+				List<LocalizationValue> values = entry.getValue().stream().sorted(Comparator.comparing(o -> o.getLocalizationKey().getKey())).collect(Collectors.toList());
+				StringBuilder sb = new StringBuilder();
+				for (LocalizationValue value : values) {
+					sb.append(value.getLocalizationKey().getKey())
+							.append("=")
+							.append(value.getCurrentDisplayValue())
+							.append("\n");
+				}
+				zos.write(sb.toString().getBytes(StandardCharsets.UTF_8));
+			}
+		}
+		zos.close();
+		fos.close();
+		return zipFile;
 	}
 
 }

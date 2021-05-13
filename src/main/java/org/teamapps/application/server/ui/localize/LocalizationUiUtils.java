@@ -34,6 +34,7 @@ import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.component.template.Template;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class LocalizationUiUtils {
@@ -42,7 +43,7 @@ public class LocalizationUiUtils {
 		return createLocalizationKeyCombo(template, localizationProvider, null);
 	}
 
-	public static ComboBox<String> createLocalizationKeyCombo(Template template, ApplicationLocalizationProvider localizationProvider, Application application) {
+	public static ComboBox<String> createLocalizationKeyCombo(Template template, ApplicationLocalizationProvider localizationProvider, Supplier<Application> applicationSupplier) {
 		ComboBox<String> comboBox = new ComboBox<>(template);
 		comboBox.setPropertyProvider((s, propertyNames) -> {
 			Map<String, Object> map = new HashMap<>();
@@ -55,23 +56,24 @@ public class LocalizationUiUtils {
 		comboBox.setRecordToStringFunction(localizationProvider::getLocalized);
 		comboBox.setModel(query -> {
 			List<LocalizationKey> keys = new ArrayList<>();
-			keys.addAll(application != null ? LocalizationKey.filter().application(NumericFilter.equalsFilter(application.getId())).execute() : Collections.emptyList());
+			keys.addAll(applicationSupplier != null && applicationSupplier.get() != null ? LocalizationKey.filter().application(NumericFilter.equalsFilter(applicationSupplier.get().getId())).execute() : Collections.emptyList());
 			keys.addAll(LocalizationKey.filter().localizationKeyType(EnumFilterType.EQUALS, LocalizationKeyType.DICTIONARY_KEY).execute());
 			keys.addAll(LocalizationKey.filter().localizationKeyType(EnumFilterType.EQUALS, LocalizationKeyType.SYSTEM_KEY).execute());
 			if (query == null || query.isBlank()) {
 				return keys.stream()
-						.limit(50)
+						.limit(150)
 						.map(LocalizationKey::getKey)
 						.collect(Collectors.toList());
 			} else {
 				String q = query.toLowerCase();
 				return keys.stream()
 						.filter(key -> key.getKey().toLowerCase().contains(q) || localizationProvider.getLocalized(key.getKey()).toLowerCase().contains(q))
-						.limit(50)
+						.limit(150)
 						.map(LocalizationKey::getKey)
 						.collect(Collectors.toList());
 			}
 		});
+		comboBox.setTemplate(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
 		return comboBox;
 	}
 

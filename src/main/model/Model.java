@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
+
 import org.teamapps.universaldb.schema.*;
 
 import static org.teamapps.universaldb.schema.TableOption.*;
@@ -37,6 +38,8 @@ public class Model implements SchemaInfoProvider {
 
 		//system model:
 		Table user = db.addTable("user", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
+		Table userAcceptedPolicy = db.addTable("userAcceptedPolicy", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
+		Table userAcceptedPolicyEntries = db.addTable("userAcceptedPolicyEntries", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
 		Table userAccessToken = db.addTable("userAccessToken", KEEP_DELETED, TRACK_CREATION);
 		Table organizationUnit = db.addTable("organizationUnit", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table organizationUnitType = db.addTable("organizationUnitType", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
@@ -84,6 +87,19 @@ public class Model implements SchemaInfoProvider {
 		Table appointment = db.addTable("appointment", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table appointmentSeries = db.addTable("appointmentSeries", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 
+		Table chatChannel = db.addTable("chatChannel", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
+		Table chatMessage = db.addTable("chatMessage", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
+
+		chatChannel
+				.addText("title")
+				.addReference("chatMessages", chatMessage, true, "chatChannel")
+		;
+
+		chatMessage
+				.addReference("chatChannel", chatChannel, false, "chatMessages")
+				.addReference("author", user, false)
+				.addText("message")
+		;
 
 		language
 				.addText("isoCode")
@@ -266,6 +282,7 @@ public class Model implements SchemaInfoProvider {
 				.addText("password")
 				.addText("theme")
 				.addEnum("userAccountStatus", "active", "inactive", "superAdmin")
+				.addReference("acceptedPolicies", userAcceptedPolicy, false)
 				.addReference("address", address, false)
 				.addReference("container", userContainer, false, "users")
 				.addReference("accessTokens", userAccessToken, true, "user")
@@ -274,12 +291,24 @@ public class Model implements SchemaInfoProvider {
 				.addReference("privateMessages", message, true, "privateRecipients") //private message entry instead!?
 		;
 
+		userAcceptedPolicy
+				.addInteger("lastAcceptedPrivacyPolicy")
+				.addInteger("lastAcceptedTermsOfUse")
+				.addReference("acceptEntries", userAcceptedPolicyEntries, true)
+				;
+
+		userAcceptedPolicyEntries
+				.addInteger("acceptedPrivacyPolicy")
+				.addInteger("acceptedTermsOfUse")
+				;
+
 		userAccessToken
 				.addReference("user", user, false, "accessTokens")
 				.addText("userAgentOnCreation")
 				.addText("userAgentLastUsed")
 				.addTimestamp("lastUsed")
 				.addBoolean("valid")
+				.addBoolean("restApi")
 				.addText("secureToken")
 		;
 

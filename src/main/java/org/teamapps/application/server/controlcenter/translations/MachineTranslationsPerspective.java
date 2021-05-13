@@ -70,6 +70,25 @@ public class MachineTranslationsPerspective extends AbstractManagedApplicationPe
 	private boolean language2Visible;
 	private boolean machineTranslationVisible;
 
+	/*
+		Export to property files
+			each language one property file, sorted by keys
+
+		Run machine translation
+			Check that there is no other task running
+
+		Maybe better a translation app:
+			Application translation
+				For Translators
+				For Proofreaders
+				Dashboard: numbers, status of all languages, per language
+				For Administrators
+			Machine translation
+			Language settings: required languages
+			Machine translation config
+
+	 */
+
 
 	public MachineTranslationsPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
 		super(applicationInstanceData, perspectiveInfoBadgeValue);
