@@ -36,7 +36,7 @@ public class MachineTranslation implements TranslationService {
     }
 
     public void setGoogleTranslationKey(String googleKey) {
-        if (googleKey != null && googleTranslation == null) {
+        if (googleKey != null && !googleKey.isEmpty() && googleTranslation == null) {
             try {
                 googleTranslation = new GoogleTranslation(googleKey);
                 services.add(googleTranslation);
@@ -47,9 +47,12 @@ public class MachineTranslation implements TranslationService {
         }
     }
 
-    public void setDeepLKey(String deepLKey) {
-        if (deepLKey != null && deepLTranslation == null) {
+    public void setDeepLKey(String deepLKey, boolean freeApi) {
+        if (deepLKey != null && !deepLKey.isEmpty() && deepLTranslation == null) {
             deepLTranslation = new DeepLTranslation(deepLKey);
+            if (freeApi) {
+                deepLTranslation.setFreeApi();
+            }
             services.add(deepLTranslation);
             supportedLanguages.addAll(deepLTranslation.getSupportedLanguages());
         }
