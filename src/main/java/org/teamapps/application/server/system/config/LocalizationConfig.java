@@ -25,8 +25,8 @@ import java.util.List;
 
 public class LocalizationConfig {
 
-	private List<String> allowedSourceLanguages = new ArrayList<>(Arrays.asList("en", "de", "fr", "es", "pt", "nl", "it", "pl", "ru"));
-	private List<String> requiredLanguages = new ArrayList<>(Arrays.asList("en", "de", "fr", "es"));
+	private List<String> allowedSourceLanguages = new ArrayList<>(Arrays.asList("en", "de", "fr", "es", "pt", "nl", "it", "pl", "ru", "da", "et", "fi", "cs"));
+	private List<String> requiredLanguages = new ArrayList<>(Arrays.asList("bg", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr", "hu", "it", "ja", "lt", "lv", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "zh"));
 
 	public List<String> getAllowedSourceLanguages() {
 		return allowedSourceLanguages;
