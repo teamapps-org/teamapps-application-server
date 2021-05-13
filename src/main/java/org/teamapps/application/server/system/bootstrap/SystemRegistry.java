@@ -120,7 +120,7 @@ public class SystemRegistry {
 							.setApplicationGroup(unspecifiedApplicationGroup)
 							.setSingleApplication(applicationInfo.isUnmanagedPerspectives())
 							.save();
-					List<ApplicationPerspective> perspectives = application.getPerspectives().stream().filter(perspective -> perspective.getAutoProvision()).collect(Collectors.toList());
+					List<ApplicationPerspective> perspectives = application.getPerspectives().stream().filter(ApplicationPerspective::getAutoProvision).collect(Collectors.toList());
 					for (ApplicationPerspective perspective : perspectives) {
 						ManagedApplicationPerspective.create()
 								.setManagedApplication(managedApplication)

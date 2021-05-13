@@ -76,6 +76,11 @@ public class DatabaseExplorerAppBuilder extends AbstractBaseApplicationBuilder {
 			public List<LocalizationEntry> getEntries() {
 				return Collections.emptyList();
 			}
+
+			@Override
+			public boolean isMachineTranslation() {
+				return false;
+			}
 		});
 	}
 

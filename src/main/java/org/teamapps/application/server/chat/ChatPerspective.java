@@ -66,7 +66,7 @@ public class ChatPerspective extends AbstractManagedApplicationPerspective {
 
 		timeLineView.setComponent(timeGraph);
 
-		TemplateField<User> userTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(userSessionData));
+		TemplateField<User> userTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(getApplicationInstanceData()));
 
 		table.addColumn(new TableColumn<ChatMessage>(ChatMessage.FIELD_CHAT_CHANNEL, "Channel", new TextField()).setDefaultWidth(150));
 		table.addColumn(new TableColumn<ChatMessage>(ChatMessage.FIELD_AUTHOR, "Author", userTableField).setDefaultWidth(180));
@@ -83,7 +83,7 @@ public class ChatPerspective extends AbstractManagedApplicationPerspective {
 		masterView.setComponent(table);
 
 		TextField channelTitle = new TextField();
-		TemplateField<User> author = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(userSessionData));
+		TemplateField<User> author = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(getApplicationInstanceData()));
 		InstantDateTimeField dateTimeField = new InstantDateTimeField();
 		MultiLineTextField messageField = new MultiLineTextField();
 		messageField.setCssStyle("height", Length.ofPixels(150).toCssString());

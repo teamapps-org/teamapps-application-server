@@ -36,10 +36,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -54,6 +51,7 @@ public class LocalizationUtil {
 
 	public static void synchronizeLocalizationData(LocalizationData localizationData, Application application, LocalizationKeyType localizationKeyType, List<String> requiredLanguages) {
 		Map<String, Map<String, String>> localizationMapByKey = localizationData.createLocalizationMapByKey();
+		Set<String> machineTranslatedLanguages = localizationData.getMachineTranslatedLanguages();
 		int appIdFilter = 0;
 		if (application != null) {
 			appIdFilter = application.getId();
@@ -74,16 +72,28 @@ public class LocalizationUtil {
 			Map<String, String> translations = localizationMapByKey.get(key);
 			for (Map.Entry<String, String> entry : translations.entrySet()) {
 				String language = entry.getKey();
-				String original = entry.getValue();
-				LocalizationValue.create()
-						.setLocalizationKey(localizationKey)
-						.setLanguage(language)
-						.setOriginal(original)
-						.setCurrentDisplayValue(original)
-						.setMachineTranslationState(MachineTranslationState.NOT_NECESSARY)
-						.setTranslationState(TranslationState.NOT_NECESSARY)
-						.setTranslationVerificationState(TranslationVerificationState.NOT_NECESSARY)
-						.save();
+				String value = entry.getValue();
+				if (machineTranslatedLanguages.contains(language)) {
+					LocalizationValue.create()
+							.setLocalizationKey(localizationKey)
+							.setLanguage(language)
+							.setMachineTranslation(value)
+							.setCurrentDisplayValue(value)
+							.setMachineTranslationState(MachineTranslationState.OK)
+							.setTranslationState(TranslationState.TRANSLATION_REQUESTED)
+							.setTranslationVerificationState(TranslationVerificationState.NOT_YET_TRANSLATED)
+							.save();
+				} else {
+					LocalizationValue.create()
+							.setLocalizationKey(localizationKey)
+							.setLanguage(language)
+							.setOriginal(value)
+							.setCurrentDisplayValue(value)
+							.setMachineTranslationState(MachineTranslationState.NOT_NECESSARY)
+							.setTranslationState(TranslationState.NOT_NECESSARY)
+							.setTranslationVerificationState(TranslationVerificationState.NOT_NECESSARY)
+							.save();
+				}
 			}
 		}
 

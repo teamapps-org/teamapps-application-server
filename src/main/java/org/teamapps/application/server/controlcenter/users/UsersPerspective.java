@@ -111,7 +111,7 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		userModelBuilder.updateModels();
 
 
-		TemplateField<User> userTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(userSessionData));
+		TemplateField<User> userTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(getApplicationInstanceData()));
 		TemplateField<UserAccountStatus> accountStatusTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, createAccountStatusPropertyProvider());
 		InstantDateTimeField lastLogin = new InstantDateTimeField();
 		TagComboBox<Language> languagesTableField = Language.createTagComboBox(getApplicationInstanceData());

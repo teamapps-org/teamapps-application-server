@@ -26,6 +26,7 @@ import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.desktop.ApplicationDesktop;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.privilege.*;
+import org.teamapps.application.api.ui.UiComponentFactory;
 import org.teamapps.application.api.user.SessionUser;
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.icons.Icon;
@@ -48,6 +49,7 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	private final ApplicationLocalizationProvider localizationProvider;
 	private final Supplier<DocumentConverter> documentConverterSupplier;
 	private final UserSessionData userSessionData;
+	private final SessionUiComponentFactory componentFactory;
 
 	public PerspectiveSessionData(ManagedApplicationSessionData managedApplicationSessionData, ManagedApplication managedApplication, ManagedApplicationPerspective managedApplicationPerspective, PerspectiveBuilder perspectiveBuilder, ApplicationPrivilegeProvider privilegeProvider, ApplicationLocalizationProvider localizationProvider, Supplier<DocumentConverter> documentConverterSupplier) {
 		this.managedApplicationSessionData = managedApplicationSessionData;
@@ -58,6 +60,7 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 		this.localizationProvider = localizationProvider;
 		this.documentConverterSupplier = documentConverterSupplier;
 		this.userSessionData = managedApplicationSessionData.getUserSessionData();
+		this.componentFactory = new SessionUiComponentFactory(this, userSessionData.getRegistry().getBaseResourceLinkProvider(), managedApplication.getMainApplication());
 	}
 
 	public Icon getIcon() {
@@ -130,6 +133,12 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	public ApplicationDesktop createApplicationDesktop() {
 		return userSessionData.getApplicationDesktopSupplier().get();
 	}
+
+	@Override
+	public UiComponentFactory getComponentFactory() {
+		return componentFactory;
+	}
+
 	@Override
 	public boolean isDarkTheme() {
 		return managedApplication.getDarkTheme();

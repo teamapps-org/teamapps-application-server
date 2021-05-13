@@ -191,6 +191,7 @@ public class PropertyProviders {
 		};
 	}
 
+
 	public static PropertyProvider<OrganizationUnit> creatOrganizationUnitPropertyProvider(ApplicationInstanceData applicationInstanceData) {
 		Function<TranslatableText, String> translatableTextExtractor = TranslatableTextUtils.createTranslatableTextExtractor(applicationInstanceData);
 		return (unit, propertyNames) -> {
@@ -237,14 +238,36 @@ public class PropertyProviders {
 		};
 	}
 
-	public static PropertyProvider<User> createUserPropertyProvider(UserSessionData userSessionData) {
-		Function<TranslatableText, String> translatableTextExtractor = TranslatableTextUtils.createTranslatableTextExtractor(userSessionData.getRankedLanguages());
+	public static PropertyProvider<User> createUserPropertyProvider(ApplicationInstanceData applicationInstanceData) {
+		Function<TranslatableText, String> translatableTextExtractor = TranslatableTextUtils.createTranslatableTextExtractor(applicationInstanceData.getUser().getRankedLanguages());
 		return (user, propertyNames) -> {
 			Map<String, Object> map = new HashMap<>();
-			String userProfilePictureLink = userSessionData.getRegistry().getBaseResourceLinkProvider().getUserProfilePictureLink(user);
+			String userProfilePictureLink = applicationInstanceData.getComponentFactory().createUserAvatarLink(user.getId(), false);
 			if (userProfilePictureLink != null) {
 				map.put(BaseTemplate.PROPERTY_IMAGE, userProfilePictureLink);
 			} else {
+				//todo generic user image
+				map.put(BaseTemplate.PROPERTY_ICON, ApplicationIcons.USER);
+			}
+			map.put(BaseTemplate.PROPERTY_CAPTION, user.getFirstName() + " " + user.getLastName());
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, user.getContainer() != null ? translatableTextExtractor.apply(user.getContainer().getOrganizationUnit().getName()) : null);
+			return map;
+		};
+	}
+
+	public static PropertyProvider<Integer> createUserIdPropertyProvider(ApplicationInstanceData applicationInstanceData) {
+		Function<TranslatableText, String> translatableTextExtractor = TranslatableTextUtils.createTranslatableTextExtractor(applicationInstanceData.getUser().getRankedLanguages());
+		return (userId, propertyNames) -> {
+			User user = User.getById(userId);
+			Map<String, Object> map = new HashMap<>();
+			if (!user.isStored()) {
+				return map;
+			}
+			String userProfilePictureLink = applicationInstanceData.getComponentFactory().createUserAvatarLink(userId, false);
+			if (userProfilePictureLink != null) {
+				map.put(BaseTemplate.PROPERTY_IMAGE, userProfilePictureLink);
+			} else {
+				//todo generic user image
 				map.put(BaseTemplate.PROPERTY_ICON, ApplicationIcons.USER);
 			}
 			map.put(BaseTemplate.PROPERTY_CAPTION, user.getFirstName() + " " + user.getLastName());

@@ -82,7 +82,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 		table.setStripedRows(false);
 		roleModelBuilder.updateModels();
 
-		TemplateField<User> userTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(userSessionData));
+		TemplateField<User> userTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(getApplicationInstanceData()));
 		TemplateField<Role> roleTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createRolePropertyProvider(getApplicationInstanceData()));
 		TemplateField<OrganizationUnit> orgUnitTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.creatOrganizationUnitPropertyProvider(getApplicationInstanceData()));
 
@@ -108,7 +108,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 		ComboBox<User> userCombobox = ComboBoxUtils.createComboBox(query -> query == null || query.isBlank() ?
 						User.getAll().stream().limit(50).collect(Collectors.toList()) :
 						User.filter().parseFullTextFilter(query).execute().stream().limit(50).collect(Collectors.toList()),
-				PropertyProviders.createUserPropertyProvider(userSessionData), BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
+				PropertyProviders.createUserPropertyProvider(getApplicationInstanceData()), BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
 		ComboBox<Role> roleComboBox = ComboBoxUtils.createRecordComboBox(
 				() -> isAppFilter() ? Role.filter().organizationField(NumericFilter.equalsFilter(getOrganizationField().getId())).execute() : Role.getAll(),
 				PropertyProviders.createRolePropertyProvider(getApplicationInstanceData()),

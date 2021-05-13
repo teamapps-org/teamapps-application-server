@@ -155,7 +155,7 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 		TemplateField<ManagedApplication> managedApplicationFormField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationPropertyProvider(userSessionData));
 		TemplateField<ManagedApplicationPerspective> perspectiveFormField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationPerspectivePropertyProvider(userSessionData));
 		TemplateField<LogLevel> logLevelFormField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, createLogLevelPropertyProvider());
-		TemplateField<User> userFormField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(userSessionData));
+		TemplateField<User> userFormField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(getApplicationInstanceData()));
 		DisplayField exceptionClassFormField = new DisplayField();
 		DisplayField messageFormField = new DisplayField();
 		MultiLineTextField detailsFormField = new MultiLineTextField();
@@ -230,7 +230,7 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 
 	private ComboBox<User> createUserComboBox() {
 		ComboBox<User> comboBox = new ComboBox<>(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
-		comboBox.setPropertyProvider(PropertyProviders.createUserPropertyProvider(userSessionData));
+		comboBox.setPropertyProvider(PropertyProviders.createUserPropertyProvider(getApplicationInstanceData()));
 		comboBox.setRecordToStringFunction(user -> user.getFirstName() + " " + user.getLastName());
 		comboBox.setModel(query -> query == null || query.isBlank() ?
 				User.getAll().stream().limit(50).collect(Collectors.toList()) :

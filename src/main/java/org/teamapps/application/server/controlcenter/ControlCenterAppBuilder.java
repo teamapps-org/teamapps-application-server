@@ -23,6 +23,7 @@ import org.teamapps.application.api.application.AbstractApplicationBuilder;
 import org.teamapps.application.api.application.perspective.PerspectiveBuilder;
 import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.localization.LocalizationData;
+import org.teamapps.application.api.localization.LocalizationLanguages;
 import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.api.privilege.ApplicationRole;
 import org.teamapps.application.api.privilege.PrivilegeGroup;
@@ -110,30 +111,33 @@ public class ControlCenterAppBuilder extends AbstractApplicationBuilder {
 	@Override
 	public LocalizationData getLocalizationData() {
 		return LocalizationData.createFromPropertyFiles("org.teamapps.application.server.i18n.controlCenter", getClass().getClassLoader(),
-				Locale.ENGLISH,
-				Locale.GERMAN,
-				Locale.FRENCH,
-				Locale.ITALIAN,
-				Locale.JAPANESE,
-				Locale.CHINESE,
-				Locale.forLanguageTag("bg"),
-				Locale.forLanguageTag("cs"),
-				Locale.forLanguageTag("da"),
-				Locale.forLanguageTag("el"),
-				Locale.forLanguageTag("es"),
-				Locale.forLanguageTag("et"),
-				Locale.forLanguageTag("fi"),
-				Locale.forLanguageTag("hu"),
-				Locale.forLanguageTag("lt"),
-				Locale.forLanguageTag("lv"),
-				Locale.forLanguageTag("nl"),
-				Locale.forLanguageTag("pl"),
-				Locale.forLanguageTag("pt"),
-				Locale.forLanguageTag("ro"),
-				Locale.forLanguageTag("ru"),
-				Locale.forLanguageTag("sk"),
-				Locale.forLanguageTag("sl"),
-				Locale.forLanguageTag("sv")
+				new LocalizationLanguages(
+						Locale.ENGLISH
+				).setMachineTranslatedLanguages(
+						Locale.GERMAN,
+						Locale.FRENCH,
+						Locale.ITALIAN,
+						Locale.JAPANESE,
+						Locale.CHINESE,
+						Locale.forLanguageTag("bg"),
+						Locale.forLanguageTag("cs"),
+						Locale.forLanguageTag("da"),
+						Locale.forLanguageTag("el"),
+						Locale.forLanguageTag("es"),
+						Locale.forLanguageTag("et"),
+						Locale.forLanguageTag("fi"),
+						Locale.forLanguageTag("hu"),
+						Locale.forLanguageTag("lt"),
+						Locale.forLanguageTag("lv"),
+						Locale.forLanguageTag("nl"),
+						Locale.forLanguageTag("pl"),
+						Locale.forLanguageTag("pt"),
+						Locale.forLanguageTag("ro"),
+						Locale.forLanguageTag("ru"),
+						Locale.forLanguageTag("sk"),
+						Locale.forLanguageTag("sl"),
+						Locale.forLanguageTag("sv")
+				)
 		);
 	}
 

@@ -26,6 +26,7 @@ import org.teamapps.application.server.system.application.AbstractManagedApplica
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
+import org.teamapps.application.server.ui.localize.LocalizationTranslationKeyField;
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.application.server.ui.localize.LocalizationUiUtils;
 import org.teamapps.application.ux.UiUtils;
@@ -101,8 +102,11 @@ public class ApplicationGroupsPerspective extends AbstractManagedApplicationPers
 		ResponsiveFormLayout formLayout = groupForm.addResponsiveFormLayout(400);
 
 		ComboBox<Icon> iconComboBox = ApplicationIcons.createIconComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, true);
-		ComboBox<String> titleKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData(), this::getMainApplication);
-		LinkButton crateTitleKeyButton = new LinkButton(getLocalized("applications.createNewTitle"));
+
+		LocalizationTranslationKeyField titleKeyField = new LocalizationTranslationKeyField(getLocalized("applications.createNewTitle"), getApplicationInstanceData(), userSessionData.getRegistry().getSystemDictionary());
+
+//		ComboBox<String> titleKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData(), this::getMainApplication);
+//		LinkButton crateTitleKeyButton = new LinkButton(getLocalized("applications.createNewTitle"));
 
 		EntityListModelBuilder<ManagedApplication> applicationModelBuilder = new EntityListModelBuilder<>(getApplicationInstanceData());
 		Table<ManagedApplication> applicationTable = applicationModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationPropertyProvider(userSessionData), 26);
@@ -113,11 +117,11 @@ public class ApplicationGroupsPerspective extends AbstractManagedApplicationPers
 
 		formLayout.addSection().setDrawHeaderLine(false).setCollapsible(false);
 		formLayout.addLabelAndComponent(null, getLocalized("applicationGroups.groupIcon"), iconComboBox);
-		formLayout.addLabelAndComponent(null, getLocalized("applicationGroups.groupTitle"), titleKeyCombo);
-		formLayout.addLabelAndComponent(null, null, crateTitleKeyButton);
+		formLayout.addLabelAndComponent(null, getLocalized("applicationGroups.groupTitle"), titleKeyField.getSelectionField());
+		formLayout.addLabelAndComponent(null, null, titleKeyField.getKeyLinkButton());
 		formLayout.addLabelAndComponent(null, getLocalized(Dictionary.APPLICATIONS), formPanel.getPanel());
 
-		Arrays.asList(iconComboBox, titleKeyCombo).forEach(f -> f.setRequired(true));
+		Arrays.asList(iconComboBox, titleKeyField.getSelectionField()).forEach(f -> f.setRequired(true));
 		applicationDetailsView.setComponent(groupForm);
 
 		addGroupButton.onClick.addListener(() -> selectedGroup.set(ManagedApplicationGroup.create()));
@@ -130,7 +134,7 @@ public class ApplicationGroupsPerspective extends AbstractManagedApplicationPers
 
 		selectedGroup.onChanged().addListener(group -> {
 			iconComboBox.setValue(IconUtils.decodeIcon(group.getIcon()));
-			titleKeyCombo.setValue(group.getTitleKey());
+			titleKeyField.setKey(group.getTitleKey());
 			applicationModelBuilder.setRecords(group.getApplications());
 		});
 
@@ -139,9 +143,9 @@ public class ApplicationGroupsPerspective extends AbstractManagedApplicationPers
 			if (group == null) {
 				return;
 			}
-			if (Fields.validateAll(iconComboBox, titleKeyCombo)) {
+			if (Fields.validateAll(iconComboBox, titleKeyField.getSelectionField())) {
 				group.setIcon(IconUtils.encodeNoStyle(iconComboBox.getValue()));
-				group.setTitleKey(titleKeyCombo.getValue());
+				group.setTitleKey(titleKeyField.getKey());
 				group.save();
 				int pos = 0;
 				for (ManagedApplication application : applicationModelBuilder.getRecords()) {

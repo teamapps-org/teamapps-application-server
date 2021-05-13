@@ -23,6 +23,7 @@ import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.model.controlcenter.User;
 import org.teamapps.ux.session.SessionContext;
 
+
 public interface SessionRegistryHandler {
 
 	void handleNewSession(SessionContext context);
