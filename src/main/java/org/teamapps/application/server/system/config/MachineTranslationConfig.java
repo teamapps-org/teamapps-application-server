@@ -19,10 +19,11 @@
  */
 package org.teamapps.application.server.system.config;
 
-public class MachineTranslation {
+public class MachineTranslationConfig {
 
 	private boolean active;
 	private String deepLKey = "deepKey";
+	private boolean deepLFreeApi;
 	private String googleKey = "googleKey";
 
 	public boolean isActive() {
@@ -35,6 +36,14 @@ public class MachineTranslation {
 
 	public String getDeepLKey() {
 		return deepLKey;
+	}
+
+	public boolean isDeepLFreeApi() {
+		return deepLFreeApi;
+	}
+
+	public void setDeepLFreeApi(boolean deepLFreeApi) {
+		this.deepLFreeApi = deepLFreeApi;
 	}
 
 	public void setDeepLKey(String deepLKey) {

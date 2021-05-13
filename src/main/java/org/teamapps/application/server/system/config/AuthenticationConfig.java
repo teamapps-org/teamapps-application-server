@@ -21,9 +21,17 @@ package org.teamapps.application.server.system.config;
 
 public class AuthenticationConfig {
 
-	private boolean allowStoringSecurityTokensOnClient;
+	private boolean allowStoringSecurityTokensOnClient = true;
 	private boolean allowPasswordReset;
 	private boolean allowRegistration;
+
+	private boolean checkTermsOfUse = false;
+	private int currentTermsOfUseVersion = 1;
+	private String termsOfUseLink = "https://www.example.com/terms-of.use.html";
+
+	private boolean checkPrivacyPolicy = false;
+	private int currentPrivacyPolicyVersion = 1;
+	private String privacyPolicyLink = "https://www.example.com/privacy-policy.html";
 
 	public boolean isAllowStoringSecurityTokensOnClient() {
 		return allowStoringSecurityTokensOnClient;
@@ -47,5 +55,53 @@ public class AuthenticationConfig {
 
 	public void setAllowRegistration(boolean allowRegistration) {
 		this.allowRegistration = allowRegistration;
+	}
+
+	public boolean isCheckTermsOfUse() {
+		return checkTermsOfUse;
+	}
+
+	public void setCheckTermsOfUse(boolean checkTermsOfUse) {
+		this.checkTermsOfUse = checkTermsOfUse;
+	}
+
+	public int getCurrentTermsOfUseVersion() {
+		return currentTermsOfUseVersion;
+	}
+
+	public void setCurrentTermsOfUseVersion(int currentTermsOfUseVersion) {
+		this.currentTermsOfUseVersion = currentTermsOfUseVersion;
+	}
+
+	public String getTermsOfUseLink() {
+		return termsOfUseLink;
+	}
+
+	public void setTermsOfUseLink(String termsOfUseLink) {
+		this.termsOfUseLink = termsOfUseLink;
+	}
+
+	public boolean isCheckPrivacyPolicy() {
+		return checkPrivacyPolicy;
+	}
+
+	public void setCheckPrivacyPolicy(boolean checkPrivacyPolicy) {
+		this.checkPrivacyPolicy = checkPrivacyPolicy;
+	}
+
+	public int getCurrentPrivacyPolicyVersion() {
+		return currentPrivacyPolicyVersion;
+	}
+
+	public void setCurrentPrivacyPolicyVersion(int currentPrivacyPolicyVersion) {
+		this.currentPrivacyPolicyVersion = currentPrivacyPolicyVersion;
+	}
+
+	public String getPrivacyPolicyLink() {
+		return privacyPolicyLink;
+	}
+
+	public void setPrivacyPolicyLink(String privacyPolicyLink) {
+		this.privacyPolicyLink = privacyPolicyLink;
 	}
 }
