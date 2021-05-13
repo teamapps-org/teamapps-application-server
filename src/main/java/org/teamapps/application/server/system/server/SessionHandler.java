@@ -27,7 +27,7 @@ import java.io.File;
 
 public interface SessionHandler {
 
-	void init(SessionManager sessionManager, UniversalDB universalDb, File configPath);
+	void init(SessionManager sessionManager, UniversalDB universalDb);
 
 	void handleSessionStart(SessionContext context);
 

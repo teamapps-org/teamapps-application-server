@@ -23,6 +23,7 @@ import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfoList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.teamapps.application.server.rest.ChatRestServlet;
 import org.teamapps.application.server.system.bootstrap.PublicLinkResourceProvider;
 import org.teamapps.config.TeamAppsConfiguration;
 import org.teamapps.model.ApplicationServerSchema;
@@ -53,7 +54,6 @@ public class ApplicationServer implements WebController, SessionManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private final File basePath;
-	private final File configPath;
 	private TeamAppsConfiguration teamAppsConfiguration;
 	private int port;
 	private UniversalDB universalDb;
@@ -64,15 +64,13 @@ public class ApplicationServer implements WebController, SessionManager {
 	private WeakHashMap<SessionHandler, Long> weakStartDateBySessionHandler = new WeakHashMap<>();
 
 	public ApplicationServer(File basePath) {
-		this(basePath, new File(basePath, "config"), new TeamAppsConfiguration(), 8080);
+		this(basePath, new TeamAppsConfiguration(), 8080);
 	}
 
-	public ApplicationServer(File basePath, File configPath, TeamAppsConfiguration teamAppsConfiguration, int port) {
+	public ApplicationServer(File basePath, TeamAppsConfiguration teamAppsConfiguration, int port) {
 		this.basePath = basePath;
-		this.configPath = configPath;
 		this.teamAppsConfiguration = teamAppsConfiguration;
 		this.port = port;
-		configPath.mkdir();
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			SystemStarts.create().setTimestamp(Instant.now()).setType(Type.STOP).save();
 		}));
@@ -82,7 +80,7 @@ public class ApplicationServer implements WebController, SessionManager {
 		LOGGER.info("Loading new session handler:" + jarFile.getPath());
 		URLClassLoader classLoader = new URLClassLoader(new URL[]{jarFile.toURI().toURL()});
 		SessionHandler newSessionHandler = loadSessionHandler(classLoader);
-		newSessionHandler.init(this, universalDb, configPath);
+		newSessionHandler.init(this, universalDb);
 		weakStartDateBySessionHandler.put(newSessionHandler, System.currentTimeMillis());
 		this.sessionHandler = newSessionHandler;
 		System.gc();
@@ -91,7 +89,7 @@ public class ApplicationServer implements WebController, SessionManager {
 
 	@Override
 	public void updateSessionHandler(SessionHandler sessionHandler) {
-		sessionHandler.init(this, universalDb, configPath);
+		sessionHandler.init(this, universalDb);
 		weakStartDateBySessionHandler.put(sessionHandler, System.currentTimeMillis());
 		this.sessionHandler = sessionHandler;
 		LOGGER.info("Updated fixed session handler:" + sessionHandler);
@@ -126,16 +124,19 @@ public class ApplicationServer implements WebController, SessionManager {
 	}
 
 	public void start() throws Exception {
-		File dbPath = new File(basePath, "db");
+		File dbPath = new File(basePath, "database");
 		dbPath.mkdir();
 		universalDb = UniversalDB.createStandalone(dbPath, new ApplicationServerSchema());
-		sessionHandler.init(this, universalDb, configPath);
+		sessionHandler.init(this, universalDb);
 		TeamAppsUndertowEmbeddedServer server = new TeamAppsUndertowEmbeddedServer(this, teamAppsConfiguration, port);
 
 		addClassPathResourceProvider("org.teamapps.application.server.media", "/ta-media/");
 
 		File staticResourcesPath = new File(basePath, "static");
 		staticResourcesPath.mkdir();
+
+		addServletRegistration(new ServletRegistration(new ChatRestServlet(), "/connect-api-v1/*"));
+
 		addServletRegistration(new ServletRegistration(new ResourceProviderServlet((servletPath, relativeResourcePath, httpSessionId) -> {
 			try {
 				File file = new File(staticResourcesPath, relativeResourcePath);
