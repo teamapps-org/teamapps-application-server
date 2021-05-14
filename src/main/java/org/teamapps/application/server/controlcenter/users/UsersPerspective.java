@@ -25,6 +25,7 @@ import org.teamapps.application.api.application.perspective.PerspectiveMenuPanel
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.localization.Language;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.server.controlcenter.roles.UserRoleAssignmentPerspectiveBuilder;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
@@ -180,6 +181,9 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		addressForm.createAddressSection(formLayout);
 		addressForm.addFields(formLayout);
 
+		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
+		formMetaFields.addMetaFields(formLayout, false);
+
 		detailView.setComponent(form);
 
 		addButton.onClick.addListener(() -> selectedUser.set(User.create().setAddress(Address.create()).setUserAccountStatus(UserAccountStatus.ACTIVE)));
@@ -244,7 +248,7 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 			orgUnitComboBox.setValue(user.getContainer() != null ? user.getContainer().getOrganizationUnit() : null);
 
 			addressForm.setAddress(user.getAddress());
-
+			formMetaFields.updateEntity(user);
 		});
 
 		selectedUser.set(User.create().setAddress(Address.create()).setUserAccountStatus(UserAccountStatus.ACTIVE));
