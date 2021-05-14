@@ -23,6 +23,7 @@ import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.localization.Language;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.localization.SystemLocalizationProvider;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.form.FormWindow;
@@ -36,35 +37,27 @@ import org.teamapps.ux.component.field.Fields;
 import org.teamapps.ux.component.field.TextField;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class LocalizationKeyWindow {
 
 	public final Event<String> onNewKey = new Event<>();
 	private final ApplicationInstanceData applicationInstanceData;
-	private final SystemLocalizationProvider systemLocalizationProvider;
 	private final List<Language> rankedLanguages;
-	private final Application application;
+	private final SystemRegistry systemRegistry;
+	private final Supplier<Application> applicationSupplier;
 	private FormWindow formWindow;
 	private String newLocalizationKey;
 
-	public static LocalizationKeyWindow createSystemKey(SystemLocalizationProvider systemLocalizationProvider, ApplicationInstanceData applicationInstanceData) {
-		return new LocalizationKeyWindow(applicationInstanceData, null, systemLocalizationProvider);
-	}
-
-	public static LocalizationKeyWindow createApplicationKey(Application application, ApplicationInstanceData applicationInstanceData) {
-		return new LocalizationKeyWindow(applicationInstanceData, application, null);
-	}
-
-
-	private LocalizationKeyWindow(ApplicationInstanceData applicationInstanceData, Application application, SystemLocalizationProvider systemLocalizationProvider) {
+	public LocalizationKeyWindow(ApplicationInstanceData applicationInstanceData, SystemRegistry systemRegistry, Supplier<Application> applicationSupplier) {
 		this.applicationInstanceData = applicationInstanceData;
-		this.systemLocalizationProvider = systemLocalizationProvider;
 		this.rankedLanguages = applicationInstanceData.getUser().getRankedLanguages().stream()
 				.map(Language::getLanguageByIsoCode)
 				.filter(Objects::nonNull)
 				.collect(Collectors.toList());
-		this.application = application;
+		this.systemRegistry = systemRegistry;
+		this.applicationSupplier = applicationSupplier;
 		createUi();
 	}
 
@@ -76,7 +69,7 @@ public class LocalizationKeyWindow {
 		formWindow.addSection();
 
 		TextField keyField = new TextField();
-		formWindow.addField(ApplicationIcons.KEY, applicationInstanceData.getLocalized(Dictionary.TRANSLATION_KEY), keyField);
+		formWindow.addField(ApplicationIcons.DICTIONARY, applicationInstanceData.getLocalized(Dictionary.TRANSLATION_KEY), keyField);
 		Map<Language, TextField> valueFieldByLanguage = new HashMap<>();
 		for (Language language : rankedLanguages) {
 			TextField valueField = new TextField();
@@ -87,10 +80,10 @@ public class LocalizationKeyWindow {
 		keyField.setRequired(true);
 		keyField.addValidator(s -> {
 			LocalizationKeyQuery keyQuery = LocalizationKey.filter();
-			if (application != null) {
+			if (applicationSupplier != null && applicationSupplier.get() != null) {
 				keyQuery
 						.key(TextFilter.textEqualsIgnoreCaseFilter(s))
-						.application(NumericFilter.equalsFilter(application.getId()));
+						.application(NumericFilter.equalsFilter(applicationSupplier.get().getId()));
 			} else {
 				keyQuery
 						.key(TextFilter.textEqualsIgnoreCaseFilter(SystemLocalizationProvider.SYSTEM_KEY_PREFIX + s))
@@ -111,9 +104,9 @@ public class LocalizationKeyWindow {
 						.setKey(keyField.getValue())
 						.setUsed(true)
 						.setLocalizationKeyFormat(LocalizationKeyFormat.SINGLE_LINE);
-				if (application != null) {
+				if (applicationSupplier != null && applicationSupplier.get() != null) {
 					localizationKey
-							.setApplication(application)
+							.setApplication(applicationSupplier.get())
 							.setLocalizationKeyType(LocalizationKeyType.REPORTING_KEY);
 				} else {
 					localizationKey
@@ -121,10 +114,13 @@ public class LocalizationKeyWindow {
 							.setLocalizationKeyType(LocalizationKeyType.SYSTEM_KEY);
 				}
 				List<LocalizationValue> values = new ArrayList<>();
+				StringBuilder userData = new StringBuilder();
+				userData.append("key:").append(keyField.getValue()).append("\n");
 				for (Language language : rankedLanguages) {
 					TextField field = valueFieldByLanguage.get(language);
 					String value = field.getValue();
 					if (value != null && !value.isBlank()) {
+						userData.append(language).append(":").append(value).append("\n");
 						LocalizationValue localizationValue = LocalizationValue.create()
 								.setLanguage(language.getIsoCode())
 								.setOriginal(value)
@@ -135,18 +131,32 @@ public class LocalizationKeyWindow {
 						values.add(localizationValue);
 					}
 				}
+
 				if (!values.isEmpty()) {
+					Set<String> createdLanguages = values.stream().map(LocalizationValue::getLanguage).collect(Collectors.toSet());
+					for (String requiredLanguage : systemRegistry.getSystemConfig().getLocalizationConfig().getRequiredLanguages()) {
+						if (!createdLanguages.contains(requiredLanguage)) {
+							LocalizationValue localizationValue = LocalizationValue.create()
+									.setLanguage(requiredLanguage)
+									.setMachineTranslationState(MachineTranslationState.TRANSLATION_REQUESTED)
+									.setTranslationState(TranslationState.TRANSLATION_REQUESTED)
+									.setTranslationVerificationState(TranslationVerificationState.NOT_YET_TRANSLATED)
+									.save();
+							values.add(localizationValue);
+						}
+					}
+
 					localizationKey.setLocalizationValues(values).save();
 					success = true;
 					newLocalizationKey = localizationKey.getKey();
 					formWindow.close();
-					if (application == null) {
-						systemLocalizationProvider.reload();
-					}
+					applicationInstanceData.writeActivityLog("Created new translation key", userData.toString());
+					systemRegistry.updateGlobalLocalizationProvider();
+					systemRegistry.machineTranslateMissingEntries();
 					onNewKey.fire(newLocalizationKey);
 				}
+				UiUtils.showSaveNotification(success, applicationInstanceData);
 			}
-			UiUtils.showSaveNotification(success, applicationInstanceData);
 		});
 	}
 
