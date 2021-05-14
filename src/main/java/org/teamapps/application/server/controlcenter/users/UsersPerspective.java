@@ -183,6 +183,7 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 
 		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
 		formMetaFields.addMetaFields(formLayout, false);
+		selectedUser.onChanged().addListener(formMetaFields::updateEntity);
 
 		detailView.setComponent(form);
 
@@ -248,7 +249,6 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 			orgUnitComboBox.setValue(user.getContainer() != null ? user.getContainer().getOrganizationUnit() : null);
 
 			addressForm.setAddress(user.getAddress());
-			formMetaFields.updateEntity(user);
 		});
 
 		selectedUser.set(User.create().setAddress(Address.create()).setUserAccountStatus(UserAccountStatus.ACTIVE));

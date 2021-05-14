@@ -22,6 +22,7 @@ package org.teamapps.application.server.controlcenter.applications;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
@@ -30,7 +31,6 @@ import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.server.system.utils.ApplicationUiUtils;
 import org.teamapps.application.server.ui.localize.LocalizationTranslationKeyField;
 import org.teamapps.application.ux.IconUtils;
-import org.teamapps.application.server.ui.localize.LocalizationKeyWindow;
 import org.teamapps.application.server.ui.localize.LocalizationUiUtils;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.combo.RecordComboBox;
@@ -102,8 +102,8 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		ComboBox<Icon> iconComboBox = ApplicationIcons.createIconComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, true);
 		iconComboBox.setShowClearButton(true);
 
-		LocalizationTranslationKeyField titleKeyField = new LocalizationTranslationKeyField(getLocalized("applications.createNewTitle"), getApplicationInstanceData(), applicationComboBox::getValue);
-		LocalizationTranslationKeyField descriptionKeyField = new LocalizationTranslationKeyField(getLocalized("applications.createNewDescription"), getApplicationInstanceData(), applicationComboBox::getValue);
+		LocalizationTranslationKeyField titleKeyField = new LocalizationTranslationKeyField(getLocalized("applications.createNewTitle"), getApplicationInstanceData(), userSessionData.getRegistry(), applicationComboBox::getValue);
+		LocalizationTranslationKeyField descriptionKeyField = new LocalizationTranslationKeyField(getLocalized("applications.createNewDescription"), getApplicationInstanceData(), userSessionData.getRegistry(), applicationComboBox::getValue);
 
 		CheckBox darkThemeCheckBox = new CheckBox(getLocalized("applications.darkTheme"));
 		CheckBox toolbarAppMenuCheckbox = new CheckBox(getLocalized("applications.useToolbarApplicationMenu"));
@@ -150,6 +150,10 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		formLayout.addLabelAndComponent(null, getLocalized("applications.toolbarAppMenu"), toolbarAppMenuCheckbox);
 		formLayout.addLabelAndComponent(null, getLocalized("applications.perspectives"), formPanel.getPanel());
 		formLayout.addLabelAndComponent(null, getLocalized("applications.applicationGroup"), applicationGroupComboBox);
+
+		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
+		formMetaFields.addMetaFields(formLayout, false);
+		selectedApplication.onChanged().addListener(formMetaFields::updateEntity);
 
 		ToolbarButtonGroup buttonGroup = applicationDetailsView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
 		ToolbarButton addApplicationButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.ADD, getLocalized("applications.addApplication"), getLocalized("applications.addApplication.desc")));

@@ -23,6 +23,7 @@ import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.application.perspective.PerspectiveMenuPanel;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfoDataElement;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
@@ -178,6 +179,10 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 
 		formLayout.addSection(ApplicationIcons.WINDOWS, getLocalized("applications.perspectivesDataChanges")).setDrawHeaderLine(true).setCollapsed(true);
 		formLayout.addLabelAndComponent(null, perspectiveChangesDisplayField);
+
+		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
+		formMetaFields.addMetaFields(formLayout, false);
+		selectedApplication.onChanged().addListener(formMetaFields::updateEntity);
 
 		selectedApplicationVersion.onChanged().addListener(version -> {
 			dataModelChangesField.setValue(ApplicationInfoDataElement.getChangeString(version.getDataModelData()));

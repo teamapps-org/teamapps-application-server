@@ -22,13 +22,13 @@ package org.teamapps.application.server.controlcenter.applications;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.server.ui.localize.LocalizationTranslationKeyField;
 import org.teamapps.application.ux.IconUtils;
-import org.teamapps.application.server.ui.localize.LocalizationUiUtils;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.form.FormPanel;
 import org.teamapps.application.tools.EntityListModelBuilder;
@@ -44,7 +44,6 @@ import org.teamapps.ux.component.field.Fields;
 import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.form.ResponsiveForm;
 import org.teamapps.ux.component.form.ResponsiveFormLayout;
-import org.teamapps.ux.component.linkbutton.LinkButton;
 import org.teamapps.ux.component.table.Table;
 import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.component.toolbar.ToolbarButton;
@@ -103,7 +102,7 @@ public class ApplicationGroupsPerspective extends AbstractManagedApplicationPers
 
 		ComboBox<Icon> iconComboBox = ApplicationIcons.createIconComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, true);
 
-		LocalizationTranslationKeyField titleKeyField = new LocalizationTranslationKeyField(getLocalized("applications.createNewTitle"), getApplicationInstanceData(), userSessionData.getRegistry().getSystemDictionary());
+		LocalizationTranslationKeyField titleKeyField = new LocalizationTranslationKeyField(getLocalized("applications.createNewTitle"), getApplicationInstanceData(), userSessionData.getRegistry(), null);
 
 //		ComboBox<String> titleKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData(), this::getMainApplication);
 //		LinkButton crateTitleKeyButton = new LinkButton(getLocalized("applications.createNewTitle"));
@@ -120,6 +119,10 @@ public class ApplicationGroupsPerspective extends AbstractManagedApplicationPers
 		formLayout.addLabelAndComponent(null, getLocalized("applicationGroups.groupTitle"), titleKeyField.getSelectionField());
 		formLayout.addLabelAndComponent(null, null, titleKeyField.getKeyLinkButton());
 		formLayout.addLabelAndComponent(null, getLocalized(Dictionary.APPLICATIONS), formPanel.getPanel());
+
+		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
+		formMetaFields.addMetaFields(formLayout, false);
+		selectedGroup.onChanged().addListener(formMetaFields::updateEntity);
 
 		Arrays.asList(iconComboBox, titleKeyField.getSelectionField()).forEach(f -> f.setRequired(true));
 		applicationDetailsView.setComponent(groupForm);

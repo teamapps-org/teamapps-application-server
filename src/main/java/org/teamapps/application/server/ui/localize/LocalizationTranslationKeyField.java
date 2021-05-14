@@ -21,6 +21,7 @@ package org.teamapps.application.server.ui.localize;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.ui.TranslationKeyField;
+import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.localization.SystemLocalizationProvider;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.ux.component.field.AbstractField;
@@ -34,19 +35,13 @@ import java.util.function.Supplier;
 
 public class LocalizationTranslationKeyField implements TranslationKeyField {
 
+	private final SystemRegistry systemRegistry;
 	private final ComboBox<String> localizationKeyCombo;
 	private final TextField keyTextField;
 	private final LinkButton linkButton;
 
-	public LocalizationTranslationKeyField(String linkButtonCaption, ApplicationInstanceData applicationInstanceData, Supplier<Application> applicationSupplier) {
-		this(linkButtonCaption, applicationInstanceData, applicationSupplier, null);
-	}
-
-	public LocalizationTranslationKeyField(String linkButtonCaption, ApplicationInstanceData applicationInstanceData, SystemLocalizationProvider systemLocalizationProvider) {
-		this(linkButtonCaption, applicationInstanceData, null, systemLocalizationProvider);
-	}
-
-	private LocalizationTranslationKeyField(String linkButtonCaption, ApplicationInstanceData applicationInstanceData, Supplier<Application> applicationSupplier, SystemLocalizationProvider systemLocalizationProvider) {
+	public LocalizationTranslationKeyField(String linkButtonCaption, ApplicationInstanceData applicationInstanceData, SystemRegistry systemRegistry, Supplier<Application> applicationSupplier) {
+		this.systemRegistry = systemRegistry;
 		localizationKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, applicationInstanceData, applicationSupplier);
 		localizationKeyCombo.setDropDownTemplate(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
 		localizationKeyCombo.setShowClearButton(true);
@@ -55,10 +50,12 @@ public class LocalizationTranslationKeyField implements TranslationKeyField {
 
 		linkButton = new LinkButton(linkButtonCaption);
 		localizationKeyCombo.onValueChanged.addListener(keyTextField::setValue);
-		LocalizationKeyWindow localizationKeyWindow = applicationSupplier != null ? LocalizationKeyWindow.createApplicationKey(applicationSupplier.get(), applicationInstanceData) : LocalizationKeyWindow.createSystemKey(systemLocalizationProvider, applicationInstanceData);
+		LocalizationKeyWindow localizationKeyWindow = new LocalizationKeyWindow(applicationInstanceData, systemRegistry, applicationSupplier);
 		linkButton.onClicked.addListener(() -> {
-			localizationKeyWindow.onNewKey.addListener(localizationKeyCombo::setValue);
-			localizationKeyWindow.onNewKey.addListener(keyTextField::setValue);
+			localizationKeyWindow.onNewKey.addListener(value -> {
+				localizationKeyCombo.setValue(value);
+				keyTextField.setValue(value);
+			});
 			localizationKeyWindow.show();
 		});
 	}

@@ -24,6 +24,7 @@ import org.teamapps.application.api.localization.ApplicationLocalizationProvider
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.privilege.ApplicationRole;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
@@ -142,6 +143,10 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 		}
 		formLayout.addLabelAndField(null, getLocalized("accessControl.customOrganizationUnit"), organizationFilterComboBox);
 		formLayout.addLabelAndField(null, getLocalized("accessControl.organizationUnitTypeFilter"), organizationUnitTypeFilterTagComboBox);
+
+		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
+		formMetaFields.addMetaFields(formLayout, false);
+		selectedRoleApplicationRoleAssignment.onChanged().addListener(formMetaFields::updateEntity);
 
 		detailView.setComponent(form);
 

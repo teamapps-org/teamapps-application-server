@@ -24,6 +24,7 @@ import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.api.ui.TranslationKeyField;
 import org.teamapps.application.api.ui.UiComponentFactory;
 import org.teamapps.application.server.system.bootstrap.BaseResourceLinkProvider;
+import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.server.ui.localize.LocalizationTranslationKeyField;
 import org.teamapps.application.ux.UiUtils;
@@ -43,12 +44,14 @@ import java.util.Set;
 public class SessionUiComponentFactory implements UiComponentFactory {
 
 	private final ApplicationInstanceData applicationInstanceData;
+	private final SystemRegistry systemRegistry;
 	private final BaseResourceLinkProvider baseResourceLinkProvider;
 	private final Application application;
 
-	public SessionUiComponentFactory(ApplicationInstanceData applicationInstanceData, BaseResourceLinkProvider baseResourceLinkProvider, Application application) {
+	public SessionUiComponentFactory(ApplicationInstanceData applicationInstanceData, SystemRegistry systemRegistry, Application application) {
 		this.applicationInstanceData = applicationInstanceData;
-		this.baseResourceLinkProvider = baseResourceLinkProvider;
+		this.systemRegistry = systemRegistry;
+		this.baseResourceLinkProvider = systemRegistry.getBaseResourceLinkProvider();
 		this.application = application;
 	}
 
@@ -79,7 +82,7 @@ public class SessionUiComponentFactory implements UiComponentFactory {
 
 	@Override
 	public TranslationKeyField createTranslationKeyField(String linkButtonCaption) {
-		return new LocalizationTranslationKeyField(linkButtonCaption, applicationInstanceData, () -> application);
+		return new LocalizationTranslationKeyField(linkButtonCaption, applicationInstanceData, systemRegistry, () -> application);
 	}
 
 	@Override

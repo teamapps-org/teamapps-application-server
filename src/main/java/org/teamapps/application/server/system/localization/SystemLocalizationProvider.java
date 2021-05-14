@@ -19,18 +19,15 @@
  */
 package org.teamapps.application.server.system.localization;
 
-import org.teamapps.application.api.localization.LocalizationData;
 import org.teamapps.model.controlcenter.LocalizationKey;
 import org.teamapps.model.controlcenter.LocalizationKeyType;
 import org.teamapps.model.controlcenter.LocalizationValue;
-import org.teamapps.application.server.system.machinetranslation.TranslationService;
 import org.teamapps.universaldb.index.enumeration.EnumFilterType;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class SystemLocalizationProvider implements LocalizationProvider {
 
@@ -38,11 +35,11 @@ public class SystemLocalizationProvider implements LocalizationProvider {
 
 	private Map<String, Map<String, LocalizationValue>> localizationLanguageValueMapByKey;
 
-	public SystemLocalizationProvider(TranslationService translationService, List<String> requiredLanguages) {
-		loadData();
+	public SystemLocalizationProvider() {
+		update();
 	}
 
-	private void loadData() {
+	public void update() {
 		Map<String, Map<String, LocalizationValue>> localizationLanguageValueMapByKey = new HashMap<>();
 		LocalizationKey.filter()
 				.application(NumericFilter.equalsFilter(0))
@@ -56,9 +53,10 @@ public class SystemLocalizationProvider implements LocalizationProvider {
 	}
 
 	public void reload() {
-		loadData();
+		update();
 	}
 
+	@Deprecated
 	public void createKey(String key, String language, String value) {
 		if (!key.startsWith(SYSTEM_KEY_PREFIX)) {
 			key = SYSTEM_KEY_PREFIX + key;

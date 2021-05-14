@@ -22,6 +22,7 @@ package org.teamapps.application.server.controlcenter.roles;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
@@ -124,6 +125,10 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.user"), userCombobox);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.role"), roleComboBox);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.orgUnit"), organizationComboBox);
+
+		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
+		formMetaFields.addMetaFields(formLayout, false);
+		selectedUserRoleAssignment.onChanged().addListener(formMetaFields::updateEntity);
 
 		detailView.setComponent(form);
 

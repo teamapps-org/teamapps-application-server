@@ -30,6 +30,8 @@ import org.teamapps.application.server.system.config.DocumentConversionConfig;
 import org.teamapps.application.server.system.config.MachineTranslationConfig;
 import org.teamapps.application.server.system.config.SystemConfig;
 import org.teamapps.application.server.system.localization.DictionaryLocalizationProvider;
+import org.teamapps.application.server.system.localization.GlobalLocalizationProvider;
+import org.teamapps.application.server.system.localization.LocalizationUtil;
 import org.teamapps.application.server.system.localization.SystemLocalizationProvider;
 import org.teamapps.application.server.system.machinetranslation.MachineTranslation;
 import org.teamapps.application.server.system.machinetranslation.TranslationService;
@@ -57,6 +59,7 @@ public class SystemRegistry {
 	private TranslationService translationService;
 	private final DictionaryLocalizationProvider dictionary;
 	private final SystemLocalizationProvider systemDictionary;
+	private final GlobalLocalizationProvider globalLocalizationProvider;
 	private final Map<Application, LoadedApplication> loadedApplicationMap = new HashMap<>();
 	private final ManagedApplicationGroup unspecifiedApplicationGroup;
 	private final BaseResourceLinkProvider baseResourceLinkProvider;
@@ -70,7 +73,8 @@ public class SystemRegistry {
 		this.universalDB = universalDB;
 		this.applicationConfig = applicationConfig;
 		this.dictionary = new DictionaryLocalizationProvider(translationService, systemConfig.getLocalizationConfig().getRequiredLanguages());
-		this.systemDictionary = new SystemLocalizationProvider(translationService, systemConfig.getLocalizationConfig().getRequiredLanguages());
+		this.systemDictionary = new SystemLocalizationProvider();
+		this.globalLocalizationProvider = new GlobalLocalizationProvider(this);
 		this.baseResourceLinkProvider = new BaseResourceLinkProvider();
 		this.unspecifiedApplicationGroup = getOrCreateUnspecifiedApplicationGroup();
 		handleConfigUpdate();
@@ -89,6 +93,17 @@ public class SystemRegistry {
 			machineTranslation.setGoogleTranslationKey(machineTranslationConfig.getGoogleKey());
 			machineTranslation.setDeepLKey(machineTranslationConfig.getDeepLKey(), machineTranslationConfig.isDeepLFreeApi());
 			this.translationService = machineTranslation;
+		}
+	}
+
+	public void updateGlobalLocalizationProvider() {
+		globalLocalizationProvider.updateLocalizationData();
+		systemDictionary.update();
+	}
+
+	public void machineTranslateMissingEntries() {
+		if (translationService != null) {
+			LocalizationUtil.translateAllValues(translationService);
 		}
 	}
 

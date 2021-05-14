@@ -22,6 +22,7 @@ package org.teamapps.application.server.chat;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
@@ -114,6 +115,10 @@ public class ChatPerspective extends AbstractManagedApplicationPerspective {
 		formLayout.addLabelAndField(null, "Author", author);
 		formLayout.addLabelAndField(null, "Date", dateTimeField);
 		formLayout.addLabelAndField(null, "Message", messageField);
+
+		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
+		formMetaFields.addMetaFields(formLayout, false);
+		selectedUser.onChanged().addListener(formMetaFields::updateEntity);
 
 		detailView.setComponent(form);
 

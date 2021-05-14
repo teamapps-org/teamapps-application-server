@@ -22,6 +22,7 @@ package org.teamapps.application.server.controlcenter.organization;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.template.PropertyProviders;
@@ -131,6 +132,10 @@ public class OrganizationUnitTypePerspective extends AbstractManagedApplicationP
 		formLayout.addLabelAndField(null, getLocalized("organizationUnitType.defaultChildType"), defaultChildTypeCombo);
 		formLayout.addLabelAndField(null, getLocalized("organizationUnitType.allowedChildrenTypes"), possibleChildrenTagCombo);
 		formLayout.addLabelAndField(null, getLocalized("organizationUnitType.geoLocationType"), geoLocationComboBox);
+
+		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
+		formMetaFields.addMetaFields(formLayout, false);
+		selectedType.onChanged().addListener(formMetaFields::updateEntity);
 
 		detailView.setComponent(form);
 

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -222,13 +222,16 @@ public class LocalizationUtil {
 			String translation = translationService.translate(adminValue.getAdminKeyOverride(), adminValue.getLanguage(), missingTranslationValue.getLanguage());
 			if (translation != null) {
 				translation = firstUpperIfSourceUpper(adminValue.getAdminKeyOverride(), translation);
+				LOGGER.info("Translate admin key (" + adminValue.getLanguage() + "->" + missingTranslationValue.getLanguage() + "): " + adminValue.getAdminKeyOverride() + " -> " + translation);
 				missingTranslationValue
 						.setMachineTranslation(translation)
 						.setMachineTranslationState(MachineTranslationState.OK)
 						.setCurrentDisplayValue(getDisplayValue(missingTranslationValue))
 						.save();
-				return;
+			} else {
+				LOGGER.warn("Missing translation admin key result (" + adminValue.getLanguage() + "->" + missingTranslationValue.getLanguage() + "): " + adminValue.getAdminKeyOverride() + " -> " + translation);
 			}
+			return;
 		}
 
 		Map<String, LocalizationValue> localizationValueByLanguage = missingTranslationValue.getLocalizationKey().getLocalizationValues().stream()
@@ -244,14 +247,16 @@ public class LocalizationUtil {
 					String translation = translationService.translate(translationSourceText, language, missingTranslationValue.getLanguage());
 					if (translation != null) {
 						translation = firstUpperIfSourceUpper(translationSourceText, translation);
-						System.out.println("Translate (" + language + "->" + missingTranslationValue.getLanguage() + "): " + translationSourceText + " -> " + translation);
+						LOGGER.info("Translate (" + language + "->" + missingTranslationValue.getLanguage() + "): " + translationSourceText + " -> " + translation);
 						missingTranslationValue
 								.setMachineTranslation(translation)
 								.setMachineTranslationState(MachineTranslationState.OK)
 								.setCurrentDisplayValue(getDisplayValue(missingTranslationValue))
 								.save();
-						return;
+					} else {
+						LOGGER.warn("Missing translation result (" + language + "->" + missingTranslationValue.getLanguage() + "): " + translationSourceText + " -> " + translation);
 					}
+					break;
 				}
 			}
 		}

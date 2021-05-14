@@ -22,6 +22,7 @@ package org.teamapps.application.server.controlcenter.organization;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.ux.IconUtils;
@@ -81,6 +82,10 @@ public class OrganizationFieldPerspective extends AbstractManagedApplicationPers
 		formLayout.addSection().setCollapsible(false).setDrawHeaderLine(false);
 		formLayout.addLabelAndField(null, getLocalized("organizationField.organizationFieldName"), translatableNameField);
 		formLayout.addLabelAndField(null, getLocalized("organizationField.icon"), iconComboBox);
+
+		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
+		formMetaFields.addMetaFields(formLayout, false);
+		selectedField.onChanged().addListener(formMetaFields::updateEntity);
 
 		detailView.setComponent(form);
 

@@ -24,6 +24,7 @@ import org.teamapps.application.api.application.perspective.PerspectiveMenuPanel
 import org.teamapps.application.api.localization.Country;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.template.PropertyProviders;
@@ -114,6 +115,10 @@ public class OrganizationPerspective extends AbstractManagedApplicationPerspecti
 
 		addressForm.createAddressSection(formLayout);
 		addressForm.addFields(formLayout);
+
+		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
+		formMetaFields.addMetaFields(formLayout, false);
+		selectedUnit.onChanged().addListener(formMetaFields::updateEntity);
 
 		detailView.setComponent(form);
 

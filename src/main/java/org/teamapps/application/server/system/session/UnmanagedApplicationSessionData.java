@@ -60,7 +60,7 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 		this.privilegeProvider = privilegeProvider;
 		this.localizationProvider = localizationProvider;
 		this.documentConverterSupplier = documentConverterSupplier;
-		this.componentFactory = new SessionUiComponentFactory(this, userSessionData.getRegistry().getBaseResourceLinkProvider(), application);
+		this.componentFactory = new SessionUiComponentFactory(this, userSessionData.getRegistry(), application);
 	}
 
 	@Override
