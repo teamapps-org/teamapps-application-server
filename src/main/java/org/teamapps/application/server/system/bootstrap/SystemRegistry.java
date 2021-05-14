@@ -144,8 +144,7 @@ public class SystemRegistry {
 					}
 				}
 			} else {
-				System.out.println("Error installing " + applicationInstaller.getApplicationInfo().getName() + ": " + applicationInstaller.getApplicationInfo().getErrorMessage());
-				System.out.println("\tWarnings:" + applicationInstaller.getApplicationInfo().getWarningMessage());
+				LOGGER.error("Error installing " + applicationInstaller.getApplicationInfo().getName() + ": " + applicationInstaller.getApplicationInfo().getErrorMessage() + "\n" + "Warnings:" + applicationInstaller.getApplicationInfo().getWarningMessage());
 				return false;
 			}
 		}
@@ -156,7 +155,8 @@ public class SystemRegistry {
 	public void loadApplication(ApplicationInstaller applicationInstaller) {
 		try {
 			LoadedApplication loadedApplication = applicationInstaller.loadApplication();
-			System.out.println("Loaded app:" + applicationInstaller.getApplicationInfo().getName());
+			updateGlobalLocalizationProvider();
+			LOGGER.info("Loaded app:" + applicationInstaller.getApplicationInfo().getName());
 			if (applicationInstaller.getApplicationInfo().getErrors().isEmpty()) {
 				addLoadedApplication(loadedApplication);
 			}
@@ -207,5 +207,9 @@ public class SystemRegistry {
 
 	public void setSessionRegistryHandler(SessionRegistryHandler sessionRegistryHandler) {
 		this.sessionRegistryHandler = sessionRegistryHandler;
+	}
+
+	public GlobalLocalizationProvider getGlobalLocalizationProvider() {
+		return globalLocalizationProvider;
 	}
 }

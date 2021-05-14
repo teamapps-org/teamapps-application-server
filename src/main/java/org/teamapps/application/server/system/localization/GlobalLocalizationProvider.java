@@ -73,17 +73,17 @@ public class GlobalLocalizationProvider {
 		} else if (key.startsWith(SystemLocalizationProvider.SYSTEM_KEY_PREFIX)) {
 			return systemDictionary.getLocalizationValue(key, rankedLanguages);
 		} else {
-			String result = getLocalizationValue(key, applicationLocalizationMap.get(application), rankedLanguages);
-			if (result == null) {
-				result = getLocalizationValue(key, allKeysMap, rankedLanguages);
+			if (application != null) {
+				return getLocalizationValue(key, applicationLocalizationMap.get(application), rankedLanguages);
+			} else {
+				return getLocalizationValue(key, allKeysMap, rankedLanguages);
 			}
-			return result != null ? result : key;
 		}
 	}
 
 	private String getLocalizationValue(String key, Map<String, Map<String, LocalizationValue>> localizationMap, List<String> rankedLanguages) {
 		if (localizationMap == null) {
-			return null;
+			return key;
 		}
 		Map<String, LocalizationValue> languageValueMap = localizationMap.get(key);
 		if (languageValueMap != null) {
@@ -94,10 +94,10 @@ public class GlobalLocalizationProvider {
 				}
 			}
 		}
-		return null;
+		return key;
 	}
 
-	public String getLocalized(Application application, String key, List<String> rankedLanguage, Object... parameters) {
+	public String getLocalized(String key, Application application, List<String> rankedLanguage, Object... parameters) {
 		String localizationValue = getLocalized(key, application, rankedLanguage);
 		if (parameters != null && parameters.length > 0) {
 			try {

@@ -25,7 +25,7 @@ import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.api.user.SessionUser;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.launcher.MobileApplicationNavigation;
-import org.teamapps.application.server.system.localization.SessionLocalizationProvider;
+import org.teamapps.application.server.system.localization.SessionApplicationLocalizationProvider;
 import org.teamapps.application.server.system.privilege.PrivilegeApplicationKey;
 import org.teamapps.application.server.system.privilege.UserPrivileges;
 import org.teamapps.icons.Icon;
@@ -37,9 +37,7 @@ import org.teamapps.ux.component.Component;
 import org.teamapps.ux.component.rootpanel.RootPanel;
 import org.teamapps.ux.session.SessionContext;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -52,10 +50,11 @@ public class UserSessionData {
 	private UserPrivileges userPrivileges;
 	private final SessionUser sessionUser;
 	private final SessionIconProvider iconProvider;
-	private final SessionLocalizationProvider sessionLocalizationProvider;
+	private final List<String> localizationRankedLanguages;
 	private final Map<Application, ApplicationLocalizationProvider> localizationProviderByApplication = new HashMap<>();
 	private Supplier<ApplicationDesktop> applicationDesktopSupplier;
 	private Function<Component, Component> rootWrapperComponentFunction;
+	private final ApplicationLocalizationProvider localizationProvider;
 
 	public UserSessionData(User user, SessionContext context, SystemRegistry registry, RootPanel rootPanel) {
 		this.user = user;
@@ -64,8 +63,20 @@ public class UserSessionData {
 		this.rootPanel = rootPanel;
 		this.userPrivileges = new UserPrivileges(user, registry);
 		this.sessionUser = new SessionUserImpl(user, context);
-		this.sessionLocalizationProvider = new SessionLocalizationProvider(sessionUser.getRankedLanguages(), registry.getDictionary(), registry.getSystemDictionary());
+		this.localizationRankedLanguages = createLocalizationRankedLanguages();
 		this.iconProvider = context.getIconProvider();
+		this.localizationProvider = new SessionApplicationLocalizationProvider(null, localizationRankedLanguages, registry.getGlobalLocalizationProvider());
+	}
+
+	private List<String> createLocalizationRankedLanguages() {
+		HashSet<String> languages = new HashSet<>(sessionUser.getRankedLanguages());
+		if (!languages.contains("en")) {
+			ArrayList<String> rankedLanguages = new ArrayList<>(sessionUser.getRankedLanguages());
+			rankedLanguages.add("en");
+			return rankedLanguages;
+		} else {
+			return sessionUser.getRankedLanguages();
+		}
 	}
 
 	public ManagedApplicationSessionData createManageApplicationSessionData(ManagedApplication managedApplication, MobileApplicationNavigation mobileNavigation) {
@@ -85,7 +96,7 @@ public class UserSessionData {
 	}
 
 	private ApplicationLocalizationProvider createApplicationLocalizationProvider(Application application) {
-		return sessionLocalizationProvider.createApplicationLocalizationProvider(application);
+		return new SessionApplicationLocalizationProvider(application, localizationRankedLanguages, registry.getGlobalLocalizationProvider());
 	}
 
 	public Icon<?, ?> decodeIcon(String name) {
@@ -137,8 +148,8 @@ public class UserSessionData {
 		return iconProvider;
 	}
 
-	public SessionLocalizationProvider getLocalizationProvider() {
-		return sessionLocalizationProvider;
+	public ApplicationLocalizationProvider getLocalizationProvider() {
+		return localizationProvider;
 	}
 
 	public UserPrivileges getUserPrivileges() {

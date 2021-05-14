@@ -32,24 +32,26 @@ import java.util.Map;
 public class SessionApplicationLocalizationProvider implements ApplicationLocalizationProvider {
 
 	private final Application application;
-	private final SessionLocalizationProvider localizationProvider;
+	private final List<String> rankedLanguages;
+	private final GlobalLocalizationProvider localizationProvider;
 
-	public SessionApplicationLocalizationProvider(Application application, SessionLocalizationProvider localizationProvider) {
+	public SessionApplicationLocalizationProvider(Application application, List<String> rankedLanguages, GlobalLocalizationProvider localizationProvider) {
 		this.application = application;
+		this.rankedLanguages = rankedLanguages;
 		this.localizationProvider = localizationProvider;
 	}
 
 	public String getLocalized(Application application, String key) {
-		return localizationProvider.getLocalized(application, key);
+		return localizationProvider.getLocalized(key, application, rankedLanguages);
 	}
 
 	@Override
 	public String getLocalized(String key, Object... parameters) {
-		return localizationProvider.getLocalized(application, key, parameters);
+		return localizationProvider.getLocalized(key, application, rankedLanguages, parameters);
 	}
 
 	@Override
 	public String getLocalized(TranslatableText translatableText) {
-		return localizationProvider.getLocalized(translatableText);
+		return localizationProvider.getLocalized(translatableText, rankedLanguages);
 	}
 }

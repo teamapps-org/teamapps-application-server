@@ -73,7 +73,7 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 
 	public String getTitle() {
 		if (managedApplicationPerspective.getTitleKeyOverride() != null) {
-			return userSessionData.getLocalizationProvider().getLocalized(managedApplicationPerspective.getTitleKeyOverride());
+			return localizationProvider.getLocalized(managedApplicationPerspective.getTitleKeyOverride());
 		} else {
 			return localizationProvider.getLocalized(perspectiveBuilder.getTitleKey());
 		}
@@ -81,7 +81,7 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 
 	public String getDescription() {
 		if (managedApplicationPerspective.getDescriptionKeyOverride() != null) {
-			return userSessionData.getLocalizationProvider().getLocalized(managedApplicationPerspective.getDescriptionKeyOverride());
+			return localizationProvider.getLocalized(managedApplicationPerspective.getDescriptionKeyOverride());
 		} else {
 			return localizationProvider.getLocalized(perspectiveBuilder.getDescriptionKey());
 		}

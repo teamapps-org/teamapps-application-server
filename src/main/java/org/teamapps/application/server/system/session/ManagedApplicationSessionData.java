@@ -80,7 +80,7 @@ public class ManagedApplicationSessionData {
 		}
 		registry = userSessionData.getRegistry();
 		this.mainApplication = registry.getLoadedApplication(managedApplication.getMainApplication());
-		this.mainApplicationLocalizationProvider = userSessionData.getLocalizationProvider().createApplicationLocalizationProvider(managedApplication.getMainApplication());
+		this.mainApplicationLocalizationProvider = userSessionData.getApplicationLocalizationProvider(managedApplication.getMainApplication());
 	}
 
 	public PerspectiveSessionData createPerspectiveSessionData(ManagedApplicationPerspective managedApplicationPerspective) {
