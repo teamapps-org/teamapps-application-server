@@ -195,13 +195,13 @@ public class OrganizationUtils {
 
 	public static List<OrganizationUnit> queryOrganizationUnits(String query, Collection<OrganizationUnit> allowedUnits) {
 		return query == null || query.isBlank() ?
-				allowedUnits.stream().limit(50).collect(Collectors.toList()) :
+				allowedUnits.stream().limit(150).collect(Collectors.toList()) :
 				OrganizationUnit.filter()
 						.parseFullTextFilter(query)
 						.execute()
 						.stream()
 						.filter(allowedUnits::contains)
-						.limit(50)
+						.limit(150)
 						.collect(Collectors.toList());
 	}
 
@@ -210,7 +210,7 @@ public class OrganizationUtils {
 				allowedUnits.stream()
 						.filter(unit -> unit.getUserContainer() != null)
 						.map(OrganizationUnit::getUserContainer)
-						.limit(50)
+						.limit(150)
 						.collect(Collectors.toList()) :
 				OrganizationUnit.filter()
 						.parseFullTextFilter(query)
@@ -218,7 +218,7 @@ public class OrganizationUtils {
 						.stream()
 						.filter(allowedUnits::contains)
 						.filter(unit -> unit.getUserContainer() != null)
-						.limit(50)
+						.limit(150)
 						.map(OrganizationUnit::getUserContainer)
 						.collect(Collectors.toList());
 	}
