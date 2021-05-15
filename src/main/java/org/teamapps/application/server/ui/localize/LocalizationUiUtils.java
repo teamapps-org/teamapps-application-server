@@ -47,7 +47,13 @@ public class LocalizationUiUtils {
 		ComboBox<String> comboBox = new ComboBox<>(template);
 		comboBox.setPropertyProvider((s, propertyNames) -> {
 			Map<String, Object> map = new HashMap<>();
+			if (s == null || s.isBlank()) {
+				return map;
+			}
 			LocalizationKey localizationKey = LocalizationKey.filter().key(TextFilter.textEqualsFilter(s)).executeExpectSingleton();
+			if (localizationKey == null) {
+				return map;
+			}
 			map.put(BaseTemplate.PROPERTY_ICON, getLocalizationKeyIcon(localizationKey));
 			map.put(BaseTemplate.PROPERTY_CAPTION, localizationProvider.getLocalized(localizationKey.getKey()));
 			map.put(BaseTemplate.PROPERTY_DESCRIPTION, localizationKey.getKey());
@@ -78,6 +84,9 @@ public class LocalizationUiUtils {
 	}
 
 	public static Icon getLocalizationKeyIcon(LocalizationKey key) {
+		if (key == null) {
+			return null;
+		}
 		return switch (key.getLocalizationKeyType()) {
 			case APPLICATION_RESOURCE_KEY -> IconUtils.decodeIcon(key.getApplication().getIcon());
 			case DICTIONARY_KEY -> ApplicationIcons.DICTIONARY;
