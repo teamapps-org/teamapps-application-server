@@ -21,7 +21,6 @@ package org.teamapps.application.server.rest;
 
 
 import com.google.gson.Gson;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
@@ -34,12 +33,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -118,6 +115,35 @@ public class ChatRestServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String pathInfo = request.getPathInfo();
+		if (pathInfo == null || !pathInfo.contains("/")) {
+			setError(response);
+			return;
+		}
+		String[] parts = pathInfo.split("/");
+		String method = parts[1];
+		String token = parts[2];
+		User user = getUser(token);
+		if (user == null) {
+			setError(response);
+			return;
+		}
+
+		switch (method) {
+			case "message":
+				NewMessage newMessage = this.gson.fromJson(request.getReader(), NewMessage.class);
+				handleNewMessage(newMessage, user, response);
+				break;
+			case "media":
+				break;
+		}
+
+		//String requestData = request.getReader().lines().collect(Collectors.joining());
+
+
+
+
+
 
 
 //		try {
@@ -148,6 +174,24 @@ public class ChatRestServlet extends HttpServlet {
 //				.collect(Collectors.joining(",")) + "]");
 	}
 
+	private void handleNewMessage(NewMessage newMessage, User user, HttpServletResponse response) {
+		String channelId = newMessage.getChannelId();
+		ChatChannel channel = ChatChannel.getById(parseId(channelId));
+		if (!channel.isStored()) {
+			setError(response);
+			return;
+		}
+
+		ChatMessage.create()
+				.setMessage(newMessage.getMessage())
+				.setChatChannel(channel)
+				.setAuthor(user)
+				.save();
+
+		response.setStatus(HttpServletResponse.SC_OK);
+
+	}
+
 	private void handleAvatarRequest(User user, String avatarId, HttpServletResponse response) throws IOException {
 		if (avatarId.startsWith("user-")) {
 			int id = parseId(avatarId);
@@ -174,7 +218,7 @@ public class ChatRestServlet extends HttpServlet {
 		int messageId = parseId(lastMessageId);
 		List<Message> messages = new ArrayList<>();
 		channel.getChatMessages().stream().filter(message -> message.getId() > messageId).forEach(message -> {
-			messages.add(new Message("message-" + message.getId(), createAuthor(message.getAuthor()), message.getMessage()));
+			messages.add(new Message("message-" + message.getId(), createAuthor(message.getAuthor()), message.getMessage(), message.getMetaCreationDateAsEpochMilli()));
 		});
 		sendJson(messages, response);
 		ChatMessage.create().setChatChannel(ChatChannel.getById(3)).setAuthor(user).setMessage("Message request for channel: " + channel.getTitle() + ", last message id:" + lastMessageId + " returned messages:" + messages.size()).save();

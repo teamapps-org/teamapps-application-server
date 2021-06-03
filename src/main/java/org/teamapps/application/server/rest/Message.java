@@ -24,11 +24,13 @@ public class Message {
 	private final String messageId;
 	private final Author author;
 	private final String message;
+	private final long timestamp;
 
-	public Message(String messageId, Author author, String message) {
+	public Message(String messageId, Author author, String message, long timestamp) {
 		this.messageId = messageId;
 		this.author = author;
 		this.message = message;
+		this.timestamp = timestamp;
 	}
 
 	public String getMessageId() {
