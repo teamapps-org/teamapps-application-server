@@ -19,11 +19,18 @@
  */
 package org.teamapps.application.server.system.localization;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.localization.LocalizationData;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.system.config.LocalizationConfig;
 import org.teamapps.application.server.system.machinetranslation.TranslationService;
+import org.teamapps.application.server.system.utils.ChangeCounter;
 import org.teamapps.application.server.system.utils.KeyCompare;
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.model.controlcenter.*;
@@ -31,25 +38,23 @@ import org.teamapps.universaldb.index.enumeration.EnumFilterType;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.index.text.TextFilter;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class LocalizationUtil {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private static List<String> allowedSourceTranslationLanguages = Arrays.asList("bg", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr", "hu", "it", "ja", "lt", "lv", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "zh");
-
-	public static void synchronizeLocalizationData(LocalizationData localizationData, Application application, LocalizationKeyType localizationKeyType, List<String> requiredLanguages) {
+	public static void synchronizeLocalizationData(LocalizationData localizationData, Application application, LocalizationKeyType localizationKeyType, LocalizationConfig localizationConfig) {
 		Map<String, Map<String, String>> localizationMapByKey = localizationData.createLocalizationMapByKey();
 		Set<String> machineTranslatedLanguages = localizationData.getMachineTranslatedLanguages();
 		int appIdFilter = 0;
@@ -58,7 +63,7 @@ public class LocalizationUtil {
 		}
 		List<LocalizationKey> localizationKeys = LocalizationKey.filter().application(NumericFilter.equalsFilter(appIdFilter)).execute();
 		KeyCompare<String, LocalizationKey> keyCompare = new KeyCompare<>(localizationMapByKey.keySet(), localizationKeys, s -> s, LocalizationKey::getKey);
-		List<String> newKeys = keyCompare.getNotInB();
+		List<String> newKeys = keyCompare.getAEntriesNotInB();
 
 		LocalizationTopic topic = getTopic(localizationKeyType, application);
 		for (String key : newKeys) {
@@ -97,17 +102,17 @@ public class LocalizationUtil {
 			}
 		}
 
-		List<LocalizationKey> removedKeys = keyCompare.getNotInA();
+		List<LocalizationKey> removedKeys = keyCompare.getBEntriesNotInA();
 		removedKeys.forEach(key -> key.setUsed(false).save());
 
-		List<String> existingKeys = keyCompare.getInB();
+		List<String> existingKeys = keyCompare.getAEntriesInB();
 		for (String key : existingKeys) {
 			//todo check if used = false -> set to true!
 			Map<String, String> translations = localizationMapByKey.get(key);
 			LocalizationKey localizationKey = keyCompare.getB(key);
 			KeyCompare<String, LocalizationValue> languageCompare = new KeyCompare<>(translations.keySet(), localizationKey.getLocalizationValues(), s -> s, LocalizationValue::getLanguage);
 			if (languageCompare.isDifferent()) {
-				List<String> newLanguages = languageCompare.getNotInB();
+				List<String> newLanguages = languageCompare.getAEntriesNotInB();
 				newLanguages.forEach(language -> {
 					String original = translations.get(language);
 					LocalizationValue.create()
@@ -120,23 +125,19 @@ public class LocalizationUtil {
 							.setTranslationVerificationState(TranslationVerificationState.NOT_NECESSARY)
 							.save();
 				});
-				List<LocalizationValue> removedLanguages = languageCompare.getNotInA();
-				for (LocalizationValue value : removedLanguages) {
-					value.setOriginal(null);
-					if (value.getAdminKeyOverride() == null && value.getAdminLocalOverride() == null && value.getMachineTranslation() == null && value.getTranslation() == null) {
-						value
-								.setMachineTranslationState(MachineTranslationState.TRANSLATION_REQUESTED)
-								.setTranslationState(TranslationState.TRANSLATION_REQUESTED)
-								.setTranslationVerificationState(TranslationVerificationState.NOT_YET_TRANSLATED);
-
-					}
-					value.save();
-				}
 			}
 			//checking all existing values if the original changed
-			for (LocalizationValue localizationValue : languageCompare.getInA()) {
-				String original = translations.get(localizationValue.getLanguage());
-				if (original != null && !original.isBlank() && !original.equals(localizationValue.getOriginal())) {
+			for (LocalizationValue localizationValue : languageCompare.getBEntriesInA()) {
+				String language = localizationValue.getLanguage();
+				if (machineTranslatedLanguages.contains(language)) {
+					continue;
+				}
+				String original = translations.get(language);
+				if (original != null &&
+						!original.isBlank() &&
+						localizationValue.getOriginal() != null &&
+						!original.equals(localizationValue.getOriginal())
+				) {
 					localizationValue.setOriginal(original).save();
 					localizationValue.getLocalizationKey().getLocalizationValues().stream()
 							.filter(value -> !value.equals(localizationValue))
@@ -153,7 +154,7 @@ public class LocalizationUtil {
 		}
 
 		//create translation requests
-		localizationKeys = LocalizationKey.filter().application(NumericFilter.equalsFilter(appIdFilter)).execute();
+		List<String> requiredLanguages = localizationConfig.getRequiredLanguages();
 		for (LocalizationKey key : localizationKeys) {
 			Map<String, LocalizationValue> valueByLanguage = key.getLocalizationValues().stream().collect(Collectors.toMap(LocalizationValue::getLanguage, v -> v));
 			for (String language : requiredLanguages) {
@@ -170,49 +171,58 @@ public class LocalizationUtil {
 		}
 	}
 
-	public static void translateAllApplicationValues(TranslationService translationService, Application application) {
-		if (translationService == null) {
+	public static void translateAllApplicationValues(TranslationService translationService, Application application, LocalizationConfig localizationConfig) {
+		if (translationService == null || localizationConfig == null) {
 			return;
 		}
+		Set<String> allowedSourceTranslationLanguages = new HashSet<>(localizationConfig.getAllowedSourceLanguages());
 		List<LocalizationValue> translationRequests = LocalizationValue
 				.filter()
 				.machineTranslationState(EnumFilterType.EQUALS, MachineTranslationState.TRANSLATION_REQUESTED)
+				.original(TextFilter.emptyFilter())
+				.machineTranslation(TextFilter.emptyFilter())
 				.execute().stream()
 				.filter(value -> value.getLocalizationKey().getApplication().equals(application))
 				.collect(Collectors.toList());
 		ExecutorService executor = Executors.newFixedThreadPool(10);
-		translationRequests.forEach(localizationValue -> executor.submit(() -> translateLocalizationValue(localizationValue, translationService)));
+		translationRequests.forEach(localizationValue -> executor.submit(() -> translateLocalizationValue(localizationValue, translationService, allowedSourceTranslationLanguages)));
 		executor.shutdown();
 	}
 
-	public static void translateAllDictionaryValues(TranslationService translationService) {
-		if (translationService == null) {
+	public static void translateAllDictionaryValues(TranslationService translationService, LocalizationConfig localizationConfig) {
+		if (translationService == null || localizationConfig == null) {
 			return;
 		}
+		Set<String> allowedSourceTranslationLanguages = new HashSet<>(localizationConfig.getAllowedSourceLanguages());
 		List<LocalizationValue> translationRequests = LocalizationValue
 				.filter()
 				.machineTranslationState(EnumFilterType.EQUALS, MachineTranslationState.TRANSLATION_REQUESTED)
+				.original(TextFilter.emptyFilter())
+				.machineTranslation(TextFilter.emptyFilter())
 				.execute().stream()
 				.filter(value -> value.getLocalizationKey().getLocalizationKeyType() == LocalizationKeyType.DICTIONARY_KEY)
 				.collect(Collectors.toList());
 		ExecutorService executor = Executors.newFixedThreadPool(10);
-		translationRequests.forEach(localizationValue -> executor.submit(() -> translateLocalizationValue(localizationValue, translationService)));
+		translationRequests.forEach(localizationValue -> executor.submit(() -> translateLocalizationValue(localizationValue, translationService, allowedSourceTranslationLanguages)));
 		executor.shutdown();
 	}
 
-	public static void translateAllValues(TranslationService translationService) {
-		if (translationService == null) {
+	public static void translateAllValues(TranslationService translationService, LocalizationConfig localizationConfig) {
+		if (translationService == null || localizationConfig == null) {
 			return;
 		}
+		Set<String> allowedSourceTranslationLanguages = new HashSet<>(localizationConfig.getAllowedSourceLanguages());
 		List<LocalizationValue> translationRequests = LocalizationValue.filter()
 				.machineTranslationState(EnumFilterType.EQUALS, MachineTranslationState.TRANSLATION_REQUESTED)
+				.original(TextFilter.emptyFilter())
+				.machineTranslation(TextFilter.emptyFilter())
 				.execute();
 		ExecutorService executor = Executors.newFixedThreadPool(10);
-		translationRequests.forEach(localizationValue -> executor.submit(() -> translateLocalizationValue(localizationValue, translationService)));
+		translationRequests.forEach(localizationValue -> executor.submit(() -> translateLocalizationValue(localizationValue, translationService, allowedSourceTranslationLanguages)));
 		executor.shutdown();
 	}
 
-	public static void translateLocalizationValue(LocalizationValue missingTranslationValue, TranslationService translationService) {
+	public static void translateLocalizationValue(LocalizationValue missingTranslationValue, TranslationService translationService, Set<String> allowedSourceTranslationLanguages) {
 		LocalizationValue adminValue = missingTranslationValue.getLocalizationKey().getLocalizationValues().stream()
 				.filter(value -> value.getAdminKeyOverride() != null)
 				.filter(value -> allowedSourceTranslationLanguages.contains(value.getLanguage()))
@@ -364,5 +374,194 @@ public class LocalizationUtil {
 		fos.close();
 		return zipFile;
 	}
+
+	public static File createTranslationExport(Application application) throws IOException {
+		Stream<LocalizationKey> keyStream = LocalizationKey.getAll().stream()
+				.filter(LocalizationKey::isUsed);
+		if (application != null) {
+			keyStream = keyStream.filter(localizationKey -> localizationKey.getApplication().equals(application));
+		}
+		List<LocalizationKey> keys = keyStream.collect(Collectors.toList());
+
+		File zipFile = File.createTempFile("temp", ".zip");
+		FileOutputStream fos = new FileOutputStream(zipFile);
+		ZipOutputStream zos = new ZipOutputStream(fos);
+
+		zos.putNextEntry(new ZipEntry("LocalizationKey.csv"));
+		CSVPrinter printer = new CSVPrinter(new OutputStreamWriter(zos), CSVFormat
+				.DEFAULT
+				.withHeader("key", "application", "localizationKeyFormat", "localizationKeyType", "comments"));
+		for (LocalizationKey key : keys) {
+			printer.printRecord(
+					key.getKey(),
+					key.getApplication() != null ? key.getApplication().getName() : null,
+					key.getLocalizationKeyFormat() != null ? key.getLocalizationKeyFormat().name() : null,
+					key.getLocalizationKeyType() != null ? key.getLocalizationKeyType().name() : null,
+					key.getComments()
+			);
+		}
+		printer.flush();
+		zos.closeEntry();
+		zos.putNextEntry(new ZipEntry("LocalizationValue.csv"));
+
+		printer = new CSVPrinter(new OutputStreamWriter(zos),
+				CSVFormat
+						.DEFAULT
+						.withHeader("key", "application", "language", "original", "machineTranslation", "translation", "adminLocalOverride", "adminKeyOverride", "currentDisplayValue", "notes", "machineTranslationState", "translationState", "translationVerificationState")
+		);
+		for (LocalizationKey key : keys) {
+			for (LocalizationValue value : key.getLocalizationValues()) {
+				printer.printRecord(
+						value.getLocalizationKey().getKey(),
+						value.getLocalizationKey().getApplication() != null ? value.getLocalizationKey().getApplication().getName() : null,
+						value.getLanguage(),
+						value.getOriginal(),
+						value.getMachineTranslation(),
+						value.getTranslation(),
+						value.getAdminLocalOverride(),
+						value.getAdminKeyOverride(),
+						value.getCurrentDisplayValue(),
+						value.getNotes(),
+						value.getMachineTranslationState() != null ? value.getMachineTranslationState().name() : null,
+						value.getTranslationState() != null ? value.getTranslationState().name() : null,
+						value.getTranslationVerificationState() != null ? value.getTranslationVerificationState().name() : null
+				);
+			}
+		}
+		printer.flush();
+		zos.closeEntry();
+		zos.close();
+		fos.close();
+		LOGGER.info("User exported translation data: " + keys.size() + " keys.");
+		return zipFile;
+	}
+
+	public static void importTranslationExport(File file, Application application) throws IOException {
+		ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
+		ZipEntry zipEntry = zis.getNextEntry();
+		Map<String, LocalizationKey> keyApplicationMap = LocalizationKey.getAll().stream().collect(Collectors.toMap(key -> key.getKey() + ":" + (key.getApplication() != null ? key.getApplication().getName() : ""), key -> key));
+		Map<String, Application> applicationMap = Application.getAll().stream().collect(Collectors.toMap(Application::getName, app -> app));
+		Map<String, LocalizationKeyFormat> localizationKeyFormatMap = Arrays.stream(LocalizationKeyFormat.values()).collect(Collectors.toMap(Enum::name, e -> e));
+		Map<String, LocalizationKeyType> localizationKeyTypeMap = Arrays.stream(LocalizationKeyType.values()).collect(Collectors.toMap(Enum::name, e -> e));
+		Map<String, MachineTranslationState> machineTranslationStateMap = Arrays.stream(MachineTranslationState.values()).collect(Collectors.toMap(Enum::name, e -> e));
+		Map<String, TranslationState> translationStateMap = Arrays.stream(TranslationState.values()).collect(Collectors.toMap(Enum::name, e -> e));
+		Map<String, TranslationVerificationState> translationVerificationStateMap = Arrays.stream(TranslationVerificationState.values()).collect(Collectors.toMap(Enum::name, e -> e));
+		Map<String, LocalizationValue> valueByKeyAppAndLanguage = LocalizationValue.getAll().stream().collect(Collectors.toMap(value -> value.getLocalizationKey().getKey() + ":" + (value.getLocalizationKey().getApplication() != null ? value.getLocalizationKey().getApplication().getName() : "") + ":" + value.getLanguage(), value -> value));
+		ChangeCounter changeCounter = new ChangeCounter();
+
+		while (zipEntry != null) {
+			if (zipEntry.getName().equals("LocalizationKey.csv")) {
+				CSVParser parser = CSVFormat.DEFAULT
+						.withHeader("key", "application", "localizationKeyFormat", "localizationKeyType", "comments")
+						.withFirstRecordAsHeader()
+						.parse(new InputStreamReader(zis));
+				for (CSVRecord csvRecord : parser) {
+					String key = csvRecord.get("key");
+					Application app = applicationMap.get(csvRecord.get("application"));
+					String keyApp = key + ":" + (app != null ? app.getName() : "");
+					LocalizationKeyFormat localizationKeyFormat = localizationKeyFormatMap.get(csvRecord.get("localizationKeyFormat"));
+					LocalizationKeyType localizationKeyType = localizationKeyTypeMap.get(csvRecord.get("localizationKeyType"));
+					String comments = csvRecord.get("comments");
+					if (application != null && !application.equals(app)) {
+						changeCounter.error("key");
+						continue;
+					}
+					changeCounter.updateOrCreate("key", keyApplicationMap.containsKey(keyApp));
+					LocalizationKey localizationKey = keyApplicationMap.computeIfAbsent(keyApp, keyValue -> LocalizationKey.create());
+					localizationKey
+							.setApplication(app)
+							.setLocalizationKeyFormat(localizationKeyFormat)
+							.setLocalizationKeyType(localizationKeyType)
+							.setComments(comments)
+							.save();
+				}
+			} else if (zipEntry.getName().equals("LocalizationValue.csv")) {
+				CSVParser parser = CSVFormat.DEFAULT
+						.withHeader("key", "application", "language", "original", "machineTranslation", "translation", "adminLocalOverride", "adminKeyOverride", "currentDisplayValue", "notes", "machineTranslationState", "translationState", "translationVerificationState")
+						.withFirstRecordAsHeader()
+						.parse(new InputStreamReader(zis));
+				for (CSVRecord csvRecord : parser) {
+					LocalizationKey key = keyApplicationMap.get(csvRecord.get("key") + ":" + csvRecord.get("application"));
+					String language = csvRecord.get("language");
+					String original = csvRecord.get("original");
+					String machineTranslation = csvRecord.get("machineTranslation");
+					String translation = csvRecord.get("translation");
+					String adminLocalOverride = csvRecord.get("adminLocalOverride");
+					String adminKeyOverride = csvRecord.get("adminKeyOverride");
+					String currentDisplayValue = csvRecord.get("currentDisplayValue");
+					String notes = csvRecord.get("notes");
+					MachineTranslationState machineTranslationState = machineTranslationStateMap.get("machineTranslationState");
+					TranslationState translationState = translationStateMap.get("translationState");
+					TranslationVerificationState translationVerificationState = translationVerificationStateMap.get("translationVerificationState");
+					if (key == null || language == null) {
+						changeCounter.error("value");
+						continue;
+					}
+					String keyAppLangKey = key.getKey() + ":" + (key.getApplication() != null ? key.getApplication().getName() : null) + ":" + language;
+					changeCounter.updateOrCreate("value", valueByKeyAppAndLanguage.containsKey(keyAppLangKey));
+					LocalizationValue localizationValue = valueByKeyAppAndLanguage.computeIfAbsent(keyAppLangKey, s -> LocalizationValue.create());
+					localizationValue
+							.setLocalizationKey(key)
+							.setLanguage(language)
+							.setOriginal(original)
+							.setMachineTranslation(machineTranslation)
+							.setTranslation(translation)
+							.setAdminLocalOverride(adminLocalOverride)
+							.setAdminKeyOverride(adminKeyOverride)
+							.setCurrentDisplayValue(currentDisplayValue)
+							.setNotes(notes)
+							.setMachineTranslationState(machineTranslationState)
+							.setTranslationState(translationState)
+							.setTranslationVerificationState(translationVerificationState)
+							.save();
+				}
+			}
+			zipEntry = zis.getNextEntry();
+		}
+		zis.closeEntry();
+		zis.close();
+		LOGGER.info("User imported localization data: " + changeCounter.getResults());
+	}
+
+
+	public static File createTranslationTemplateFile() throws IOException {
+		File csvFile = File.createTempFile("temp", ".csv");
+		BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(csvFile));
+		List<String> languages = LocalizationValue.getAll().stream().map(LocalizationValue::getLanguage).collect(Collectors.toSet()).stream().sorted().collect(Collectors.toList());
+
+		//todo use apache csv
+		StringBuilder header = new StringBuilder();
+		header.append("Key,Application,Type");
+		for (String language : languages) {
+			header.append(",").append(StringEscapeUtils.escapeCsv(language));
+		}
+		header.append("\n");
+		bos.write(header.toString().getBytes(StandardCharsets.UTF_8));
+
+		for (LocalizationKey key : LocalizationKey.getAll()) {
+			Map<String, LocalizationValue> valueByLanguage = key.getLocalizationValues().stream().collect(Collectors.toMap(LocalizationValue::getLanguage, v -> v));
+			StringBuilder sb = new StringBuilder();
+			String app = key.getApplication() != null ? key.getApplication().getName() : null;
+			sb.append(StringEscapeUtils.escapeCsv(key.getKey())).append(",");
+			sb.append(StringEscapeUtils.escapeCsv(app)).append(",");
+			sb.append(StringEscapeUtils.escapeCsv(key.getLocalizationKeyType().name())).append(",");
+			for (String language : languages) {
+				LocalizationValue value = valueByLanguage.get(language);
+				String v = value != null ? value.getOriginal() : null;
+				sb.append(StringEscapeUtils.escapeCsv(v)).append(",");
+			}
+			sb.append("\n");
+			bos.write(sb.toString().getBytes(StandardCharsets.UTF_8));
+		}
+		bos.close();
+		return csvFile;
+	}
+
+	public static void importTranslationTemplate() {
+		Set<String> possibleLanguages = LocalizationValue.getAll().stream().map(LocalizationValue::getLanguage).collect(Collectors.toSet());
+		//todo implement
+	}
+
+
 
 }

@@ -29,6 +29,7 @@ import org.teamapps.application.server.system.localization.LocalizationUtil;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
+import org.teamapps.application.server.ui.dialogue.UploadDialogue;
 import org.teamapps.application.tools.EntityModelBuilder;
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.application.ux.UiUtils;
@@ -103,6 +104,9 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		buttonGroup = localizationKeyView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
 		ToolbarButton startMachineTranslationButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.GEARWHEELS, ApplicationIcons.MESSAGES), getLocalized("translations.startMachineTranslation"), getLocalized("translations.translateAllNewEntries")));
 		ToolbarButton createTranslationFilesButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.FOLDER_ZIP, ApplicationIcons.EARTH), getLocalized("translations.createTranslationFiles"), getLocalized("translations.createApplicationResourceFiles")));
+
+		ToolbarButton exportTranslationsButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.BOX_OUT, ApplicationIcons.EARTH), getLocalized(Dictionary.EXPORT), getLocalized("translations.exportTranslations")));
+		ToolbarButton importTranslationsButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.BOX_INTO, ApplicationIcons.EARTH), getLocalized(Dictionary.IMPORT), getLocalized("translations.importTranslations")));
 
 
 		buttonGroup = translationView.addLocalButtonGroup(new ToolbarButtonGroup());
@@ -348,17 +352,34 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		translationModeChangeHandler.accept(getAvailableModes().get(0));
 
 		startMachineTranslationButton.onClick.addListener(() -> {
-			LocalizationUtil.translateAllValues(userSessionData.getRegistry().getTranslationService());
+			LocalizationUtil.translateAllValues(userSessionData.getRegistry().getTranslationService(), userSessionData.getRegistry().getSystemConfig().getLocalizationConfig());
 		});
 
 		createTranslationFilesButton.onClick.addListener(() -> {
 			try {
 				File file = LocalizationUtil.createTranslationResourceFiles();
-				SessionContext.current().downloadFile(file, "translations.zip");
+				SessionContext.current().downloadFile(file, "Translations.zip");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		});
+
+		exportTranslationsButton.onClick.addListener(() -> {
+			try {
+				File file = LocalizationUtil.createTranslationExport(isAppFilter() ? getMainApplication() : null);
+				SessionContext.current().downloadFile(file, "Translation-Export.zip");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+
+		importTranslationsButton.onClick.addListener(() -> UploadDialogue.createFileUploadDialogue(file -> {
+			try {
+				LocalizationUtil.importTranslationExport(file, isAppFilter() ? getMainApplication() : null);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}, getApplicationInstanceData()));
 
 		modeComboBox.onValueChanged.addListener(translationModeChangeHandler);
 
