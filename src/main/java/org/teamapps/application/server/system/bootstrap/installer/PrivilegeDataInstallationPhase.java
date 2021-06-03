@@ -26,7 +26,7 @@ import org.teamapps.application.api.privilege.PrivilegeGroupType;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfoDataElement;
 import org.teamapps.application.server.system.privilege.ApplicationScopePrivilegeProvider;
-import org.teamapps.application.server.system.utils.KeyCompare;
+import org.teamapps.application.tools.KeyCompare;
 import org.teamapps.application.server.system.utils.ValueCompare;
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.model.controlcenter.Application;

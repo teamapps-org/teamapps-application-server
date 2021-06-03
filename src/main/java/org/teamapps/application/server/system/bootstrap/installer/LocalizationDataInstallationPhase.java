@@ -27,7 +27,7 @@ import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfoDataElement;
 import org.teamapps.application.server.system.config.LocalizationConfig;
 import org.teamapps.application.server.system.localization.LocalizationUtil;
-import org.teamapps.application.server.system.utils.KeyCompare;
+import org.teamapps.application.tools.KeyCompare;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.LocalizationKey;
 import org.teamapps.model.controlcenter.LocalizationKeyType;
