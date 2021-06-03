@@ -31,7 +31,7 @@ import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.bootstrap.LogoutHandler;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.config.ThemingConfig;
-import org.teamapps.application.server.system.login.LoginHandler;
+import org.teamapps.application.server.system.auth.LoginHandler;
 import org.teamapps.application.server.system.session.ManagedApplicationSessionData;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
@@ -40,10 +40,7 @@ import org.teamapps.application.ux.UiUtils;
 import org.teamapps.common.format.Color;
 import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.icons.Icon;
-import org.teamapps.model.controlcenter.Application;
-import org.teamapps.model.controlcenter.ManagedApplication;
-import org.teamapps.model.controlcenter.ManagedApplicationGroup;
-import org.teamapps.model.controlcenter.ManagedApplicationPerspective;
+import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.UniversalDB;
 import org.teamapps.ux.application.ResponsiveApplication;
 import org.teamapps.ux.application.assembler.DesktopApplicationAssembler;
@@ -51,7 +48,6 @@ import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.perspective.Perspective;
 import org.teamapps.ux.application.view.View;
 import org.teamapps.ux.component.Component;
-import org.teamapps.ux.component.absolutelayout.Length;
 import org.teamapps.ux.component.animation.PageTransition;
 import org.teamapps.ux.component.dialogue.FormDialogue;
 import org.teamapps.ux.component.field.FieldEditingMode;
@@ -72,6 +68,7 @@ import org.teamapps.ux.component.toolbar.ToolbarButton;
 import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
 import org.teamapps.ux.component.tree.Tree;
 import org.teamapps.ux.model.ListTreeModel;
+import org.teamapps.ux.session.ClientInfo;
 import org.teamapps.ux.session.SessionConfiguration;
 import org.teamapps.ux.session.SessionContext;
 import org.teamapps.ux.session.StylingTheme;
@@ -100,16 +97,30 @@ public class ApplicationLauncher {
 	private ManagedApplicationPerspective currentPerspective;
 	private TwoWayBindableValue<ManagedApplication> selectedApplication = TwoWayBindableValue.create();
 	private boolean selectedThemeIsDarkTheme;
+	private int activityCount;
+	private int applicationOpenCount;
+	private final Login loginData;
+	private Tab applicationLauncherTab;
 
 	public ApplicationLauncher(UserSessionData userSessionData, LogoutHandler logoutHandler) {
 		this.userSessionData = userSessionData;
 		this.registry = userSessionData.getRegistry();
-		this.mobileView = userSessionData.getContext().getClientInfo().isMobileDevice();
+		ClientInfo clientInfo = userSessionData.getContext().getClientInfo();
+		this.mobileView = clientInfo.isMobileDevice();
 		this.logoutHandler = logoutHandler;
+		loginData = createLoginData(userSessionData, clientInfo);
+
+		userSessionData.getContext().onDestroyed.addListener(() -> loginData
+				.setActivityCount(activityCount)
+				.setApplicationOpenCount(applicationOpenCount)
+				.setDateLogout(Instant.now())
+				.save());
+
 		userSessionData.getContext().addExecutionDecorator(runnable -> {
 			UniversalDB.setUserId(userSessionData.getUser().getId());
 			THREAD_LOCAL_APPLICATION.set(selectedApplication.get());
 			THREAD_LOCAL_MANAGED_PERSPECTIVE.set(currentPerspective);
+			activityCount++;
 			try {
 				runnable.run();
 			} catch (Throwable e) {
@@ -123,6 +134,17 @@ public class ApplicationLauncher {
 		initApplicationData();
 		createApplicationLauncher();
 		createMainView();
+	}
+
+	private Login createLoginData(UserSessionData userSessionData, ClientInfo clientInfo) {
+		return Login.create()
+				.setUser(userSessionData.getUser())
+				.setDateLogin(Instant.now())
+				.setIp(clientInfo.getIp())
+				.setUserAgent(clientInfo.getUserAgent())
+				.setMobileDevice(clientInfo.isMobileDevice())
+				.setScreenSize(clientInfo.getScreenWidth() + "x" + clientInfo.getScreenHeight())
+				.save();
 	}
 
 	private void handleSessionException(Throwable e) {
@@ -148,8 +170,10 @@ public class ApplicationLauncher {
 	}
 
 	private void handleApplicationSelection(ManagedApplication application) {
+		if (application == null) {
+			return;
+		}
 		THREAD_LOCAL_APPLICATION.set(application);
-		System.out.println("dark:" + application.isDarkTheme() + ", app:" + application.getMainApplication().getTitleKey());
 		if (application.isDarkTheme()) {
 			userSessionData.getContext().setBackgroundImage("defaultDarkBackground", 0);
 			SessionConfiguration configuration = SessionContext.current().getConfiguration();
@@ -163,6 +187,17 @@ public class ApplicationLauncher {
 			SessionContext.current().setConfiguration(configuration);
 		}
 		selectedThemeIsDarkTheme = application.getDarkTheme();
+	}
+
+	private void handleApplicationLauncherSelection() {
+		selectedApplication.set(null);
+		if (selectedThemeIsDarkTheme) {
+			userSessionData.getContext().setBackgroundImage("defaultBackground", 0);
+			SessionConfiguration configuration = SessionContext.current().getConfiguration();
+			configuration.setTheme(StylingTheme.DEFAULT);
+			SessionContext.current().setConfiguration(configuration);
+			selectedThemeIsDarkTheme = false;
+		}
 	}
 
 	private void initApplicationData() {
@@ -204,6 +239,14 @@ public class ApplicationLauncher {
 		applicationLauncher = createLauncherView(itemView, mobileView);
 	}
 
+	public void updateApplicationLauncher() {
+		initApplicationData();
+		createApplicationLauncher();
+		if (applicationLauncherTab != null) {
+			applicationLauncherTab.setContent(applicationLauncher);
+		}
+	}
+
 	private void logout() {
 		registry.getBootstrapSessionHandler().onUserLogout.fire(userSessionData.getContext());
 		LoginHandler loginHandler = new LoginHandler(registry, logoutHandler, userSessionData);
@@ -228,9 +271,12 @@ public class ApplicationLauncher {
 						.filter(entry -> entry.getValue().equals(tab))
 						.map(Map.Entry::getKey).findAny()
 						.ifPresent(applicationData -> selectedApplication.set(applicationData.getManagedApplication()));
+				if (tab.equals(applicationLauncherTab)) {
+					handleApplicationLauncherSelection();
+				}
 			});
-			Tab applicationsTab = new Tab(ApplicationIcons.HOME, getLocalized(Dictionary.APPLICATIONS), applicationLauncher);
-			applicationsTabPanel.addTab(applicationsTab, true);
+			applicationLauncherTab = new Tab(ApplicationIcons.HOME, getLocalized(Dictionary.APPLICATIONS), applicationLauncher);
+			applicationsTabPanel.addTab(applicationLauncherTab, true);
 
 			Tab logoutTab = new Tab(ApplicationIcons.LOG_OUT, getLocalized(Dictionary.LOGOUT), null);
 			logoutTab.setLazyLoading(true);
@@ -238,6 +284,11 @@ public class ApplicationLauncher {
 			applicationsTabPanel.addTab(logoutTab, false);
 			logoutTab.onSelected.addListener(this::logout);
 			userSessionData.setRootComponent(applicationsTabPanel);
+		}
+
+		ApplicationData autoStartApp = getAllApplications().stream().filter(applicationData -> applicationData.getManagedApplication().isStartOnLogin()).findFirst().orElse(null);
+		if (autoStartApp != null) {
+			this.openApplication(autoStartApp);
 		}
 	}
 
@@ -270,6 +321,7 @@ public class ApplicationLauncher {
 	private void openApplication(ApplicationData applicationData) {
 		selectedApplication.set(applicationData.getManagedApplication());
 		THREAD_LOCAL_APPLICATION.set(selectedApplication.get());
+		applicationOpenCount++;
 		LOGGER.info("Open app");
 		if (openedApplications.contains(applicationData)) {
 			if (mobileView) {
@@ -563,6 +615,12 @@ public class ApplicationLauncher {
 		framePanel.setContent(panel);
 		framePanel.setBodyBackgroundColor(Color.WHITE.withAlpha(0.001f));
 		return framePanel;
+	}
+
+	private List<ApplicationData> getAllApplications() {
+		return sortedApplicationGroups.stream()
+				.flatMap(group -> group.getSortedApplications().stream())
+				.collect(Collectors.toList());
 	}
 
 	public String getLocalized(String key, Object... objects) {
