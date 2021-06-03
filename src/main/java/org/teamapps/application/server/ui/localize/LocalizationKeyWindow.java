@@ -160,6 +160,10 @@ public class LocalizationKeyWindow {
 		});
 	}
 
+	public void resetUi() {
+		formWindow.getFields().forEach(field -> field.setValue(null));
+	}
+
 	public void show() {
 		formWindow.show();
 	}

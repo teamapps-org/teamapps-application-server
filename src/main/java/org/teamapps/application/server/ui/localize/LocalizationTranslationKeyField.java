@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,7 @@ package org.teamapps.application.server.ui.localize;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.ui.TranslationKeyField;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
-import org.teamapps.application.server.system.localization.SystemLocalizationProvider;
+import org.teamapps.event.Event;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.ux.component.field.AbstractField;
 import org.teamapps.ux.component.field.FieldEditingMode;
@@ -35,29 +35,44 @@ import java.util.function.Supplier;
 
 public class LocalizationTranslationKeyField implements TranslationKeyField {
 
-	private final SystemRegistry systemRegistry;
+	public final Event<String> onValueChanged = new Event<>();
 	private final ComboBox<String> localizationKeyCombo;
 	private final TextField keyTextField;
 	private final LinkButton linkButton;
 
 	public LocalizationTranslationKeyField(String linkButtonCaption, ApplicationInstanceData applicationInstanceData, SystemRegistry systemRegistry, Supplier<Application> applicationSupplier) {
-		this.systemRegistry = systemRegistry;
-		localizationKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, applicationInstanceData, applicationSupplier);
+		this(linkButtonCaption, applicationInstanceData, systemRegistry, applicationSupplier, false, false);
+	}
+
+	public LocalizationTranslationKeyField(String linkButtonCaption, ApplicationInstanceData applicationInstanceData, SystemRegistry systemRegistry, Supplier<Application> applicationSupplier, boolean allowMultiLine, boolean selectionFieldWithKey) {
+		BaseTemplate template = selectionFieldWithKey ? BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES : BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE;
+		localizationKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(template, applicationInstanceData, applicationSupplier);
 		localizationKeyCombo.setDropDownTemplate(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
 		localizationKeyCombo.setShowClearButton(true);
 		keyTextField = new TextField();
 		keyTextField.setEditingMode(FieldEditingMode.READONLY);
 
 		linkButton = new LinkButton(linkButtonCaption);
-		localizationKeyCombo.onValueChanged.addListener(keyTextField::setValue);
+		localizationKeyCombo.onValueChanged.addListener(value -> {
+			keyTextField.setValue(value);
+			onValueChanged.fire(value);
+		});
 		LocalizationKeyWindow localizationKeyWindow = new LocalizationKeyWindow(applicationInstanceData, systemRegistry, applicationSupplier);
+		localizationKeyWindow.onNewKey.addListener(value -> {
+			localizationKeyCombo.setValue(value);
+			keyTextField.setValue(value);
+			localizationKeyCombo.onValueChanged.fire(value);
+			onValueChanged.fire(value);
+		});
 		linkButton.onClicked.addListener(() -> {
-			localizationKeyWindow.onNewKey.addListener(value -> {
-				localizationKeyCombo.setValue(value);
-				keyTextField.setValue(value);
-			});
+			localizationKeyWindow.resetUi();
 			localizationKeyWindow.show();
 		});
+	}
+
+	@Override
+	public Event<String> getOnValueChanged() {
+		return onValueChanged;
 	}
 
 	@Override

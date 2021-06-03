@@ -52,6 +52,8 @@ public class LocalizationUiUtils {
 			}
 			LocalizationKey localizationKey = LocalizationKey.filter().key(TextFilter.textEqualsFilter(s)).executeExpectSingleton();
 			if (localizationKey == null) {
+				map.put(BaseTemplate.PROPERTY_ICON, ApplicationIcons.SYMBOL_QUESTIONMARK);
+				map.put(BaseTemplate.PROPERTY_CAPTION, s);
 				return map;
 			}
 			map.put(BaseTemplate.PROPERTY_ICON, getLocalizationKeyIcon(localizationKey));
@@ -79,7 +81,6 @@ public class LocalizationUiUtils {
 						.collect(Collectors.toList());
 			}
 		});
-		comboBox.setTemplate(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
 		return comboBox;
 	}
 
@@ -92,7 +93,6 @@ public class LocalizationUiUtils {
 			case DICTIONARY_KEY -> ApplicationIcons.DICTIONARY;
 			case REPORTING_KEY -> ApplicationIcons.DOCUMENT_NOTEBOOK;
 			case SYSTEM_KEY -> ApplicationIcons.SYSTEM;
-			default -> null;
 		};
 	}
 }
