@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,6 +37,7 @@ public class Model implements SchemaInfoProvider {
 		Table currency = db.addTable("currency", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
 
 		//system model:
+		Table login = db.addTable("login", KEEP_DELETED);
 		Table user = db.addTable("user", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
 		Table userAcceptedPolicy = db.addTable("userAcceptedPolicy", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
 		Table userAcceptedPolicyEntries = db.addTable("userAcceptedPolicyEntries", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
@@ -211,6 +212,7 @@ public class Model implements SchemaInfoProvider {
 				.addText("descriptionKey")
 				.addBoolean("singleApplication")
 				.addBoolean("darkTheme")
+				.addBoolean("startOnLogin")
 				.addReference("perspectives", managedApplicationPerspective, true, "managedApplication", true)
 				.addInteger("listingPosition")
 				.addBoolean("toolbarApplicationMenu")
@@ -269,6 +271,18 @@ public class Model implements SchemaInfoProvider {
 				.addFile("screenshot")
 		;
 
+		login
+				.addReference("user", user, false)
+				.addText("ip")
+				.addText("userAgent")
+				.addBoolean("mobileDevice")
+				.addText("screenSize")
+				.addTimestamp("dateLogin")
+				.addTimestamp("dateLogout")
+				.addInteger("activityCount")
+				.addInteger("applicationOpenCount")
+		;
+
 		user
 				.addText("firstName")
 				.addText("lastName")
@@ -295,12 +309,12 @@ public class Model implements SchemaInfoProvider {
 				.addInteger("lastAcceptedPrivacyPolicy")
 				.addInteger("lastAcceptedTermsOfUse")
 				.addReference("acceptEntries", userAcceptedPolicyEntries, true)
-				;
+		;
 
 		userAcceptedPolicyEntries
 				.addInteger("acceptedPrivacyPolicy")
 				.addInteger("acceptedTermsOfUse")
-				;
+		;
 
 		userAccessToken
 				.addReference("user", user, false, "accessTokens")
