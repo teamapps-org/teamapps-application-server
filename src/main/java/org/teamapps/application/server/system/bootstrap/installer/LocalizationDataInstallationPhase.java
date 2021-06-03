@@ -75,7 +75,7 @@ public class LocalizationDataInstallationPhase implements ApplicationInstallatio
 			Map<String, Map<String, String>> localizationMapByKey = localizationData.createLocalizationMapByKey();
 			List<LocalizationKey> localizationKeys = application == null ? Collections.emptyList() : LocalizationKey.filter().application(NumericFilter.equalsFilter(application.getId())).execute();
 			KeyCompare<String, LocalizationKey> keyCompare = new KeyCompare<>(localizationMapByKey.keySet(), localizationKeys, s -> s, LocalizationKey::getKey);
-			List<String> newKeys = keyCompare.getNotInB();
+			List<String> newKeys = keyCompare.getAEntriesNotInB();
 			for (String key : newKeys) {
 				Map<String, String> translations = localizationMapByKey.get(key);
 				for (Map.Entry<String, String> entry : translations.entrySet()) {
@@ -85,19 +85,19 @@ public class LocalizationDataInstallationPhase implements ApplicationInstallatio
 				}
 			}
 
-			List<LocalizationKey> removedKeys = keyCompare.getNotInA();
+			List<LocalizationKey> removedKeys = keyCompare.getBEntriesNotInA();
 			removedKeys.stream().flatMap(key -> key.getLocalizationValues().stream()).forEach(value -> {
 				dataInfo.removed(value.getLocalizationKey().getKey() + " -> " + value.getLanguage() + ":" + value.getOriginal());
 			});
-			List<String> existingKeys = keyCompare.getInB();
+			List<String> existingKeys = keyCompare.getAEntriesInB();
 			for (String key : existingKeys) {
 				Map<String, String> translations = localizationMapByKey.get(key);
 				LocalizationKey localizationKey = keyCompare.getB(key);
 				KeyCompare<String, LocalizationValue> languageCompare = new KeyCompare<>(translations.keySet(), localizationKey.getLocalizationValues(), s -> s, LocalizationValue::getLanguage);
 				if (languageCompare.isDifferent()) {
-					List<String> newLanguages = languageCompare.getNotInB();
+					List<String> newLanguages = languageCompare.getAEntriesNotInB();
 					newLanguages.forEach(language -> dataInfo.added(key + " -> " + language + ":" + translations.get(language)));
-					List<LocalizationValue> removedLanguages = languageCompare.getNotInA();
+					List<LocalizationValue> removedLanguages = languageCompare.getBEntriesNotInA();
 					removedLanguages.forEach(value -> dataInfo.removed(key + " -> " + value.getLanguage() + ":" + value.getOriginal()));
 					//todo changed originals
 				}
@@ -114,7 +114,7 @@ public class LocalizationDataInstallationPhase implements ApplicationInstallatio
 		LocalizationData localizationData = applicationInfo.getBaseApplicationBuilder().getLocalizationData();
 		Application application = applicationInfo.getApplication();
 		LocalizationKeyType localizationKeyType = LocalizationKeyType.APPLICATION_RESOURCE_KEY;
-		LocalizationUtil.synchronizeLocalizationData(localizationData, application, localizationKeyType, localizationConfig.getRequiredLanguages());
+		LocalizationUtil.synchronizeLocalizationData(localizationData, application, localizationKeyType, localizationConfig);
 	}
 
 	@Override

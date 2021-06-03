@@ -28,8 +28,7 @@ import org.teamapps.application.server.controlcenter.dbexplorer.DatabaseExplorer
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
 import org.teamapps.application.server.system.config.SystemConfig;
 import org.teamapps.application.server.system.logging.DatabaseLogAppender;
-import org.teamapps.application.server.system.login.LoginHandler;
-import org.teamapps.application.server.system.machinetranslation.MachineTranslation;
+import org.teamapps.application.server.system.auth.LoginHandler;
 import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
 import org.teamapps.application.server.system.server.ApplicationServer;
 import org.teamapps.application.server.system.server.SessionHandler;

@@ -66,13 +66,13 @@ public class PrivilegeDataInstallationPhase implements ApplicationInstallationPh
 			} else {
 				List<ApplicationPrivilegeGroup> applicationPrivilegeGroups = getApplicationPrivilegeGroups(application);
 				KeyCompare<PrivilegeGroup, ApplicationPrivilegeGroup> keyCompare = new KeyCompare<>(privilegeGroups, applicationPrivilegeGroups, PrivilegeGroup::getName, ApplicationPrivilegeGroup::getName);
-				List<PrivilegeGroup> newPrivilegeGroups = keyCompare.getNotInB();
+				List<PrivilegeGroup> newPrivilegeGroups = keyCompare.getAEntriesNotInB();
 				dataInfo.setDataAdded(getPrivilegeGroupInfoData(newPrivilegeGroups));
 
-				List<ApplicationPrivilegeGroup> removedPrivilegeGroups = keyCompare.getNotInA();
+				List<ApplicationPrivilegeGroup> removedPrivilegeGroups = keyCompare.getBEntriesNotInA();
 				dataInfo.setDataRemoved(getApplicationPrivilegeGroupInfoData(removedPrivilegeGroups));
 
-				List<PrivilegeGroup> existingGroups = keyCompare.getInB();
+				List<PrivilegeGroup> existingGroups = keyCompare.getAEntriesInB();
 				for (PrivilegeGroup privilegeGroup : existingGroups) {
 					KeyCompare<Privilege, ApplicationPrivilege> privilegeCompare = new KeyCompare<>(privilegeGroup.getPrivileges(), keyCompare.getB(privilegeGroup).getPrivileges(), Privilege::getName, ApplicationPrivilege::getName);
 					//privilege diff
@@ -93,13 +93,13 @@ public class PrivilegeDataInstallationPhase implements ApplicationInstallationPh
 		List<ApplicationPrivilegeGroup> applicationPrivilegeGroups = getApplicationPrivilegeGroups(application);
 
 		KeyCompare<PrivilegeGroup, ApplicationPrivilegeGroup> keyCompare = new KeyCompare<>(privilegeGroups, applicationPrivilegeGroups, PrivilegeGroup::getName, ApplicationPrivilegeGroup::getName);
-		List<PrivilegeGroup> newPrivilegeGroups = keyCompare.getNotInB();
+		List<PrivilegeGroup> newPrivilegeGroups = keyCompare.getAEntriesNotInB();
 		newPrivilegeGroups.forEach(group -> createApplicationPrivilegeGroup(group, application));
 
-		List<ApplicationPrivilegeGroup> removedPrivilegeGroups = keyCompare.getNotInA();
+		List<ApplicationPrivilegeGroup> removedPrivilegeGroups = keyCompare.getBEntriesNotInA();
 		removedPrivilegeGroups.forEach(Entity::delete);
 
-		List<PrivilegeGroup> existingGroups = keyCompare.getInB();
+		List<PrivilegeGroup> existingGroups = keyCompare.getAEntriesInB();
 		for (PrivilegeGroup group : existingGroups) {
 			ApplicationPrivilegeGroup applicationPrivilegeGroup = keyCompare.getB(group);
 			ValueCompare valueCompare = new ValueCompare()
@@ -117,13 +117,13 @@ public class PrivilegeDataInstallationPhase implements ApplicationInstallationPh
 						.save();
 			}
 			KeyCompare<Privilege, ApplicationPrivilege> privilegeCompare = new KeyCompare<>(group.getPrivileges(), applicationPrivilegeGroup.getPrivileges(), Privilege::getName, ApplicationPrivilege::getName);
-			List<Privilege> newPrivileges = privilegeCompare.getNotInB();
+			List<Privilege> newPrivileges = privilegeCompare.getAEntriesNotInB();
 			newPrivileges.forEach(privilege -> createApplicationPrivilege(applicationPrivilegeGroup, privilege));
 
-			List<ApplicationPrivilege> removedPrivileges = privilegeCompare.getNotInA();
+			List<ApplicationPrivilege> removedPrivileges = privilegeCompare.getBEntriesNotInA();
 			removedPrivileges.forEach(Entity::delete);
 
-			List<Privilege> existingPrivileges = privilegeCompare.getInB();
+			List<Privilege> existingPrivileges = privilegeCompare.getAEntriesInB();
 			for (Privilege existingPrivilege : existingPrivileges) {
 				ApplicationPrivilege applicationPrivilege = privilegeCompare.getB(existingPrivilege);
 				if (new ValueCompare()

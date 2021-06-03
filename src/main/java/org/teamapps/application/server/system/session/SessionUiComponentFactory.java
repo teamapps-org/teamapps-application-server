@@ -81,8 +81,8 @@ public class SessionUiComponentFactory implements UiComponentFactory {
 	}
 
 	@Override
-	public TranslationKeyField createTranslationKeyField(String linkButtonCaption) {
-		return new LocalizationTranslationKeyField(linkButtonCaption, applicationInstanceData, systemRegistry, () -> application);
+	public TranslationKeyField createTranslationKeyField(String linkButtonCaption, boolean allowMultiLine, boolean selectionFieldWithKey) {
+		return new LocalizationTranslationKeyField(linkButtonCaption, applicationInstanceData, systemRegistry, () -> application, allowMultiLine, selectionFieldWithKey);
 	}
 
 	@Override

@@ -70,9 +70,9 @@ public class PerspectiveDataInstallationPhase implements ApplicationInstallation
 
 			dataInfo.setData(perspectives.stream().map(PerspectiveBuilder::getName).collect(Collectors.joining("\n")));
 			KeyCompare<PerspectiveBuilder, ApplicationPerspective> keyCompare = new KeyCompare<>(perspectives, applicationPerspectives, PerspectiveBuilder::getName, ApplicationPerspective::getName);
-			List<PerspectiveBuilder> newPerspectives = keyCompare.getNotInB();
+			List<PerspectiveBuilder> newPerspectives = keyCompare.getAEntriesNotInB();
 			dataInfo.setDataAdded(newPerspectives.stream().map(PerspectiveBuilder::getName).collect(Collectors.toList()));
-			List<ApplicationPerspective> removedPerspectives = keyCompare.getNotInA();
+			List<ApplicationPerspective> removedPerspectives = keyCompare.getBEntriesNotInA();
 			dataInfo.setDataRemoved(removedPerspectives.stream().map(ApplicationPerspective::getName).collect(Collectors.toList()));
 			applicationInfo.setPerspectiveData(dataInfo);
 		} catch (Exception e) {
@@ -95,7 +95,7 @@ public class PerspectiveDataInstallationPhase implements ApplicationInstallation
 				.execute();
 
 		KeyCompare<PerspectiveBuilder, ApplicationPerspective> keyCompare = new KeyCompare<>(perspectives, applicationPerspectives, PerspectiveBuilder::getName, ApplicationPerspective::getName);
-		List<PerspectiveBuilder> newPerspectives = keyCompare.getNotInB();
+		List<PerspectiveBuilder> newPerspectives = keyCompare.getAEntriesNotInB();
 		newPerspectives.forEach(perspective -> ApplicationPerspective.create()
 				.setApplication(application)
 				.setName(perspective.getName())
@@ -106,10 +106,10 @@ public class PerspectiveDataInstallationPhase implements ApplicationInstallation
 				.setToolbarPerspectiveMenu(perspective.useToolbarPerspectiveMenu())
 				.save());
 
-		List<ApplicationPerspective> removedPerspectives = keyCompare.getNotInA();
+		List<ApplicationPerspective> removedPerspectives = keyCompare.getBEntriesNotInA();
 		removedPerspectives.forEach(Entity::delete);
 
-		List<PerspectiveBuilder> existingPerspectives = keyCompare.getInB();
+		List<PerspectiveBuilder> existingPerspectives = keyCompare.getAEntriesInB();
 		for (PerspectiveBuilder perspective : existingPerspectives) {
 			ApplicationPerspective applicationPerspective = keyCompare.getB(perspective);
 			if (ValueCompare

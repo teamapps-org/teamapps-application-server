@@ -20,6 +20,7 @@
 package org.teamapps.application.server.system.localization;
 
 import org.teamapps.application.api.localization.LocalizationData;
+import org.teamapps.application.server.system.config.LocalizationConfig;
 import org.teamapps.model.controlcenter.LocalizationKey;
 import org.teamapps.model.controlcenter.LocalizationKeyType;
 import org.teamapps.model.controlcenter.LocalizationValue;
@@ -35,14 +36,14 @@ public class DictionaryLocalizationProvider implements LocalizationProvider {
 
 	private Map<String, Map<String, LocalizationValue>> localizationLanguageValueMapByKey;
 
-	public DictionaryLocalizationProvider(TranslationService translationService, List<String> requiredLanguages) {
-		synchronizeDictionaryData(requiredLanguages);
+	public DictionaryLocalizationProvider(TranslationService translationService, LocalizationConfig localizationConfig) {
+		synchronizeDictionaryData(localizationConfig);
 		loadDictionary();
-		translateDictionary(translationService);
+		LocalizationUtil.translateAllDictionaryValues(translationService, localizationConfig);
 	}
 
-	private void synchronizeDictionaryData(List<String> requiredLanguages) {
-		LocalizationUtil.synchronizeLocalizationData(LocalizationData.createDictionaryData(getClass().getClassLoader()), null, LocalizationKeyType.DICTIONARY_KEY, requiredLanguages);
+	private void synchronizeDictionaryData(LocalizationConfig localizationConfig) {
+		LocalizationUtil.synchronizeLocalizationData(LocalizationData.createDictionaryData(getClass().getClassLoader()), null, LocalizationKeyType.DICTIONARY_KEY, localizationConfig);
 	}
 
 	private void loadDictionary() {
@@ -55,10 +56,6 @@ public class DictionaryLocalizationProvider implements LocalizationProvider {
 				.flatMap(key -> key.getLocalizationValues().stream()).forEach(value -> {
 			localizationLanguageValueMapByKey.computeIfAbsent(value.getLocalizationKey().getKey(), k -> new HashMap<>()).put(value.getLanguage(), value);
 		});
-	}
-
-	private void translateDictionary(TranslationService translationService) {
-		LocalizationUtil.translateAllDictionaryValues(translationService);
 	}
 
 	public String getLocalizationValue(String key, List<String> languagePriorityOrder) {

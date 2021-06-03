@@ -53,7 +53,7 @@ public class ApplicationServer implements WebController, SessionManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private final File basePath;
+	private File basePath;
 	private TeamAppsConfiguration teamAppsConfiguration;
 	private int port;
 	private UniversalDB universalDb;
@@ -62,6 +62,10 @@ public class ApplicationServer implements WebController, SessionManager {
 	private SessionHandler sessionHandler;
 
 	private WeakHashMap<SessionHandler, Long> weakStartDateBySessionHandler = new WeakHashMap<>();
+
+	public ApplicationServer() {
+		this(new File("./server-data"), new TeamAppsConfiguration(), 8080);
+	}
 
 	public ApplicationServer(File basePath) {
 		this(basePath, new TeamAppsConfiguration(), 8080);
@@ -187,4 +191,15 @@ public class ApplicationServer implements WebController, SessionManager {
 		this.servletRegistrations.add(servletRegistration);
 	}
 
+	public void setTeamAppsConfiguration(TeamAppsConfiguration teamAppsConfiguration) {
+		this.teamAppsConfiguration = teamAppsConfiguration;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public void setBasePath(File basePath) {
+		this.basePath = basePath;
+	}
 }

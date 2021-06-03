@@ -104,9 +104,6 @@ public class ApplicationGroupsPerspective extends AbstractManagedApplicationPers
 
 		LocalizationTranslationKeyField titleKeyField = new LocalizationTranslationKeyField(getLocalized("applications.createNewTitle"), getApplicationInstanceData(), userSessionData.getRegistry(), null);
 
-//		ComboBox<String> titleKeyCombo = LocalizationUiUtils.createLocalizationKeyCombo(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, getApplicationInstanceData(), this::getMainApplication);
-//		LinkButton crateTitleKeyButton = new LinkButton(getLocalized("applications.createNewTitle"));
-
 		EntityListModelBuilder<ManagedApplication> applicationModelBuilder = new EntityListModelBuilder<>(getApplicationInstanceData());
 		Table<ManagedApplication> applicationTable = applicationModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationPropertyProvider(userSessionData), 26);
 		FormPanel formPanel = new FormPanel(getApplicationInstanceData());

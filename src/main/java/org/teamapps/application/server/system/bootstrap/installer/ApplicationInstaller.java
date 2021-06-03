@@ -38,6 +38,7 @@ public class ApplicationInstaller {
 	private final ApplicationInfo applicationInfo;
 	private final UniversalDB universalDB;
 	private final TranslationService translationService;
+	private final LocalizationConfig localizationConfig;
 
 	private final List<ApplicationInstallationPhase> applicationInstallationPhases;
 
@@ -54,6 +55,7 @@ public class ApplicationInstaller {
 		this.applicationInfo = applicationInfo;
 		this.universalDB = universalDB;
 		this.translationService = translationService;
+		this.localizationConfig = localizationConfig;
 		applicationInstallationPhases = Arrays.asList(
 				new ApplicationJarInstallationPhase(),
 				new ApplicationArtifactInstallationPhase(),
@@ -87,7 +89,7 @@ public class ApplicationInstaller {
 		if (applicationInfo.isChecked() && applicationInfo.getErrors().isEmpty()) {
 			applicationInstallationPhases.forEach(phase -> phase.installApplication(applicationInfo));
 			applicationInfo.getApplication().setInstalledVersion(applicationInfo.getApplicationVersion()).save();
-			LocalizationUtil.translateAllApplicationValues(translationService, applicationInfo.getApplication());
+			LocalizationUtil.translateAllApplicationValues(translationService, applicationInfo.getApplication(), localizationConfig);
 			applicationInfo.getBaseApplicationBuilder().getOnApplicationInstalled().fire();
 			return true;
 		} else {

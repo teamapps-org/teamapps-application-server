@@ -71,19 +71,19 @@ public class KeyCompare<A, B> {
 		return bByKey.get(keyOfA.apply(a));
 	}
 
-	public List<A> getNotInB() {
+	public List<A> getAEntriesNotInB() {
 		return notInB;
 	}
 
-	public List<B> getNotInA() {
+	public List<B> getBEntriesNotInA() {
 		return notInA;
 	}
 
-	public List<A> getInB() {
+	public List<A> getAEntriesInB() {
 		return inB;
 	}
 
-	public List<B> getInA() {
+	public List<B> getBEntriesInA() {
 		return inA;
 	}
 
