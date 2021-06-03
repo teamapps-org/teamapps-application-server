@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@ import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.system.auth.AuthenticationHandler;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
 import org.teamapps.application.server.system.config.DocumentConversionConfig;
 import org.teamapps.application.server.system.config.MachineTranslationConfig;
@@ -43,6 +44,7 @@ import org.teamapps.universaldb.UniversalDB;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,7 @@ public class SystemRegistry {
 	private final BaseResourceLinkProvider baseResourceLinkProvider;
 	private SessionRegistryHandler sessionRegistryHandler;
 	private DocumentConverter documentConverter;
+	private List<AuthenticationHandler> authenticationHandlers = new ArrayList<>();
 
 
 	public SystemRegistry(BootstrapSessionHandler bootstrapSessionHandler, UniversalDB universalDB, ApplicationConfig<SystemConfig> applicationConfig) {
@@ -72,7 +75,7 @@ public class SystemRegistry {
 		this.bootstrapSessionHandler = bootstrapSessionHandler;
 		this.universalDB = universalDB;
 		this.applicationConfig = applicationConfig;
-		this.dictionary = new DictionaryLocalizationProvider(translationService, systemConfig.getLocalizationConfig().getRequiredLanguages());
+		this.dictionary = new DictionaryLocalizationProvider(translationService, systemConfig.getLocalizationConfig());
 		this.systemDictionary = new SystemLocalizationProvider();
 		this.globalLocalizationProvider = new GlobalLocalizationProvider(this);
 		this.baseResourceLinkProvider = new BaseResourceLinkProvider();
@@ -103,7 +106,7 @@ public class SystemRegistry {
 
 	public void machineTranslateMissingEntries() {
 		if (translationService != null) {
-			LocalizationUtil.translateAllValues(translationService);
+			LocalizationUtil.translateAllValues(translationService, getSystemConfig().getLocalizationConfig());
 		}
 	}
 
@@ -211,5 +214,13 @@ public class SystemRegistry {
 
 	public GlobalLocalizationProvider getGlobalLocalizationProvider() {
 		return globalLocalizationProvider;
+	}
+
+	public void addAuthenticationHandler(AuthenticationHandler authenticationHandler) {
+		authenticationHandlers.add(authenticationHandler);
+	}
+
+	public List<AuthenticationHandler> getAuthenticationHandlers() {
+		return authenticationHandlers;
 	}
 }
