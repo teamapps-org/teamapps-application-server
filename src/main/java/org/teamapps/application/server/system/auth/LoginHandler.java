@@ -17,7 +17,7 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-package org.teamapps.application.server.system.login;
+package org.teamapps.application.server.system.auth;
 
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
@@ -44,14 +44,13 @@ import org.teamapps.ux.component.infiniteitemview.ListInfiniteItemViewModel;
 import org.teamapps.ux.component.itemview.ItemViewRowJustification;
 import org.teamapps.ux.component.itemview.ItemViewVerticalItemAlignment;
 import org.teamapps.ux.component.linkbutton.LinkButton;
-import org.teamapps.ux.component.login.LoginWindow;
 import org.teamapps.ux.component.panel.ElegantPanel;
+import org.teamapps.ux.component.panel.Panel;
 import org.teamapps.ux.component.rootpanel.RootPanel;
 import org.teamapps.ux.session.SessionContext;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class LoginHandler {
 
@@ -77,6 +76,18 @@ public class LoginHandler {
 			rankedLanguages.add("en");
 		}
 		RootPanel rootPanel = context.addRootPanel();
+
+		Map<String, Object> clientParameters = context.getClientInfo().getClientParameters();
+		if (clientParameters != null && clientParameters.containsKey("ATOK")) {
+			for (AuthenticationHandler authenticationHandler : systemRegistry.getAuthenticationHandlers()) {
+				User authenticatedUser = authenticationHandler.authenticate(context, clientParameters);
+				if (authenticatedUser != null) {
+					rootPanel.setContent(new Panel());
+					handleSuccessfulLogin(authenticatedUser, rootPanel, context);
+					return;
+				}
+			}
+		}
 		createLoginView(context, rootPanel);
 	}
 
