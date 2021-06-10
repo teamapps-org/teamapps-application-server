@@ -116,7 +116,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 				BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES
 		);
 
-		ComboBox<OrganizationUnit> organizationComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), getApplicationInstanceData());
+		ComboBox<OrganizationUnit> organizationComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), true, getApplicationInstanceData());
 
 
 		ResponsiveForm form = new ResponsiveForm(120, 120, 0);

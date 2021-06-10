@@ -160,7 +160,7 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		PasswordField passwordField = new PasswordField();
 		ComboBox<UserAccountStatus> accountStatusComboBox = createAccountStatusComboBox();
 		TagComboBox<UserRoleAssignment> userRoleAssignmentTagCombo = createUserRoleAssignmentTagCombo();
-		ComboBox<OrganizationUnit> orgUnitComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), getApplicationInstanceData());
+		ComboBox<OrganizationUnit> orgUnitComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), true, getApplicationInstanceData());
 
 
 		ResponsiveForm form = new ResponsiveForm(120, 120, 0);
@@ -291,6 +291,7 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 
 	public String getRolesString(List<UserRoleAssignment> assignments, int limit) {
 		return assignments.stream()
+				.filter(assignment -> assignment.getRole() != null)
 				.map(assignment -> getLocalized(assignment.getRole().getTitle()))
 				.limit(limit)
 				.collect(Collectors.joining(", "));

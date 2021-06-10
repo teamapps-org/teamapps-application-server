@@ -128,7 +128,7 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 		ComboBox<Application> applicationComboBox = createApplicationComboBox();
 		ComboBox<ApplicationRole> applicationRoleComboBox = createApplicationRoleComboBox(applicationComboBox);
 		ComboBox<OrganizationField> organizationFieldFilterComboBox = createOrganizationFieldComboBox();
-		ComboBox<OrganizationUnit> organizationFilterComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), getApplicationInstanceData());
+		ComboBox<OrganizationUnit> organizationFilterComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), true, getApplicationInstanceData());
 		TagComboBox<OrganizationUnitType> organizationUnitTypeFilterTagComboBox = OrganizationUtils.createOrganizationUnitTypeTagComboBox(50, getApplicationInstanceData());
 
 

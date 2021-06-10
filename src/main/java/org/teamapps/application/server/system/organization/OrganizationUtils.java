@@ -168,6 +168,10 @@ public class OrganizationUtils {
 	}
 
 	public static ComboBox<OrganizationUnit> createOrganizationComboBox(Template template, Collection<OrganizationUnit> allowedUnits, ApplicationInstanceData applicationInstanceData) {
+		return createOrganizationComboBox(template, allowedUnits, false, applicationInstanceData);
+	}
+
+	public static ComboBox<OrganizationUnit> createOrganizationComboBox(Template template, Collection<OrganizationUnit> allowedUnits, boolean withPath, ApplicationInstanceData applicationInstanceData) {
 		ComboBox<OrganizationUnit> comboBox = new ComboBox<>(template);
 		ComboBoxModel<OrganizationUnit> model = new ComboBoxModel<>() {
 			@Override
@@ -182,7 +186,9 @@ public class OrganizationUtils {
 		};
 		comboBox.setModel(model);
 		comboBox.setShowExpanders(true);
-		PropertyProvider<OrganizationUnit> propertyProvider = PropertyProviders.creatOrganizationUnitPropertyProvider(applicationInstanceData);
+		PropertyProvider<OrganizationUnit> propertyProvider = withPath ?
+				PropertyProviders.creatOrganizationUnitWithPathPropertyProvider(applicationInstanceData) :
+				PropertyProviders.creatOrganizationUnitPropertyProvider(applicationInstanceData);
 		comboBox.setPropertyProvider(propertyProvider);
 		Function<OrganizationUnit, String> recordToStringFunction = unit -> {
 			Map<String, Object> values = propertyProvider.getValues(unit, Collections.singleton(BaseTemplate.PROPERTY_CAPTION));

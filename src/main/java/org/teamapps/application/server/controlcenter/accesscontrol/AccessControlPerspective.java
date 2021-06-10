@@ -132,7 +132,7 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 		TagComboBox<PrivilegeObject> privilegeObjectTagComboBox = createPrivilegeObjectTagComboBox(applicationComboBox, privilegeGroupComboBox);
 		CheckBox privilegeObjectInheritanceCheckBox = new CheckBox(getLocalized("accessControl.privilegeObjectInheritance"));
 		ComboBox<OrganizationField> organizationFieldFilterComboBox = createOrganizationFieldComboBox();
-		ComboBox<OrganizationUnit> organizationFilterComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), getApplicationInstanceData());
+		ComboBox<OrganizationUnit> organizationFilterComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), true, getApplicationInstanceData());
 		TagComboBox<OrganizationUnitType> organizationUnitTypeFilterTagComboBox = OrganizationUtils.createOrganizationUnitTypeTagComboBox(50, getApplicationInstanceData());
 
 

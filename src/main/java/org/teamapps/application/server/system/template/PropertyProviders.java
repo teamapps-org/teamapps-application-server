@@ -208,6 +208,24 @@ public class PropertyProviders {
 		};
 	}
 
+	public static PropertyProvider<OrganizationUnit> creatOrganizationUnitWithPathPropertyProvider(ApplicationInstanceData applicationInstanceData) {
+		PropertyProvider<OrganizationUnit> unitPropertyProvider = creatOrganizationUnitPropertyProvider(applicationInstanceData);
+		return (unit, propertyNames) -> {
+			Map<String, Object> map = unitPropertyProvider.getValues(unit, propertyNames);
+			String path = (String) map.get(BaseTemplate.PROPERTY_CAPTION);
+			int level = 0;
+			OrganizationUnit parent = unit.getParent();
+			while (parent != null && level < 3) {
+				Map<String, Object> parentMap = unitPropertyProvider.getValues(parent, propertyNames);
+				path = parentMap.get(BaseTemplate.PROPERTY_CAPTION) + "/" + path;
+						level++;
+				parent = parent.getParent();
+			}
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, path);
+			return map;
+		};
+	}
+
 	public static PropertyProvider<UserContainer> creatUserContainerPropertyProvider(ApplicationInstanceData applicationInstanceData) {
 		Function<TranslatableText, String> translatableTextExtractor = TranslatableTextUtils.createTranslatableTextExtractor(applicationInstanceData);
 		return (container, propertyNames) -> {
@@ -322,7 +340,7 @@ public class PropertyProviders {
 				prefix = abbreviation + "-";
 			}
 			Map<String, Object> map = new HashMap<>();
-			map.put(BaseTemplate.PROPERTY_ICON, IconUtils.decodeIcon(assignment.getRole().getIcon()));
+			map.put(BaseTemplate.PROPERTY_ICON, assignment.getRole() != null ? IconUtils.decodeIcon(assignment.getRole().getIcon()) : null);
 			map.put(BaseTemplate.PROPERTY_CAPTION, translatableTextExtractor.apply(assignment.getRole().getTitle()));
 			map.put(BaseTemplate.PROPERTY_DESCRIPTION, prefix + translatableTextExtractor.apply(assignment.getOrganizationUnit().getName()));
 			return map;
