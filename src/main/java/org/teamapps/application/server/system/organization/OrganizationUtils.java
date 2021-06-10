@@ -88,23 +88,11 @@ public class OrganizationUtils {
 		}
 	}
 
-	public static Set<UserContainer> getAllUserContainers(OrganizationUnit unit, Collection<OrganizationUnitType> unitTypesFilter) {
-		Set<OrganizationUnit> allUnits = getAllUnits(unit, unitTypesFilter);
-		Set<UserContainer> result = new HashSet<>();
-		for (OrganizationUnit organizationUnit : allUnits) {
-			UserContainer userContainer = organizationUnit.getUserContainer();
-			if (userContainer != null) {
-				result.add(userContainer);
-			}
-		}
-		return result;
-	}
-
 	public static Set<User> getAllUsers(OrganizationUnit unit, Collection<OrganizationUnitType> unitTypesFilter) {
-		Set<UserContainer> allUserContainers = getAllUserContainers(unit, unitTypesFilter);
+		Set<OrganizationUnit> allUnits = getAllUnits(unit, unitTypesFilter);
 		Set<User> result = new HashSet<>();
-		for (UserContainer userContainer : allUserContainers) {
-			List<User> users = userContainer.getUsers();
+		for (OrganizationUnit organizationUnit : allUnits) {
+			List<User> users = organizationUnit.getUsers();
 			result.addAll(users);
 		}
 		return result;
@@ -139,32 +127,6 @@ public class OrganizationUtils {
 			parent = parent.getParent();
 		}
 		return null;
-	}
-
-	public static ComboBox<UserContainer> createUserContainerComboBox(Template template, Collection<OrganizationUnit> allowedUnits, ApplicationInstanceData applicationInstanceData) {
-		ComboBox<UserContainer> comboBox = new ComboBox<>(template);
-		ComboBoxModel<UserContainer> model = new ComboBoxModel<>() {
-			@Override
-			public List<UserContainer> getRecords(String query) {
-				return queryUserContainer(query, allowedUnits);
-			}
-
-			@Override
-			public TreeNodeInfo getTreeNodeInfo(UserContainer unit) {
-				return new TreeNodeInfoImpl<>(unit.getOrganizationUnit().getParent() != null ? unit.getOrganizationUnit().getParent().getUserContainer() : null);
-			}
-		};
-		comboBox.setModel(model);
-		comboBox.setShowExpanders(true);
-		PropertyProvider<UserContainer> propertyProvider = PropertyProviders.creatUserContainerPropertyProvider(applicationInstanceData);
-		comboBox.setPropertyProvider(propertyProvider);
-		Function<UserContainer, String> recordToStringFunction = unit -> {
-			Map<String, Object> values = propertyProvider.getValues(unit, Collections.singleton(BaseTemplate.PROPERTY_CAPTION));
-			Object result = values.get(BaseTemplate.PROPERTY_CAPTION);
-			return (String) result;
-		};
-		comboBox.setRecordToStringFunction(recordToStringFunction);
-		return comboBox;
 	}
 
 	public static ComboBox<OrganizationUnit> createOrganizationComboBox(Template template, Collection<OrganizationUnit> allowedUnits, ApplicationInstanceData applicationInstanceData) {
@@ -208,24 +170,6 @@ public class OrganizationUtils {
 						.stream()
 						.filter(allowedUnits::contains)
 						.limit(150)
-						.collect(Collectors.toList());
-	}
-
-	public static List<UserContainer> queryUserContainer(String query, Collection<OrganizationUnit> allowedUnits) {
-		return query == null || query.isBlank() ?
-				allowedUnits.stream()
-						.filter(unit -> unit.getUserContainer() != null)
-						.map(OrganizationUnit::getUserContainer)
-						.limit(150)
-						.collect(Collectors.toList()) :
-				OrganizationUnit.filter()
-						.parseFullTextFilter(query)
-						.execute()
-						.stream()
-						.filter(allowedUnits::contains)
-						.filter(unit -> unit.getUserContainer() != null)
-						.limit(150)
-						.map(OrganizationUnit::getUserContainer)
 						.collect(Collectors.toList());
 	}
 

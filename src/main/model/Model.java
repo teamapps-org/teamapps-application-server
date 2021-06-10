@@ -45,7 +45,6 @@ public class Model implements SchemaInfoProvider {
 		Table organizationUnit = db.addTable("organizationUnit", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table organizationUnitType = db.addTable("organizationUnitType", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table organizationField = db.addTable("organizationField", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
-		Table userContainer = db.addTable("userContainer", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table address = db.addTable("address", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 
 		//views:
@@ -291,6 +290,7 @@ public class Model implements SchemaInfoProvider {
 				.addText("languages")
 				.addText("email")
 				.addText("mobile")
+				.addText("phone")
 				.addText("login")
 				.addTimestamp("lastLogin")
 				.addText("password")
@@ -298,7 +298,7 @@ public class Model implements SchemaInfoProvider {
 				.addEnum("userAccountStatus", "active", "inactive", "superAdmin")
 				.addReference("acceptedPolicies", userAcceptedPolicy, false)
 				.addReference("address", address, false)
-				.addReference("container", userContainer, false, "users")
+				.addReference("organizationUnit", organizationUnit, false, "users")
 				.addReference("accessTokens", userAccessToken, true, "user")
 				.addReference("roleAssignments", userRoleAssignment, true, "user")
 				.addReference("allGroupMemberships", userGroupMembership, true, "user")
@@ -373,7 +373,7 @@ public class Model implements SchemaInfoProvider {
 				.addReference("type", organizationUnitType, false)
 				.addText("icon")
 				.addReference("address", address, false)
-				.addReference("userContainer", userContainer, false, "organizationUnit")
+				.addReference("users", user, true, "organizationUnit")
 		;
 
 		organizationUnitView
@@ -391,7 +391,7 @@ public class Model implements SchemaInfoProvider {
 				.addTranslatableText("abbreviation")
 				.addText("icon")
 				.addBoolean("translateOrganizationUnits")
-				.addBoolean("allowUserContainer")
+				.addBoolean("allowUsers")
 				.addReference("defaultChildType", organizationUnitType, false)
 				.addReference("possibleChildrenTypes", organizationUnitType, true)
 				.addEnum("geoLocationType", "country", "state", "city", "place", "none")
@@ -416,12 +416,6 @@ public class Model implements SchemaInfoProvider {
 		organizationFieldView
 				.addTranslatableText("title")
 				.addText("icon")
-		;
-
-
-		userContainer
-				.addReference("organizationUnit", organizationUnit, false, "userContainer")
-				.addReference("users", user, true, "container")
 		;
 
 		role

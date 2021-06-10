@@ -116,7 +116,7 @@ public class OrganizationUnitTypePerspective extends AbstractManagedApplicationP
 		ComboBox<Icon> iconComboBox = ApplicationIcons.createIconComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, true);
 		iconComboBox.setDropDownTemplate(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE);
 		CheckBox translateOrgUnitsCheckBox = new CheckBox(getLocalized("organizationUnitType.translateOrganizationUnits"));
-		CheckBox allowAsUserContainerCheckBox = new CheckBox(getLocalized("organizationUnitType.allowAsUserContainer"));
+		CheckBox allowAsUsersCheckBox = new CheckBox(getLocalized("organizationUnitType.allowUsers"));
 		ComboBox<OrganizationUnitType> defaultChildTypeCombo = createOrgUnitTypeComboBox();
 		TagComboBox<OrganizationUnitType> possibleChildrenTagCombo = OrganizationUtils.createOrganizationUnitTypeTagComboBox(50, getApplicationInstanceData());
 		ComboBox<GeoLocationType> geoLocationComboBox = createGeoLocationComboBox();
@@ -128,7 +128,7 @@ public class OrganizationUnitTypePerspective extends AbstractManagedApplicationP
 		formLayout.addLabelAndField(null, getLocalized("organizationUnitType.abbreviation"), translatableAbbreviationField);
 		formLayout.addLabelAndField(null, getLocalized("organizationUnitType.icon"), iconComboBox);
 		formLayout.addLabelAndField(null, getLocalized("organizationUnitType.translateUnits"), translateOrgUnitsCheckBox);
-		formLayout.addLabelAndField(null, getLocalized("organizationUnitType.allowUsers"), allowAsUserContainerCheckBox);
+		formLayout.addLabelAndField(null, getLocalized("organizationUnitType.allowUsers"), allowAsUsersCheckBox);
 		formLayout.addLabelAndField(null, getLocalized("organizationUnitType.defaultChildType"), defaultChildTypeCombo);
 		formLayout.addLabelAndField(null, getLocalized("organizationUnitType.allowedChildrenTypes"), possibleChildrenTagCombo);
 		formLayout.addLabelAndField(null, getLocalized("organizationUnitType.geoLocationType"), geoLocationComboBox);
@@ -149,7 +149,7 @@ public class OrganizationUnitTypePerspective extends AbstractManagedApplicationP
 						.setAbbreviation(translatableAbbreviationField.getValue())
 						.setIcon(IconUtils.encodeNoStyle(iconComboBox.getValue()))
 						.setTranslateOrganizationUnits(translateOrgUnitsCheckBox.getValue())
-						.setAllowUserContainer(allowAsUserContainerCheckBox.getValue())
+						.setAllowUsers(allowAsUsersCheckBox.getValue())
 						.setDefaultChildType(defaultChildTypeCombo.getValue())
 						.setPossibleChildrenTypes(possibleChildrenTagCombo.getValue())
 						.setGeoLocationType(geoLocationComboBox.getValue())
@@ -166,7 +166,7 @@ public class OrganizationUnitTypePerspective extends AbstractManagedApplicationP
 			translatableAbbreviationField.setValue(type.getAbbreviation());
 			iconComboBox.setValue(IconUtils.decodeIcon(type.getIcon()));
 			translateOrgUnitsCheckBox.setValue(type.getTranslateOrganizationUnits());
-			allowAsUserContainerCheckBox.setValue(type.getAllowUserContainer());
+			allowAsUsersCheckBox.setValue(type.isAllowUsers());
 			defaultChildTypeCombo.setValue(type.getDefaultChildType());
 			possibleChildrenTagCombo.setValue(type.getPossibleChildrenTypes());
 			geoLocationComboBox.setValue(type.getGeoLocationType());

@@ -199,11 +199,7 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		saveButton.onClick.addListener(() -> {
 			User user = selectedUser.get();
 			OrganizationUnit organizationUnit = orgUnitComboBox.getValue();
-			if (organizationUnit != null && organizationUnit.getType().getAllowUserContainer()) {
-				if (organizationUnit.getUserContainer() == null) {
-					UserContainer.create().setOrganizationUnit(organizationUnit).save();
-				}
-			} else {
+			if (organizationUnit == null || !organizationUnit.getType().isAllowUsers()) {
 				UiUtils.showNotification(ApplicationIcons.ERROR, getLocalized("users.wrongOrMissingOrgUnit"));
 				return;
 			}
@@ -211,7 +207,7 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 				UiUtils.showSaveNotification(false, getApplicationInstanceData());
 				return;
 			}
-			if (organizationUnit != null && organizationUnit.getUserContainer() != null && user != null && firstNameField.getValue() != null && lastNameField.getValue() != null) {
+			if (user != null && firstNameField.getValue() != null && lastNameField.getValue() != null) {
 				byte[] picture = readUserPicture(pictureChooser);
 				user
 						.setFirstName(firstNameField.getValue())
@@ -222,7 +218,7 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 						.setLogin(loginField.getValue())
 						.setUserAccountStatus(accountStatusComboBox.getValue())
 						.setAddress(addressForm.getAddress())
-						.setContainer(organizationUnit.getUserContainer())
+						.setOrganizationUnit(organizationUnit)
 				;
 				if (picture != null && picture.length != user.getProfilePictureLength()) {
 					user.setProfilePicture(picture);
@@ -246,8 +242,7 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 			passwordField.setValue(user.getPassword());
 			accountStatusComboBox.setValue(user.getUserAccountStatus());
 			userRoleAssignmentTagCombo.setValue(user.getRoleAssignments());
-			orgUnitComboBox.setValue(user.getContainer() != null ? user.getContainer().getOrganizationUnit() : null);
-
+			orgUnitComboBox.setValue(user.getOrganizationUnit());
 			addressForm.setAddress(user.getAddress());
 		});
 
