@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,8 +24,14 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.teamapps.application.api.localization.Language;
 import org.teamapps.application.api.localization.LocalizationData;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.config.LocalizationConfig;
@@ -153,6 +159,10 @@ public class LocalizationUtil {
 			}
 		}
 
+		createRequiredLanguageValues(localizationKeys, localizationConfig);
+	}
+
+	private static void createRequiredLanguageValues(List<LocalizationKey> localizationKeys, LocalizationConfig localizationConfig) {
 		//create translation requests
 		List<String> requiredLanguages = localizationConfig.getRequiredLanguages();
 		for (LocalizationKey key : localizationKeys) {
@@ -379,8 +389,11 @@ public class LocalizationUtil {
 		Stream<LocalizationKey> keyStream = LocalizationKey.getAll().stream()
 				.filter(LocalizationKey::isUsed);
 		if (application != null) {
-			keyStream = keyStream.filter(localizationKey -> localizationKey.getApplication().equals(application));
+			keyStream = keyStream
+					.filter(key -> key.getApplication() != null)
+					.filter(key -> key.getApplication().equals(application));
 		}
+		keyStream = keyStream.sorted(Comparator.comparing(LocalizationKey::getKey));
 		List<LocalizationKey> keys = keyStream.collect(Collectors.toList());
 
 		File zipFile = File.createTempFile("temp", ".zip");
@@ -557,11 +570,139 @@ public class LocalizationUtil {
 		return csvFile;
 	}
 
-	public static void importTranslationTemplate() {
-		Set<String> possibleLanguages = LocalizationValue.getAll().stream().map(LocalizationValue::getLanguage).collect(Collectors.toSet());
-		//todo implement
+	public static String importLocalizationKeyFile(File xlsxFile, Application application, LocalizationConfig localizationConfig) throws IOException {
+		if (application == null) {
+			return "ERROR no application selected!";
+		}
+		XSSFWorkbook workbook = new XSSFWorkbook(new FileInputStream(xlsxFile));
+		XSSFSheet sheet = workbook.getSheetAt(0);
+		StringBuilder errors = new StringBuilder();
+		Map<String, LocalizationKey> keyMap = LocalizationKey.filter().application(NumericFilter.equalsFilter(application.getId())).execute().stream().collect(Collectors.toMap(LocalizationKey::getKey, key -> key));
+		int countCreatedKeys = 0;
+		int countUpdatedKeys = 0;
+		int countCreatedValues = 0;
+		int countUpdatedValues = 0;
+
+		Iterator<Row> rowIterator = sheet.iterator();
+		if (rowIterator.hasNext()) {
+			//header row
+			rowIterator.next();
+		}
+		List<LocalizationKey> createdKeys = new ArrayList<>();
+		while (rowIterator.hasNext()) {
+			Row row = rowIterator.next();
+			String key = getCellText(row.getCell(0));
+			String language = getCellText(row.getCell(1));
+			int translationMode = getCellIntValue(row.getCell(2));
+			String text = getCellText(row.getCell(3));
+			if (key != null && !key.isBlank() && text != null && !text.isBlank()) {
+				key = key.trim();
+				Language languageByIsoCode = Language.getLanguageByIsoCode(language);
+				if (languageByIsoCode == null) {
+					errors.append("Error for key: ").append(key).append(" unknown language code:").append(language).append("\n");
+					continue;
+				}
+				if (translationMode < 0 || translationMode > 3) {
+					errors.append("Error for key: ").append(key).append(" unknown translation mode:").append(translationMode).append("\n");
+					continue;
+				}
+
+				LocalizationKey localizationKey = keyMap.get(key);
+				if (localizationKey == null) {
+					localizationKey = LocalizationKey.create();
+					localizationKey
+							.setApplication(application)
+							.setKey(key)
+							.setLocalizationKeyType(LocalizationKeyType.REPORTING_KEY)
+							.setUsed(true)
+							.save();
+					createdKeys.add(localizationKey);
+					keyMap.put(key, localizationKey);
+					countCreatedKeys++;
+				} else {
+					countUpdatedKeys++;
+				}
+				LocalizationValue localizationValue = localizationKey.getLocalizationValues().stream().filter(value -> value.getLanguage().equals(language)).findFirst().orElse(null);
+				if (localizationValue == null) {
+					localizationValue = LocalizationValue.create()
+							.setLocalizationKey(localizationKey)
+							.setLanguage(language)
+							.save();
+					countCreatedValues++;
+				} else {
+					countUpdatedValues++;
+				}
+				switch (translationMode) {
+					//original
+					case 0 -> {
+						localizationValue
+								.setOriginal(text)
+								.setMachineTranslationState(MachineTranslationState.NOT_NECESSARY)
+								.setTranslationState(TranslationState.NOT_NECESSARY)
+								.setTranslationVerificationState(TranslationVerificationState.NOT_NECESSARY)
+								.setCurrentDisplayValue(text)
+								.save();
+					}
+					//translation
+					case 1 -> {
+						localizationValue
+								.setTranslation(text)
+								.setMachineTranslationState(MachineTranslationState.NOT_NECESSARY)
+								.setTranslationState(TranslationState.OK)
+								.setTranslationVerificationState(TranslationVerificationState.VERIFICATION_REQUESTED)
+								.setCurrentDisplayValue(text)
+								.save();
+					}
+					//verified translation
+					case 2 -> {
+						localizationValue
+								.setTranslation(text)
+								.setMachineTranslationState(MachineTranslationState.NOT_NECESSARY)
+								.setTranslationState(TranslationState.OK)
+								.setTranslationVerificationState(TranslationVerificationState.OK)
+								.setCurrentDisplayValue(text)
+								.save();
+					}
+					//admin local override
+					case 3 -> {
+						localizationValue
+								.setAdminLocalOverride(text)
+								.setCurrentDisplayValue(text);
+						if (localizationValue.getMachineTranslationState() == null) {
+							localizationValue.setMachineTranslationState(MachineTranslationState.NOT_NECESSARY);
+						}
+						if (localizationValue.getTranslationState() == null) {
+							localizationValue.setTranslationState(TranslationState.NOT_NECESSARY);
+						}
+						if (localizationValue.getTranslationVerificationState() == null) {
+							localizationValue.setTranslationVerificationState(TranslationVerificationState.NOT_NECESSARY);
+						}
+						localizationValue.save();
+					}
+				}
+			}
+		}
+		createRequiredLanguageValues(createdKeys, localizationConfig);
+		workbook.close();
+		return "Localization keys updates:\nCreated keys: " + countCreatedKeys + "\nUpdated keys: " + countUpdatedKeys + "\nCreated values: " + countCreatedValues + "\nUpdated values: " + countUpdatedValues + "\n\nError messages:\n" + errors;
 	}
 
+	private static String getCellText(Cell cell) {
+		if (cell != null && cell.getCellType() == CellType.STRING) {
+			return cell.getStringCellValue();
+		} else {
+			return null;
+		}
+	}
+
+	private static int getCellIntValue(Cell cell) {
+		if (cell != null && cell.getCellType() == CellType.NUMERIC) {
+			double cellValue = cell.getNumericCellValue();
+			return (int) cellValue;
+		} else {
+			return -1;
+		}
+	}
 
 
 }

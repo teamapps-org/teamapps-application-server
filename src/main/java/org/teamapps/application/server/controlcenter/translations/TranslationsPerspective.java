@@ -25,6 +25,7 @@ import org.teamapps.application.api.localization.Language;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
+import org.teamapps.application.server.system.config.LocalizationConfig;
 import org.teamapps.application.server.system.localization.LocalizationUtil;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
@@ -45,6 +46,8 @@ import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.view.View;
+import org.teamapps.ux.component.absolutelayout.Length;
+import org.teamapps.ux.component.dialogue.FormDialogue;
 import org.teamapps.ux.component.field.*;
 import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.flexcontainer.VerticalLayout;
@@ -97,16 +100,14 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		topicImageView.setVisible(false);
 
 		ToolbarButtonGroup buttonGroup = localizationKeyView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton overViewButtonOn = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.SPELL_CHECK, ApplicationIcons.CHECKBOX), getLocalized("translations.overView"), getLocalized("translations.showOverView")));
-		ToolbarButton overViewButtonOff = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.SPELL_CHECK, ApplicationIcons.DELETE), getLocalized("translations.overView"), getLocalized("translations.hideOverView")));
-		overViewButtonOn.setVisible(false);
-
-		buttonGroup = localizationKeyView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
 		ToolbarButton startMachineTranslationButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.GEARWHEELS, ApplicationIcons.MESSAGES), getLocalized("translations.startMachineTranslation"), getLocalized("translations.translateAllNewEntries")));
 		ToolbarButton createTranslationFilesButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.FOLDER_ZIP, ApplicationIcons.EARTH), getLocalized("translations.createTranslationFiles"), getLocalized("translations.createApplicationResourceFiles")));
 
 		ToolbarButton exportTranslationsButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.BOX_OUT, ApplicationIcons.EARTH), getLocalized(Dictionary.EXPORT), getLocalized("translations.exportTranslations")));
 		ToolbarButton importTranslationsButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.BOX_INTO, ApplicationIcons.EARTH), getLocalized(Dictionary.IMPORT), getLocalized("translations.importTranslations")));
+
+		buttonGroup = localizationKeyView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
+		ToolbarButton importLocalizationKeys = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.TABLES, ApplicationIcons.EARTH), getLocalized(Dictionary.IMPORT), getLocalized("translations.importLocalizationKeys")));
 
 
 		buttonGroup = translationView.addLocalButtonGroup(new ToolbarButtonGroup());
@@ -376,6 +377,25 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		importTranslationsButton.onClick.addListener(() -> UploadDialogue.createFileUploadDialogue(file -> {
 			try {
 				LocalizationUtil.importTranslationExport(file, isAppFilter() ? getMainApplication() : null);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}, getApplicationInstanceData()));
+
+
+		importLocalizationKeys.onClick.addListener(() -> UploadDialogue.createFileUploadDialogue(file -> {
+			try {
+				LocalizationConfig localizationConfig = userSessionData.getRegistry().getSystemConfig().getLocalizationConfig();
+				String result = LocalizationUtil.importLocalizationKeyFile(file, isAppFilter() ? getMainApplication() : null, localizationConfig);
+				FormDialogue formDialogue = new FormDialogue(ApplicationIcons.TABLES, "Localization key import result", "Localization key import result");
+				formDialogue.setSize(600, 450);
+				MultiLineTextField multiLineTextField = new MultiLineTextField();
+				multiLineTextField.setValue(result);
+				multiLineTextField.setCssStyle("height", Length.ofPixels(250).toCssString());
+				formDialogue.addField(null, "Import messages", multiLineTextField);
+				formDialogue.addOkButton("OK");
+				formDialogue.setAutoCloseOnOk(true);
+				formDialogue.show();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
