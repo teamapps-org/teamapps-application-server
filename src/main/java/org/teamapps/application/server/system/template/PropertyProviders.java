@@ -248,7 +248,7 @@ public class PropertyProviders {
 				map.put(BaseTemplate.PROPERTY_ICON, ApplicationIcons.USER);
 			}
 			map.put(BaseTemplate.PROPERTY_CAPTION, user.getFirstName() + " " + user.getLastName());
-			map.put(BaseTemplate.PROPERTY_DESCRIPTION, translatableTextExtractor.apply(user.getOrganizationUnit().getName()));
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, translatableTextExtractor.apply(user.getOrganizationUnit() != null ? user.getOrganizationUnit().getName() : null));
 			return map;
 		};
 	}
@@ -269,7 +269,7 @@ public class PropertyProviders {
 				map.put(BaseTemplate.PROPERTY_ICON, ApplicationIcons.USER);
 			}
 			map.put(BaseTemplate.PROPERTY_CAPTION, user.getFirstName() + " " + user.getLastName());
-			map.put(BaseTemplate.PROPERTY_DESCRIPTION, translatableTextExtractor.apply(user.getOrganizationUnit().getName()));
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, translatableTextExtractor.apply(user.getOrganizationUnit() != null ? user.getOrganizationUnit().getName() : null));
 			return map;
 		};
 	}
