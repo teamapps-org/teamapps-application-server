@@ -150,10 +150,10 @@ public class AddressForm {
 		address.setName(nameField.getValue());
 		address.setOrganisation(organizationField.getValue());
 		address.setStreet(streetField.getValue());
-		address.setDependentLocality(cityField.getValue());
-		address.setPostalCode(dependentLocalityField.getValue());
-		address.setCity(stateField.getValue());
-		address.setState(postalCodeField.getValue());
+		address.setDependentLocality(dependentLocalityField.getValue());
+		address.setPostalCode(postalCodeField.getValue());
+		address.setCity(cityField.getValue());
+		address.setState(stateField.getValue());
 		address.setCountry(countryComboBox.getValue() != null ? countryComboBox.getValue().getIsoCode() : null);
 		address.setLatitude(latitudeField.getValue() != null ? latitudeField.getValue().floatValue() : 0);
 		address.setLongitude(longitudeField.getValue() != null ? longitudeField.getValue().floatValue() : 0);
