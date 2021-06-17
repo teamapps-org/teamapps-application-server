@@ -207,8 +207,14 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 				UiUtils.showSaveNotification(false, getApplicationInstanceData());
 				return;
 			}
+			if (!addressForm.getAddress().equals(user.getAddress())) {
+				UiUtils.showSaveNotification(false, getApplicationInstanceData());
+				return;
+			}
+
 			if (user != null && firstNameField.getValue() != null && lastNameField.getValue() != null) {
 				byte[] picture = readUserPicture(pictureChooser);
+				addressForm.getAddress().save();
 				user
 						.setFirstName(firstNameField.getValue())
 						.setLastName(lastNameField.getValue())
@@ -217,7 +223,6 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 						.setMobile(mobileField.getValue())
 						.setLogin(loginField.getValue())
 						.setUserAccountStatus(accountStatusComboBox.getValue())
-						.setAddress(addressForm.getAddress())
 						.setOrganizationUnit(organizationUnit)
 				;
 				if (picture != null && picture.length != user.getProfilePictureLength()) {
