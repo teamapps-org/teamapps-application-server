@@ -33,6 +33,10 @@ public class AuthenticationConfig {
 	private int currentPrivacyPolicyVersion = 1;
 	private String privacyPolicyLink = "https://www.example.com/privacy-policy.html";
 
+	private boolean enableAutoLoginUrls = false;
+	private String autoLoginSecret = "the-secret";
+	private int autoLoginUrlValidityInSeconds = 30;
+
 	public boolean isAllowStoringSecurityTokensOnClient() {
 		return allowStoringSecurityTokensOnClient;
 	}
@@ -103,5 +107,29 @@ public class AuthenticationConfig {
 
 	public void setPrivacyPolicyLink(String privacyPolicyLink) {
 		this.privacyPolicyLink = privacyPolicyLink;
+	}
+
+	public boolean isEnableAutoLoginUrls() {
+		return enableAutoLoginUrls;
+	}
+
+	public void setEnableAutoLoginUrls(boolean enableAutoLoginUrls) {
+		this.enableAutoLoginUrls = enableAutoLoginUrls;
+	}
+
+	public String getAutoLoginSecret() {
+		return autoLoginSecret;
+	}
+
+	public void setAutoLoginSecret(String autoLoginSecret) {
+		this.autoLoginSecret = autoLoginSecret;
+	}
+
+	public int getAutoLoginUrlValidityInSeconds() {
+		return autoLoginUrlValidityInSeconds;
+	}
+
+	public void setAutoLoginUrlValidityInSeconds(int autoLoginUrlValidityInSeconds) {
+		this.autoLoginUrlValidityInSeconds = autoLoginUrlValidityInSeconds;
 	}
 }
