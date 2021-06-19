@@ -19,6 +19,8 @@
  */
 package org.teamapps.application.server.system.bootstrap.installer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfoDataElement;
@@ -27,7 +29,10 @@ import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.ApplicationVersion;
 import org.teamapps.model.controlcenter.ApplicationVersionData;
 
+import java.lang.invoke.MethodHandles;
+
 public class ApplicationArtifactInstallationPhase implements ApplicationInstallationPhase {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	@Override
 	public void checkApplication(ApplicationInfo applicationInfo) {
@@ -76,8 +81,8 @@ public class ApplicationArtifactInstallationPhase implements ApplicationInstalla
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			applicationInfo.addError("Error checking artifact:" + e.getMessage());
+			LOGGER.error("Error checking artifact:", e);
 		}
 	}
 
@@ -116,7 +121,7 @@ public class ApplicationArtifactInstallationPhase implements ApplicationInstalla
 	}
 
 	private ApplicationVersionData createVersionData(ApplicationInfoDataElement dataElement) {
-		if (dataElement == null) {
+		if (dataElement == null || (dataElement.getData() == null && dataElement.getDataAdded().isEmpty() && dataElement.getDataRemoved().isEmpty())) {
 			return null;
 		}
 		return ApplicationVersionData

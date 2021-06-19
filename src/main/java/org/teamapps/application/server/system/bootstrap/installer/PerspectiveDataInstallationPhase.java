@@ -19,6 +19,8 @@
  */
 package org.teamapps.application.server.system.bootstrap.installer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.application.ApplicationBuilder;
 import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.api.application.perspective.PerspectiveBuilder;
@@ -32,12 +34,13 @@ import org.teamapps.model.controlcenter.ApplicationPerspective;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.pojo.Entity;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class PerspectiveDataInstallationPhase implements ApplicationInstallationPhase {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	@Override
 	public void checkApplication(ApplicationInfo applicationInfo) {
@@ -76,8 +79,8 @@ public class PerspectiveDataInstallationPhase implements ApplicationInstallation
 			dataInfo.setDataRemoved(removedPerspectives.stream().map(ApplicationPerspective::getName).collect(Collectors.toList()));
 			applicationInfo.setPerspectiveData(dataInfo);
 		} catch (Exception e) {
-			e.printStackTrace();
 			applicationInfo.addError("Error checking perspectives:" + e.getMessage());
+			LOGGER.error("Error checking perspectives:", e);
 		}
 	}
 

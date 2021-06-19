@@ -19,6 +19,8 @@
  */
 package org.teamapps.application.server.system.bootstrap.installer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.api.localization.LocalizationData;
 import org.teamapps.application.api.localization.LocalizationEntry;
@@ -34,6 +36,7 @@ import org.teamapps.model.controlcenter.LocalizationKeyType;
 import org.teamapps.model.controlcenter.LocalizationValue;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,6 +44,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class LocalizationDataInstallationPhase implements ApplicationInstallationPhase {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private final LocalizationConfig localizationConfig;
 
@@ -104,8 +108,8 @@ public class LocalizationDataInstallationPhase implements ApplicationInstallatio
 			}
 			applicationInfo.setLocalizationData(dataInfo);
 		} catch (Exception e) {
-			e.printStackTrace();
 			applicationInfo.addError("Error checking localization data:" + e.getMessage());
+			LOGGER.error("Error checking localization data:", e);
 		}
 	}
 

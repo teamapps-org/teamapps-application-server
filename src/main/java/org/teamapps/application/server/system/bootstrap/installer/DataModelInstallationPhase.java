@@ -19,16 +19,20 @@
  */
 package org.teamapps.application.server.system.bootstrap.installer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfoDataElement;
 import org.teamapps.universaldb.UniversalDB;
 import org.teamapps.universaldb.schema.*;
 
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DataModelInstallationPhase implements ApplicationInstallationPhase {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private final UniversalDB universalDB;
 
@@ -96,8 +100,8 @@ public class DataModelInstallationPhase implements ApplicationInstallationPhase 
 			}
 			applicationInfo.setDataModelData(modelInfo);
 		} catch (Exception e) {
-			e.printStackTrace();
 			applicationInfo.addError("Error checking data model:" + e.getMessage());
+			LOGGER.error("Error checking data model:", e);
 		}
 	}
 

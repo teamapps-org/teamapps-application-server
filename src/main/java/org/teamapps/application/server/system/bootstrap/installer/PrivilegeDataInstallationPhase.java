@@ -19,6 +19,8 @@
  */
 package org.teamapps.application.server.system.bootstrap.installer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.api.privilege.Privilege;
 import org.teamapps.application.api.privilege.PrivilegeGroup;
@@ -36,12 +38,14 @@ import org.teamapps.model.controlcenter.ApplicationPrivilegeGroupType;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.pojo.Entity;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.teamapps.model.controlcenter.ApplicationPrivilegeGroupType.*;
 
 public class PrivilegeDataInstallationPhase implements ApplicationInstallationPhase {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	@Override
 	public void checkApplication(ApplicationInfo applicationInfo) {
@@ -80,8 +84,8 @@ public class PrivilegeDataInstallationPhase implements ApplicationInstallationPh
 			}
 			applicationInfo.setPrivilegeData(dataInfo);
 		} catch (Exception e) {
-			e.printStackTrace();
 			applicationInfo.addError("Error checking privileges:" + e.getMessage());
+			LOGGER.error("Error checking privileges:", e);
 		}
 	}
 

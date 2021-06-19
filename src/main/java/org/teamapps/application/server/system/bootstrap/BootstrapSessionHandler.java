@@ -114,6 +114,10 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 
 		for (Application application : Application.getAll()) {
 			ApplicationVersion installedVersion = application.getInstalledVersion();
+			if (installedVersion == null) {
+				System.out.println("ERROR: app has no installed version:" + application);
+				continue;
+			}
 			FileValue binary = installedVersion.getBinary();
 			if (binary != null) {
 				File jarFile = binary.getFileSupplier().get();

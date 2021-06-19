@@ -20,9 +20,10 @@
 package org.teamapps.application.server.system.bootstrap.installer;
 
 import io.github.classgraph.ClassGraph;
-import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.application.AbstractApplicationBuilder;
 import org.teamapps.application.api.application.AbstractBaseApplicationBuilder;
 import org.teamapps.application.api.application.ApplicationBuilder;
@@ -30,10 +31,12 @@ import org.teamapps.application.api.application.BaseApplicationBuilder;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfo;
 import org.teamapps.universaldb.index.file.FileUtil;
 
+import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.net.URLClassLoader;
 
 public class ApplicationJarInstallationPhase implements ApplicationInstallationPhase {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	@Override
 	public void checkApplication(ApplicationInfo applicationInfo) {
@@ -71,20 +74,20 @@ public class ApplicationJarInstallationPhase implements ApplicationInstallationP
 				return;
 			}
 
-			Class<?> builder = classes.get(0).loadClass();
+			Class<?> builderClass = classes.get(0).loadClass();
 			scanResult.close();
 			if (unmanagedApplication) {
-				baseApplicationBuilder = (ApplicationBuilder) builder.getDeclaredConstructor().newInstance();
+				baseApplicationBuilder = (ApplicationBuilder) builderClass.getDeclaredConstructor().newInstance();
 			} else {
-				baseApplicationBuilder = (ApplicationBuilder) builder.getDeclaredConstructor().newInstance();
+				baseApplicationBuilder = (ApplicationBuilder) builderClass.getDeclaredConstructor().newInstance();
 			}
 			applicationInfo.setBaseApplicationBuilder(baseApplicationBuilder);
 			applicationInfo.setUnmanagedPerspectives(unmanagedApplication);
 			applicationInfo.setBinaryHash(fileHash);
 			applicationInfo.setApplicationClassLoader(classLoader);
 		} catch (Exception e) {
-			e.printStackTrace();
 			applicationInfo.addError("Error checking jar file:" + e.getMessage());
+			LOGGER.error("Error checking jar file:", e);
 		}
 	}
 
