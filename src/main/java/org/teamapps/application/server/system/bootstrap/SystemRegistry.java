@@ -19,6 +19,7 @@
  */
 package org.teamapps.application.server.system.bootstrap;
 
+import org.docx4j.wml.U;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.application.BaseApplicationBuilder;
@@ -26,6 +27,7 @@ import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.auth.AuthenticationHandler;
+import org.teamapps.application.server.system.auth.UrlAuthenticationHandler;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
 import org.teamapps.application.server.system.config.DocumentConversionConfig;
 import org.teamapps.application.server.system.config.MachineTranslationConfig;
@@ -69,7 +71,6 @@ public class SystemRegistry {
 	private DocumentConverter documentConverter;
 	private List<AuthenticationHandler> authenticationHandlers = new ArrayList<>();
 
-
 	public SystemRegistry(BootstrapSessionHandler bootstrapSessionHandler, UniversalDB universalDB, ApplicationConfig<SystemConfig> applicationConfig) {
 		SystemConfig systemConfig = applicationConfig.getConfig();
 		this.bootstrapSessionHandler = bootstrapSessionHandler;
@@ -80,6 +81,7 @@ public class SystemRegistry {
 		this.globalLocalizationProvider = new GlobalLocalizationProvider(this);
 		this.baseResourceLinkProvider = new BaseResourceLinkProvider();
 		this.unspecifiedApplicationGroup = getOrCreateUnspecifiedApplicationGroup();
+		authenticationHandlers.add(new UrlAuthenticationHandler(() -> applicationConfig.getConfig().getAuthenticationConfig()));
 		handleConfigUpdate();
 		applicationConfig.onConfigUpdate.addListener(this::handleConfigUpdate);
 	}
