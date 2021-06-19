@@ -387,6 +387,7 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 			try {
 				LocalizationConfig localizationConfig = userSessionData.getRegistry().getSystemConfig().getLocalizationConfig();
 				String result = LocalizationUtil.importLocalizationKeyFile(file, isAppFilter() ? getMainApplication() : null, localizationConfig);
+				userSessionData.getRegistry().updateGlobalLocalizationProvider();
 				FormDialogue formDialogue = new FormDialogue(ApplicationIcons.TABLES, "Localization key import result", "Localization key import result");
 				formDialogue.setSize(600, 450);
 				MultiLineTextField multiLineTextField = new MultiLineTextField();
