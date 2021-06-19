@@ -56,7 +56,7 @@ public class DatabaseExplorerAppBuilder extends AbstractBaseApplicationBuilder {
 
 	@Override
 	public List<ApplicationRole> getApplicationRoles() {
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override
