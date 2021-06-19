@@ -81,14 +81,14 @@ public class ApplicationConfigurationPerspective extends AbstractManagedApplicat
 
 		saveButton.onClick.addListener(() -> {
 			Application application = selectedApplication.get();
-			String config = configField.getValue();
-			if (application == null && config != null && !config.isBlank()) {
+			String configXml = configField.getValue();
+			if (application == null || configXml == null || configXml.isBlank()) {
 				return;
 			}
 			LoadedApplication loadedApplication = userSessionData.getRegistry().getLoadedApplication(application);
 			try {
-				loadedApplication.getBaseApplicationBuilder().updateConfig(config, loadedApplication.getApplicationClassLoaderOrDefault());
-				application.setConfig(config).save();
+				loadedApplication.getBaseApplicationBuilder().updateConfig(configXml, loadedApplication.getApplicationClassLoaderOrDefault());
+				application.setConfig(configXml).save();
 			} catch (Exception e) {
 				UiUtils.showNotification(ApplicationIcons.ERROR, e.getMessage());
 				LOGGER.error("ERROR UPDATING APPLICATION CONFIG: " + application.getName() + ": " +e.getMessage());
