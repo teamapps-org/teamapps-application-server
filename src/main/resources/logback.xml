@@ -14,4 +14,6 @@
         <appender-ref ref="SYSTEM"/>
     </root>
     <logger name="nl.basjes.parse.useragent.utils.YauaaVersion" level="WARN"/>
+    <logger name="org.teamapps.ux.component.form.AbstractForm" level="OFF"/>
+    <logger name="org.teamapps.ux.application.assembler.DesktopApplicationAssembler" level="OFF"/>
 </configuration>
