@@ -28,6 +28,7 @@ import org.teamapps.application.api.localization.ApplicationLocalizationProvider
 import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.ui.UiComponentFactory;
 import org.teamapps.application.api.user.SessionUser;
+import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.reporting.convert.DocumentConverter;
@@ -41,25 +42,25 @@ import java.util.function.Supplier;
 
 public class UnmanagedApplicationSessionData implements ApplicationInstanceData {
 
+	private final SystemRegistry registry;
 	private final UserSessionData userSessionData;
 	private final ManagedApplication managedApplication;
 	private final Application application;
-	private final LoadedApplication mainApplication;
 	private final ResponsiveApplication responsiveApplication;
 	private final ApplicationPrivilegeProvider privilegeProvider;
 	private final ApplicationLocalizationProvider localizationProvider;
 	private final Supplier<DocumentConverter> documentConverterSupplier;
 	private final SessionUiComponentFactory componentFactory;
 
-	public UnmanagedApplicationSessionData(UserSessionData userSessionData, ManagedApplication managedApplication, LoadedApplication mainApplication, ResponsiveApplication responsiveApplication, ApplicationPrivilegeProvider privilegeProvider, ApplicationLocalizationProvider localizationProvider, Supplier<DocumentConverter> documentConverterSupplier) {
+	public UnmanagedApplicationSessionData(UserSessionData userSessionData, ManagedApplication managedApplication, ResponsiveApplication responsiveApplication, ApplicationPrivilegeProvider privilegeProvider, ApplicationLocalizationProvider localizationProvider) {
+		this.registry = userSessionData.getRegistry();
 		this.userSessionData = userSessionData;
 		this.managedApplication = managedApplication;
 		this.application = managedApplication.getMainApplication();
-		this.mainApplication = mainApplication;
 		this.responsiveApplication = responsiveApplication;
 		this.privilegeProvider = privilegeProvider;
 		this.localizationProvider = localizationProvider;
-		this.documentConverterSupplier = documentConverterSupplier;
+		this.documentConverterSupplier = registry.getDocumentConverterSupplier();
 		this.componentFactory = new SessionUiComponentFactory(this, userSessionData.getRegistry(), application);
 	}
 
@@ -108,9 +109,13 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 		return componentFactory;
 	}
 
+	public LoadedApplication getMainApplication() {
+		return registry.getLoadedApplication(managedApplication.getMainApplication());
+	}
+
 	@Override
 	public ApplicationConfig<?> getApplicationConfig() {
-		return mainApplication.getBaseApplicationBuilder().getApplicationConfig();
+		return getMainApplication().getBaseApplicationBuilder().getApplicationConfig();
 	}
 
 	@Override

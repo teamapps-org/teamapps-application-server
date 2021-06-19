@@ -49,7 +49,6 @@ public class ManagedApplicationSessionData {
 	private final OrganizationFieldView organizationFieldView;
 	private final MobileApplicationNavigation mobileNavigation;
 
-	private final LoadedApplication mainApplication;
 	private final ResponsiveApplication responsiveApplication;
 	private final SystemRegistry registry;
 	private final ApplicationLocalizationProvider mainApplicationLocalizationProvider;
@@ -79,7 +78,6 @@ public class ManagedApplicationSessionData {
 			perspectiveMenuToolbarButton.setVisible(false);
 		}
 		registry = userSessionData.getRegistry();
-		this.mainApplication = registry.getLoadedApplication(managedApplication.getMainApplication());
 		this.mainApplicationLocalizationProvider = userSessionData.getApplicationLocalizationProvider(managedApplication.getMainApplication());
 	}
 
@@ -95,12 +93,11 @@ public class ManagedApplicationSessionData {
 	}
 
 	public ApplicationInstanceData getUnmanagedApplicationData() {
-		LoadedApplication loadedApplication = registry.getLoadedApplication(managedApplication.getMainApplication());
 		ApplicationPrivilegeProvider privilegeProvider = userSessionData.getUserPrivileges().getApplicationPrivilegeProvider(PrivilegeApplicationKey.createUnmanagedKey(managedApplication));
 		if (userSessionData.getUser().getUserAccountStatus() == UserAccountStatus.SUPER_ADMIN) {
 			privilegeProvider = new AllowAllPrivilegeProvider();
 		}
-		return new UnmanagedApplicationSessionData(userSessionData, managedApplication, loadedApplication, responsiveApplication, privilegeProvider, mainApplicationLocalizationProvider, registry.getDocumentConverterSupplier());
+		return new UnmanagedApplicationSessionData(userSessionData, managedApplication, responsiveApplication, privilegeProvider, mainApplicationLocalizationProvider);
 	}
 
 
@@ -129,7 +126,7 @@ public class ManagedApplicationSessionData {
 	}
 
 	public LoadedApplication getMainApplication() {
-		return mainApplication;
+		return registry.getLoadedApplication(managedApplication.getMainApplication());
 	}
 
 	public ResponsiveApplication getResponsiveApplication() {
