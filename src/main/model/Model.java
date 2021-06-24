@@ -299,9 +299,9 @@ public class Model implements SchemaInfoProvider {
 				.addReference("acceptedPolicies", userAcceptedPolicy, false)
 				.addReference("address", address, false)
 				.addReference("organizationUnit", organizationUnit, false, "users")
-				.addReference("accessTokens", userAccessToken, true, "user")
-				.addReference("roleAssignments", userRoleAssignment, true, "user")
-				.addReference("allGroupMemberships", userGroupMembership, true, "user")
+				.addReference("accessTokens", userAccessToken, true, "user", true)
+				.addReference("roleAssignments", userRoleAssignment, true, "user", true)
+				.addReference("allGroupMemberships", userGroupMembership, true, "user", true)
 				.addReference("privateMessages", message, true, "privateRecipients") //private message entry instead!?
 		;
 
@@ -430,9 +430,9 @@ public class Model implements SchemaInfoProvider {
 				.addReference("privilegesReceivingRoles", role, true, "privilegesSendingRoles")
 				.addReference("privilegesSendingRoles", role, true, "privilegesReceivingRoles")
 				.addBoolean("noDirectMemberships")
-				.addReference("userRoleAssignments", userRoleAssignment, true, "role")
-				.addReference("privilegeAssignments", rolePrivilegeAssignment, true, "role")
-				.addReference("applicationRoleAssignments", roleApplicationRoleAssignment, true, "role")
+				.addReference("userRoleAssignments", userRoleAssignment, true, "role", true)
+				.addReference("privilegeAssignments", rolePrivilegeAssignment, true, "role", true)
+				.addReference("applicationRoleAssignments", roleApplicationRoleAssignment, true, "role", true)
 		;
 
 		userRoleAssignment
