@@ -105,7 +105,16 @@ public class MobileAssembler implements ApplicationAssembler {
 
 		mobileNavigation.onShowStartViewRequest().addListener(() -> {
 			setNavigationToolbarVisible(true);
-			showView(perspectiveViews.get(0));
+			if (!perspectiveViews.isEmpty()) {
+				showView(perspectiveViews.get(0));
+			} else {
+				showView(mobileNavigation.getApplicationMenuView());
+			}
+		});
+
+		mobileNavigation.onShowViewRequest().addListener(view -> {
+			setNavigationToolbarVisible(true);
+			showView(view);
 		});
 
 		centerGroup = navigationToolbar.addButtonGroup(new ToolbarButtonGroup());
@@ -254,6 +263,7 @@ public class MobileAssembler implements ApplicationAssembler {
 
 		SimpleItemGroup<Void> appGroup = viewsItemView.addSingleColumnGroup(ApplicationIcons.WINDOWS, getLocalized(Dictionary.APPLICATIONS));
 		appGroup.setItemTemplate(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES);
+
 		appGroup.addItem(ApplicationIcons.WINDOW_EXPLORER, getLocalized(Dictionary.APPLICATION_LAUNCHER), getLocalized(Dictionary.OPEN_NEW_APPLICATION)).onClick.addListener(() -> {
 			showView(null);
 		});
@@ -274,7 +284,7 @@ public class MobileAssembler implements ApplicationAssembler {
 	private SimpleItem<Void> createViewButton(View view) {
 		SimpleItem<Void> item;
 		if (view.equals(mobileNavigation.getApplicationMenuView())) {
-			item = new SimpleItem<>(ApplicationIcons.RADIO_BUTTON_GROUP, getLocalized(Dictionary.APPLICATION_MENU), getLocalized(Dictionary.SELECT_APPLICATION_PERSPECTIVE));
+			item = new SimpleItem<>(ApplicationIcons.WINDOW_SIDEBAR, getLocalized(Dictionary.APPLICATION_MENU), getLocalized(Dictionary.SELECT_APPLICATION_PERSPECTIVE));
 		} else {
 			item = getViewTypeItem(view.getPanel());
 		}
@@ -287,7 +297,7 @@ public class MobileAssembler implements ApplicationAssembler {
 		Icon icon = panel.getIcon();
 		Component content = panel.getContent();
 		if (content == null) {
-			return null;
+			return new SimpleItem<>(panel.getIcon(), panel.getTitle(), null);
 		}
 		if (content instanceof Table) {
 			return new SimpleItem<>(icon != null ? icon : ApplicationIcons.SPREADSHEET, title, getLocalized(Dictionary.TABLE));

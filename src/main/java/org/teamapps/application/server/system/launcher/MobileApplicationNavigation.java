@@ -27,6 +27,7 @@ public class MobileApplicationNavigation implements MobileNavigation {
 
 	public Event<Void> onBackOperation = new Event<>();
 	private Event<Void> onShowStartViewRequest = new Event<>();
+	private Event<View> onShowViewRequest = new Event<>();
 	private Component applicationLauncher;
 	private View applicationMenu;
 	private boolean backOperationAvailable;
@@ -42,6 +43,11 @@ public class MobileApplicationNavigation implements MobileNavigation {
 	@Override
 	public Event<Void> onShowStartViewRequest() {
 		return onShowStartViewRequest;
+	}
+
+	@Override
+	public Event<View> onShowViewRequest() {
+		return onShowViewRequest;
 	}
 
 	@Override

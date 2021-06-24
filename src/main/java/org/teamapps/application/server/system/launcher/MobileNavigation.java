@@ -27,6 +27,8 @@ public interface MobileNavigation {
 
 	Event<Void> onShowStartViewRequest();
 
+	Event<View> onShowViewRequest();
+
 	Component getApplicationLauncher();
 
 	View getApplicationMenuView();

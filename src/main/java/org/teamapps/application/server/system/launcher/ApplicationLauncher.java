@@ -434,7 +434,7 @@ public class ApplicationLauncher {
 			mobileLayout.setContent(tree, PageTransition.MOVE_TO_RIGHT_VS_MOVE_FROM_LEFT, 500);
 		});
 
-		showPerspective(sortedPerspectives.get(0), mobileLayout, applicationMenu, applicationPerspectiveByPerspectiveBuilder);
+		mobileNavigation.onShowViewRequest().fire(applicationMenu);
 
 		return responsiveApplication.getUi();
 	}
