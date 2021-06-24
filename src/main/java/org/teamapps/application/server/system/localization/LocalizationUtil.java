@@ -486,6 +486,7 @@ public class LocalizationUtil {
 							.setLocalizationKeyFormat(localizationKeyFormat)
 							.setLocalizationKeyType(localizationKeyType)
 							.setComments(comments)
+							.setUsed(true)
 							.save();
 				}
 			} else if (zipEntry.getName().equals("LocalizationValue.csv")) {

@@ -59,9 +59,28 @@ public class Privileges {
 	public final static StandardPrivilegeGroup ABC = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("test", null, null, null, CREATE, READ, UPDATE, DELETE, RESTORE, SHOW_RECYCLE_BIN, EXECUTE, PRINT);
 
 
-	public final static ApplicationRole role1 = ROLE_BUILDER.addRole("role", ApplicationIcons.PILOT, "title", "test",
-			ABC.createCopyWithPrivileges(CREATE, READ),
-			LAUNCH_PERSPECTIVE_ACCESS_CONTROL
+	public final static ApplicationRole APPLICATION_ADMINISTRATOR_ROLE = ROLE_BUILDER.addRole("applicationAdministratorRole", ApplicationIcons.PILOT, "application.roles.applicationAdministrator", "application.roles.applicationAdministrator.desc",
+			LAUNCH_PERSPECTIVE_APP_LOCAL_ADMINISTRATION,
+			LAUNCH_PERSPECTIVE_TRANSLATIONS,
+			LAUNCH_PERSPECTIVE_USER_ROLE_ASSIGNMENT,
+			LAUNCH_PERSPECTIVE_ROLES,
+			LAUNCH_PERSPECTIVE_ACCESS_CONTROL,
+			LAUNCH_PERSPECTIVE_ACCESS_CONTROL_APP_ROLE,
+			LAUNCH_PERSPECTIVE_APPLICATION_UPDATES,
+			LAUNCH_PERSPECTIVE_SYSTEM_LOG,
+			LAUNCH_PERSPECTIVE_APPLICATION_CONFIGURATION
+	);
+
+	public final static ApplicationRole APPLICATION_DEVELOPER_ROLE = ROLE_BUILDER.addRole("applicationDeveloperRole", ApplicationIcons.TEXT_BINARY, "application.roles.applicationDeveloper", "application.roles.applicationDeveloper.desc",
+			LAUNCH_PERSPECTIVE_APP_LOCAL_ADMINISTRATION,
+			LAUNCH_PERSPECTIVE_TRANSLATIONS,
+			LAUNCH_PERSPECTIVE_USER_ROLE_ASSIGNMENT,
+			LAUNCH_PERSPECTIVE_ROLES,
+			LAUNCH_PERSPECTIVE_ACCESS_CONTROL,
+			LAUNCH_PERSPECTIVE_ACCESS_CONTROL_APP_ROLE,
+			LAUNCH_PERSPECTIVE_APPLICATION_UPDATES,
+			LAUNCH_PERSPECTIVE_SYSTEM_LOG,
+			LAUNCH_PERSPECTIVE_APPLICATION_CONFIGURATION
 	);
 
 	public static List<ApplicationRole> getRoles() {

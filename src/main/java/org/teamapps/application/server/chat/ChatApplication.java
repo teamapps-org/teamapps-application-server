@@ -30,6 +30,7 @@ import org.teamapps.application.api.privilege.ApplicationRole;
 import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.api.versioning.ApplicationVersion;
+import org.teamapps.application.server.priv.ChatPrivileges;
 import org.teamapps.icons.Icon;
 import org.teamapps.universaldb.schema.SchemaInfoProvider;
 
@@ -81,6 +82,6 @@ public class ChatApplication extends AbstractApplicationBuilder {
 
 	@Override
 	public boolean isApplicationAccessible(ApplicationPrivilegeProvider privilegeProvider) {
-		return true;
+		return privilegeProvider.isAllowed(ChatPrivileges.LAUNCH_APPLICATION);
 	}
 }
