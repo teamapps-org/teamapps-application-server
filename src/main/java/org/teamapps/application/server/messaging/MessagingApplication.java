@@ -91,6 +91,6 @@ public class MessagingApplication extends AbstractApplicationBuilder {
 
 	@Override
 	public boolean isApplicationAccessible(ApplicationPrivilegeProvider privilegeProvider) {
-		return true;
+		return privilegeProvider.isAllowed(MessagingPrivileges.LAUNCH_APPLICATION);
 	}
 }

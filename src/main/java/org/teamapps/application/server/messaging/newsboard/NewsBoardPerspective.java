@@ -3,6 +3,7 @@ package org.teamapps.application.server.messaging.newsboard;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.messaging.MessagingPrivileges;
 import org.teamapps.application.server.messaging.newsboard.views.MessageView;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
@@ -40,9 +41,11 @@ public class NewsBoardPerspective extends AbstractManagedApplicationPerspective 
 
 		updateMessages();
 
-		Button<BaseTemplateRecord> addButton = Button.create(ApplicationIcons.ADD, getLocalized(Dictionary.ADD));
-		masterView.getPanel().setRightHeaderField(addButton);
-		addButton.onClicked.addListener(() -> showMessageWindow(null));
+		if (isAllowed(MessagingPrivileges.NEWS_BOARD_ADMIN_ACCESS)) {
+			Button<BaseTemplateRecord> addButton = Button.create(ApplicationIcons.ADD, getLocalized(Dictionary.ADD));
+			masterView.getPanel().setRightHeaderField(addButton);
+			addButton.onClicked.addListener(() -> showMessageWindow(null));
+		}
 	}
 
 	public void updateMessages() {
@@ -69,6 +72,9 @@ public class NewsBoardPerspective extends AbstractManagedApplicationPerspective 
 
 
 	private void showMessageWindow(NewsBoardMessage message) {
+		if (!isAllowed(MessagingPrivileges.NEWS_BOARD_ADMIN_ACCESS)) {
+			return;
+		}
 		if (message == null) {
 			message = NewsBoardMessage.create()
 					.setLanguage(getUser().getLocale().getLanguage())
@@ -77,61 +83,4 @@ public class NewsBoardPerspective extends AbstractManagedApplicationPerspective 
 		}
 		new MessageWindow(message, this, getApplicationInstanceData(), userSessionData.getRegistry());
 	}
-
-
-
-
-	/*
-	Message Window:
-		Toolbar:
-			Preview/Edit: show editor / show result
-			Show original: (only if this is not the original) show original message
-			Translations: show translation panel
-			Publish without translation
-			Publish with translations: tag combo with pre selected languages
-			Add translation: select not yet translated languages (from the translatable list)
-			Hide: only if already published
-			Delete:
-			Images: show image panel
-
-		Translation panel:
-			Table: original + list of translations
-			On click: show translation in message view
-
-		Message panel:
-			Read mode: show full message with all pictures & background
-			Edit mode: show editor
-
-		Images:
-			Toolbar: Add, delete, up, down: on add-> show upload dialogue (filter jpg) -> resize thumb, resize if > 1
-			Table: thumb, name, size
-
-		Message headers:
-			italic: -This is a machine translated message and may contain inaccuracies.
-			Orange border: -This message is not yet published
-
-
-		Newsboard -> Welcome, Icon: message
-
-		Model:
-			NewsBoardMessage
-				published
-				htmlMessage
-				language
-				images
-				translations
-				organizationField
-				organizationUnit
-
-			NewsBoardMessageImage
-				file
-				fileName
-				position
-
-			NewsBoardMessageTranslation
-				message
-				language
-				translation
-
-	 */
 }

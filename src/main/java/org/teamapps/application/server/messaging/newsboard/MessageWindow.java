@@ -5,6 +5,7 @@ import org.teamapps.application.api.application.AbstractApplicationView;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.messaging.MessagingPrivileges;
 import org.teamapps.application.server.messaging.newsboard.views.EditorView;
 import org.teamapps.application.server.messaging.newsboard.views.ImageListView;
 import org.teamapps.application.server.messaging.newsboard.views.LanguageSelectionView;
@@ -12,6 +13,7 @@ import org.teamapps.application.server.messaging.newsboard.views.MessageView;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.ui.dialogue.UploadDialogue;
 import org.teamapps.common.format.Color;
+import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.icon.flags.FlagIcon;
 import org.teamapps.icons.composite.CompositeIcon;
 import org.teamapps.model.controlcenter.NewsBoardMessage;
@@ -44,6 +46,7 @@ public class MessageWindow extends AbstractApplicationView {
 	private NewsBoardMessageTranslation selectedTranslation;
 	private final EditorView editorView;
 	private final View centerView;
+	private TwoWayBindableValue<String> selectedLanguage = TwoWayBindableValue.create();
 
 	public MessageWindow(NewsBoardMessage message, NewsBoardPerspective newsBoardPerspective, ApplicationInstanceData applicationInstanceData, SystemRegistry registry) {
 		super(applicationInstanceData);
@@ -52,13 +55,14 @@ public class MessageWindow extends AbstractApplicationView {
 		application = ResponsiveApplication.createApplication();
 		Perspective perspective = application.addPerspective(Perspective.createPerspective());
 
+
 		View languageView = perspective.addView(View.createView(StandardLayout.LEFT, ApplicationIcons.EARTH, getLocalized(Dictionary.LANGUAGE), null));
 		languageView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.94f));
 		languageView.setVisible(false);
 
-		//todo
-		centerView = perspective.addView(View.createView(StandardLayout.CENTER, ApplicationIcons.MESSAGE, getLocalized("Message"), null));
+		centerView = perspective.addView(View.createView(StandardLayout.CENTER, ApplicationIcons.MESSAGE, getLocalized("newsBoard.message"), null));
 		centerView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.7f));
+
 
 		View imageView = perspective.addView(View.createView(ExtendedLayout.OUTER_RIGHT, ApplicationIcons.PHOTO_LANDSCAPE, getLocalized("newsBoard.images"), null));
 		imageView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.94f));
@@ -66,8 +70,6 @@ public class MessageWindow extends AbstractApplicationView {
 		imageView.setSize(ViewSize.ofRelativeWidth(0.15f));
 		imageView.setVisible(false);
 		centerView.setSize(ViewSize.ofRelativeWidth(0.8f));
-
-		System.out.println("Message:" + message.getLanguage() + ", translations:" + message.getTranslations().stream().map(t -> t.getLanguage()).collect(Collectors.joining(", ")));
 
 		ToolbarButtonGroup buttonGroup = perspective.addWorkspaceButtonGroup(new ToolbarButtonGroup());
 		ToolbarButton saveButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.FLOPPY_DISK, getLocalized(Dictionary.SAVE), getLocalized(Dictionary.SAVE_CHANGES)));
@@ -89,8 +91,6 @@ public class MessageWindow extends AbstractApplicationView {
 		ToolbarButton deleteButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.ERROR, getLocalized(Dictionary.DELETE), getLocalized(Dictionary.DELETE_RECORD)));
 		buttonGroup = perspective.addWorkspaceButtonGroup(new ToolbarButtonGroup());
 		ToolbarButton cancelAndCloseButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.WINDOW_CLOSE, getLocalized(Dictionary.CANCEL), getLocalized(Dictionary.CANCEL_CLOSE)));
-
-
 		cancelAndCloseButton.onClick.addListener(() -> window.close());
 
 
@@ -161,19 +161,16 @@ public class MessageWindow extends AbstractApplicationView {
 			editButton.setVisible(false);
 			previewButton.setVisible(true);
 			saveButton.setVisible(true);
-			editorView.showMessage(message.getHtmlMessage());
-			centerView.setComponent(editorView.getComponent());
 			activeEditor = true;
+			updateView();
 		});
 
 		previewButton.onClick.addListener(() -> {
-			//message.setHtmlMessage(editorView.getValue());
 			editButton.setVisible(true);
 			previewButton.setVisible(false);
 			saveButton.setVisible(false);
-			MessageView messageView = new MessageView(message, applicationInstanceData, getUser().getRankedLanguages(), null);
-			centerView.setComponent(messageView.getComponent());
 			activeEditor = false;
+			updateView();
 		});
 
 		saveButton.onClick.addListener(() -> {
@@ -229,6 +226,9 @@ public class MessageWindow extends AbstractApplicationView {
 			}
 		});
 
+		if (!isAllowed(MessagingPrivileges.NEWS_BOARD_ADMIN_ACCESS)) {
+			return;
+		}
 		application.showPerspective(perspective);
 		window = new Window(1100, 800, application.getUi());
 		window.setIcon(ApplicationIcons.MESSAGE);
@@ -241,6 +241,12 @@ public class MessageWindow extends AbstractApplicationView {
 	}
 
 	private void handleLanguageSelection(String language) {
+		selectedLanguage.set(language);
+		updateView();
+	}
+
+	private void updateView() {
+		String language = selectedLanguage.get();
 		NewsBoardMessageTranslation messageTranslation = message.getTranslations().stream().filter(translation -> translation.getLanguage().equals(language)).findFirst().orElse(null);
 		if (messageTranslation != null) {
 			selectedTranslation = messageTranslation;
@@ -253,6 +259,7 @@ public class MessageWindow extends AbstractApplicationView {
 			} else {
 				editorView.showMessage(message.getHtmlMessage());
 			}
+			centerView.setComponent(editorView.getComponent());
 		} else {
 			MessageView messageView;
 			if (selectedTranslation != null) {
@@ -290,33 +297,4 @@ public class MessageWindow extends AbstractApplicationView {
 		return null;
 	}
 
-	/*
-	Message Window:
-		Toolbar:
-			Preview/Edit: show editor / show result
-			Show original: (only if this is not the original) show original message
-			Translations: show translation panel
-			Publish without translation
-			Publish with translations: tag combo with pre selected languages
-			Add translation: select not yet translated languages (from the translatable list)
-			Hide: only if already published
-			Delete:
-			Images: show image panel
-
-		Translation panel:
-			Table: original + list of translations
-			On click: show translation in message view
-
-		Message panel:
-			Read mode: show full message with all pictures & background
-			Edit mode: show editor
-
-		Images:
-			Toolbar: Add, delete, up, down: on add-> show upload dialogue (filter jpg) -> resize thumb, resize if > 1
-			Table: thumb, name, size
-
-		Message headers:
-			italic: -This is a machine translated message and may contain inaccuracies.
-			Orange border: -This message is not yet published
-	 */
 }
