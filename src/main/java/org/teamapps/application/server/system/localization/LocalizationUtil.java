@@ -505,9 +505,9 @@ public class LocalizationUtil {
 					String adminKeyOverride = csvRecord.get("adminKeyOverride");
 					String currentDisplayValue = csvRecord.get("currentDisplayValue");
 					String notes = csvRecord.get("notes");
-					MachineTranslationState machineTranslationState = machineTranslationStateMap.get("machineTranslationState");
-					TranslationState translationState = translationStateMap.get("translationState");
-					TranslationVerificationState translationVerificationState = translationVerificationStateMap.get("translationVerificationState");
+					MachineTranslationState machineTranslationState = machineTranslationStateMap.getOrDefault(csvRecord.get("machineTranslationState"), MachineTranslationState.TRANSLATION_REQUESTED);
+					TranslationState translationState = translationStateMap.getOrDefault(csvRecord.get("translationState"), TranslationState.TRANSLATION_REQUESTED);
+					TranslationVerificationState translationVerificationState = translationVerificationStateMap.getOrDefault(csvRecord.get("translationVerificationState"), TranslationVerificationState.NOT_YET_TRANSLATED);
 					if (key == null || language == null) {
 						changeCounter.error("value");
 						continue;
