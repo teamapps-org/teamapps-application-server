@@ -24,7 +24,6 @@ import org.teamapps.application.api.application.perspective.AbstractPerspectiveB
 import org.teamapps.application.api.application.perspective.ApplicationPerspective;
 import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.api.theme.ApplicationIcons;
-import org.teamapps.application.server.priv.ChatPrivileges;
 import org.teamapps.databinding.MutableValue;
 
 public class ChatPerspectiveBuilder extends AbstractPerspectiveBuilder {

@@ -1,4 +1,4 @@
-package org.teamapps.application.server.priv;
+package org.teamapps.application.server.chat;
 
 import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.theme.ApplicationIcons;

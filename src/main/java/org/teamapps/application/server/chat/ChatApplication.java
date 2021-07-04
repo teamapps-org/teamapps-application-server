@@ -23,15 +23,11 @@ import org.teamapps.application.api.application.AbstractApplicationBuilder;
 import org.teamapps.application.api.application.perspective.PerspectiveBuilder;
 import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.localization.LocalizationData;
-import org.teamapps.application.api.localization.LocalizationEntry;
-import org.teamapps.application.api.localization.LocalizationEntrySet;
 import org.teamapps.application.api.privilege.ApplicationPrivilegeProvider;
 import org.teamapps.application.api.privilege.ApplicationRole;
 import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.api.versioning.ApplicationVersion;
-import org.teamapps.application.server.priv.ChatPrivileges;
-import org.teamapps.icons.Icon;
 import org.teamapps.universaldb.schema.SchemaInfoProvider;
 
 import java.util.Arrays;
