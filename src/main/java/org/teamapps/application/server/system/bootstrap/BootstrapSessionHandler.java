@@ -24,7 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.server.chat.ChatApplication;
 import org.teamapps.application.server.controlcenter.ControlCenterAppBuilder;
-import org.teamapps.application.server.controlcenter.dbexplorer.DatabaseExplorerAppBuilder;
+import org.teamapps.application.server.controlcenter.dbexplorer.DatabaseExplorerApplicationBuilder;
+import org.teamapps.application.server.messaging.MessagingApplication;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
 import org.teamapps.application.server.system.config.SystemConfig;
 import org.teamapps.application.server.system.logging.DatabaseLogAppender;
@@ -109,7 +110,8 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 		systemRegistry.setSessionRegistryHandler(sessionRegistryHandler);
 
 		systemRegistry.installAndLoadApplication(controlCenterAppBuilder);
-		systemRegistry.installAndLoadApplication(new DatabaseExplorerAppBuilder(universalDB));
+		systemRegistry.installAndLoadApplication(new DatabaseExplorerApplicationBuilder(universalDB));
+		systemRegistry.installAndLoadApplication(new MessagingApplication());
 		systemRegistry.installAndLoadApplication(new ChatApplication());
 
 		for (Application application : Application.getAll()) {
@@ -148,27 +150,6 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 				.collect(Collectors.toMap(Enum::name, Templates::getTemplate)));
 
 		new LoginHandler(systemRegistry, this).handleNewSession(context);
-	}
-
-	public static void main(String[] args) throws Exception {
-		if (args == null || args.length == 0) {
-			LOGGER.error("Error missing path!");
-			return;
-		}
-		File path = new File(args[0]);
-		ApplicationServer applicationServer = new ApplicationServer(path);
-		applicationServer.setSessionHandler(new BootstrapSessionHandler());
-		applicationServer.start();
-		if (User.getCount() == 0) {
-			User.create()
-					.setFirstName("Super")
-					.setLastName("Admin")
-					.setLogin("admin")
-					.setPassword(SecurePasswordHash.createDefault().createSecureHash("teamapps!"))
-					.setUserAccountStatus(UserAccountStatus.SUPER_ADMIN)
-					.setLanguages(ValueConverterUtils.compressStringList(Arrays.asList("de", "en", "fr")))
-					.save();
-		}
 	}
 
 	@Override

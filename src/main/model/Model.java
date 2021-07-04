@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -90,16 +90,11 @@ public class Model implements SchemaInfoProvider {
 		Table chatChannel = db.addTable("chatChannel", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table chatMessage = db.addTable("chatMessage", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 
-		chatChannel
-				.addText("title")
-				.addReference("chatMessages", chatMessage, true, "chatChannel")
-		;
+		//news board:
+		Table newsBoardMessage = db.addTable("newsBoardMessage", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
+		Table newsBoardMessageImage = db.addTable("newsBoardMessageImage", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
+		Table newsBoardMessageTranslation = db.addTable("newsBoardMessageTranslation", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 
-		chatMessage
-				.addReference("chatChannel", chatChannel, false, "chatMessages")
-				.addReference("author", user, false)
-				.addText("message")
-		;
 
 		language
 				.addText("isoCode")
@@ -557,6 +552,44 @@ public class Model implements SchemaInfoProvider {
 				.addDateTime("endDateTime")
 				.addBoolean("fullDayEvent")
 				.addLocalDate("seriesEndDate");
+
+
+		//news board
+		newsBoardMessage
+				.addBoolean("published")
+				.addText("htmlMessage")
+				.addText("language")
+				.addReference("images", newsBoardMessageImage, true, true)
+				.addReference("translations", newsBoardMessageTranslation, true, true)
+				.addReference("organizationField", organizationField, false)
+				.addReference("organizationUnit", organizationUnit, false)
+		;
+
+		newsBoardMessageImage
+				.addFile("file")
+				.addFile("thumbnail")
+				.addText("fileName")
+				.addBoolean("embedded")
+				.addInteger("position")
+		;
+
+		newsBoardMessageTranslation
+				.addReference("message", newsBoardMessage, false, "translations")
+				.addText("language")
+				.addText("translation")
+		;
+
+		//chat server
+		chatChannel
+				.addText("title")
+				.addReference("chatMessages", chatMessage, true, "chatChannel")
+		;
+
+		chatMessage
+				.addReference("chatChannel", chatChannel, false, "chatMessages")
+				.addReference("author", user, false)
+				.addText("message")
+		;
 
 
 		return schema;

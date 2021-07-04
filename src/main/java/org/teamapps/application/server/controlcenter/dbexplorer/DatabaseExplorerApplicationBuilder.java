@@ -40,11 +40,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class DatabaseExplorerAppBuilder extends AbstractBaseApplicationBuilder {
+public class DatabaseExplorerApplicationBuilder extends AbstractBaseApplicationBuilder {
 
 	private final UniversalDB universalDB;
 
-	public DatabaseExplorerAppBuilder(UniversalDB universalDB) {
+	public DatabaseExplorerApplicationBuilder(UniversalDB universalDB) {
 		super("databaseExplorer", ApplicationIcons.DATA, Dictionary.DATABASE, Dictionary.APPLICATION_LAUNCHER);
 		this.universalDB = universalDB;
 	}

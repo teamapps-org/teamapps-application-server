@@ -34,11 +34,16 @@ import java.util.Map;
 
 public class DictionaryLocalizationProvider implements LocalizationProvider {
 
+	private final LocalizationConfig localizationConfig;
 	private Map<String, Map<String, LocalizationValue>> localizationLanguageValueMapByKey;
 
-	public DictionaryLocalizationProvider(TranslationService translationService, LocalizationConfig localizationConfig) {
+	public DictionaryLocalizationProvider(LocalizationConfig localizationConfig) {
+		this.localizationConfig = localizationConfig;
 		synchronizeDictionaryData(localizationConfig);
 		loadDictionary();
+	}
+
+	public void translateDictionary(TranslationService translationService) {
 		LocalizationUtil.translateAllDictionaryValues(translationService, localizationConfig);
 	}
 

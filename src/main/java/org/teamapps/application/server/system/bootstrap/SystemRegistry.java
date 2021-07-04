@@ -76,14 +76,14 @@ public class SystemRegistry {
 		this.bootstrapSessionHandler = bootstrapSessionHandler;
 		this.universalDB = universalDB;
 		this.applicationConfig = applicationConfig;
-		this.dictionary = new DictionaryLocalizationProvider(translationService, systemConfig.getLocalizationConfig());
 		this.systemDictionary = new SystemLocalizationProvider();
+		this.dictionary = new DictionaryLocalizationProvider(systemConfig.getLocalizationConfig());
 		this.globalLocalizationProvider = new GlobalLocalizationProvider(this);
 		this.baseResourceLinkProvider = new BaseResourceLinkProvider();
 		this.unspecifiedApplicationGroup = getOrCreateUnspecifiedApplicationGroup();
 		authenticationHandlers.add(new UrlAuthenticationHandler(() -> applicationConfig.getConfig().getAuthenticationConfig()));
-		handleConfigUpdate();
 		applicationConfig.onConfigUpdate.addListener(this::handleConfigUpdate);
+		handleConfigUpdate();
 	}
 
 	private void handleConfigUpdate() {
@@ -97,6 +97,9 @@ public class SystemRegistry {
 			MachineTranslation machineTranslation = new MachineTranslation();
 			machineTranslation.setGoogleTranslationKey(machineTranslationConfig.getGoogleKey());
 			machineTranslation.setDeepLKey(machineTranslationConfig.getDeepLKey(), machineTranslationConfig.isDeepLFreeApi());
+			if (translationService == null) {
+				dictionary.translateDictionary(machineTranslation);
+			}
 			this.translationService = machineTranslation;
 		}
 	}

@@ -24,9 +24,15 @@ import io.github.classgraph.ClassInfoList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.application.server.rest.ChatRestServlet;
+import org.teamapps.application.server.system.bootstrap.BootstrapSessionHandler;
 import org.teamapps.application.server.system.bootstrap.PublicLinkResourceProvider;
+import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
+import org.teamapps.application.server.system.utils.ValueConverterUtils;
 import org.teamapps.config.TeamAppsConfiguration;
 import org.teamapps.model.ApplicationServerSchema;
+import org.teamapps.model.controlcenter.NewsBoardMessage;
+import org.teamapps.model.controlcenter.User;
+import org.teamapps.model.controlcenter.UserAccountStatus;
 import org.teamapps.model.system.SystemStarts;
 import org.teamapps.model.system.Type;
 import org.teamapps.server.ServletRegistration;
@@ -170,8 +176,7 @@ public class ApplicationServer implements WebController, SessionManager {
 			@Override
 			public void contextInitialized(ServletContextEvent sce) {
 				ServletContext servletContext = sce.getServletContext();
-				servletContext.addServlet("ta-sec-links", new ResourceProviderServlet((servletPath, relativeResourcePath, httpSessionId) -> SecureResourceHandler.getInstance().getResource(servletPath, relativeResourcePath, httpSessionId)))
-						.addMapping(SecureResourceHandler.HANDLER_PREFIX + "*");
+				servletContext.addServlet("ta-sec-links", new ResourceProviderServlet((servletPath, relativeResourcePath, httpSessionId) -> SecureResourceHandler.getInstance().getResource(servletPath, relativeResourcePath, httpSessionId))).addMapping(SecureResourceHandler.HANDLER_PREFIX + "*");
 				servletContext.addServlet("public-link-servlet", new ResourceProviderServlet(PublicLinkResourceProvider.getInstance())).addMapping(PublicLinkResourceProvider.SERVLET_PATH_PREFIX + "*");
 			}
 		});
@@ -201,5 +206,26 @@ public class ApplicationServer implements WebController, SessionManager {
 
 	public void setBasePath(File basePath) {
 		this.basePath = basePath;
+	}
+
+	public static void main(String[] args) throws Exception {
+		if (args == null || args.length == 0) {
+			LOGGER.error("Error missing path!");
+			return;
+		}
+		File path = new File(args[0]);
+		ApplicationServer applicationServer = new ApplicationServer(path);
+		applicationServer.setSessionHandler(new BootstrapSessionHandler());
+		applicationServer.start();
+		if (User.getCount() == 0) {
+			User.create()
+					.setFirstName("Super")
+					.setLastName("Admin")
+					.setLogin("admin")
+					.setPassword(SecurePasswordHash.createDefault().createSecureHash("teamapps!"))
+					.setUserAccountStatus(UserAccountStatus.SUPER_ADMIN)
+					.setLanguages(ValueConverterUtils.compressStringList(Arrays.asList("de", "en", "fr")))
+					.save();
+		}
 	}
 }

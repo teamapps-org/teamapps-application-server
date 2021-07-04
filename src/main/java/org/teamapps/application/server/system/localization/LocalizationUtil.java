@@ -192,8 +192,9 @@ public class LocalizationUtil {
 				.original(TextFilter.emptyFilter())
 				.machineTranslation(TextFilter.emptyFilter())
 				.execute().stream()
-				.filter(value -> value.getLocalizationKey().getApplication().equals(application))
+				.filter(value -> value.getLocalizationKey().getApplication() != null && value.getLocalizationKey().getApplication().equals(application))
 				.collect(Collectors.toList());
+		LOGGER.info("Application translation requests:" + translationRequests.size() + ", app:" + application.getName());
 		ExecutorService executor = Executors.newFixedThreadPool(10);
 		translationRequests.forEach(localizationValue -> executor.submit(() -> translateLocalizationValue(localizationValue, translationService, allowedSourceTranslationLanguages)));
 		executor.shutdown();
@@ -386,8 +387,8 @@ public class LocalizationUtil {
 	}
 
 	public static File createTranslationExport(Application application) throws IOException {
-		Stream<LocalizationKey> keyStream = LocalizationKey.getAll().stream()
-				.filter(LocalizationKey::isUsed);
+		Stream<LocalizationKey> keyStream = LocalizationKey.getAll().stream();
+				//.filter(LocalizationKey::isUsed);
 		if (application != null) {
 			keyStream = keyStream
 					.filter(key -> key.getApplication() != null)

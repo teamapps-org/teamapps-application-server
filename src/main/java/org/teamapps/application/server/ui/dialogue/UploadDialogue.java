@@ -30,6 +30,7 @@ import org.teamapps.ux.component.field.upload.simple.SimpleFileField;
 import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class UploadDialogue {
 
@@ -48,6 +49,28 @@ public class UploadDialogue {
 				File file = fileItem.getFile();
 				formDialogue.close();
 				fileConsumer.accept(file);
+			}
+		});
+		formDialogue.show();
+	}
+
+	public static void createMultiFileUploadDialogue(Consumer<List<FileItem>> fileConsumer, List<String> allowedFileSuffixes, ApplicationInstanceData applicationInstanceData) {
+		FormDialogue formDialogue =new FormDialogue(ApplicationIcons.UPLOAD, applicationInstanceData.getLocalized(Dictionary.UPLOAD), applicationInstanceData.getLocalized(Dictionary.UPLOAD));
+		SimpleFileField fileField =new SimpleFileField();
+		formDialogue.addField(null, applicationInstanceData.getLocalized(Dictionary.UPLOAD), fileField);
+		fileField.setDisplayType(FileFieldDisplayType.FLOATING);
+		formDialogue.setCloseable(true);
+		formDialogue.setAutoCloseOnOk(false);
+		formDialogue.setCloseOnEscape(true);
+		formDialogue.addOkCancelButtons(applicationInstanceData.getLocalized(Dictionary.O_K), applicationInstanceData.getLocalized(Dictionary.CANCEL));
+		formDialogue.onOk.addListener(() -> {
+			List<FileItem> fileItems = fileField.getValue();
+			if (fileItems != null && !fileItems.isEmpty()) {
+				List<FileItem> files = fileItems.stream().filter(item -> allowedFileSuffixes == null || allowedFileSuffixes.stream().anyMatch(suffix -> item.getFileName().endsWith(suffix))).collect(Collectors.toList());
+				if (!files.isEmpty()) {
+					formDialogue.close();
+					fileConsumer.accept(files);
+				}
 			}
 		});
 		formDialogue.show();
