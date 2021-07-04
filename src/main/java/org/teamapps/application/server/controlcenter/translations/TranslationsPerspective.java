@@ -591,7 +591,7 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 	}
 
 	private Icon getLocalizationStateIcon(LocalizationValue value) {
-		if (value == null) return null;
+		if (value == null || value.getTranslationVerificationState() == null) return null;
 		return switch (value.getTranslationVerificationState()) {
 			case VERIFICATION_REQUESTED -> ApplicationIcons.CHECKS;
 			case OK -> ApplicationIcons.OK;
@@ -606,7 +606,7 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 	}
 
 	private String getLocalizationStateText(LocalizationValue value) {
-		if (value == null) return null;
+		if (value == null || value.getTranslationVerificationState() == null) return null;
 		return switch (value.getTranslationVerificationState()) {
 			case VERIFICATION_REQUESTED -> getLocalized(TranslationWorkState.VERIFICATION_REQUIRED.getTranslationKey());
 			case OK -> getLocalized(TranslationWorkState.VERIFIED.getTranslationKey());
