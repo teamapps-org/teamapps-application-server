@@ -51,6 +51,11 @@ public class SessionApplicationLocalizationProvider implements ApplicationLocali
 	}
 
 	@Override
+	public String getLocalized(String key, List<String> languagePriorityOrder, Object... parameters) {
+		return localizationProvider.getLocalized(key, application, languagePriorityOrder, parameters);
+	}
+
+	@Override
 	public String getLocalized(TranslatableText translatableText) {
 		return localizationProvider.getLocalized(translatableText, rankedLanguages);
 	}

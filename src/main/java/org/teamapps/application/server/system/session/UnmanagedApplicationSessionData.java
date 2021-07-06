@@ -146,6 +146,11 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 	}
 
 	@Override
+	public String getLocalized(String key, List<String> languagePriorityOrder, Object... parameters) {
+		return localizationProvider.getLocalized(key, languagePriorityOrder, parameters);
+	}
+
+	@Override
 	public String getLocalized(TranslatableText translatableText) {
 		return localizationProvider.getLocalized(translatableText);
 	}
