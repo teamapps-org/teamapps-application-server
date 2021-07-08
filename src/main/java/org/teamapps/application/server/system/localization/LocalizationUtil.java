@@ -345,7 +345,10 @@ public class LocalizationUtil {
 	}
 
 	public static File createTranslationResourceFiles() throws IOException {
-		Map<String, List<LocalizationValue>> valuesByDomain = LocalizationValue.getAll().stream().filter(value -> value.getCurrentDisplayValue() != null).collect(Collectors.groupingBy(value -> {
+		Map<String, List<LocalizationValue>> valuesByDomain = LocalizationValue.getAll().stream()
+				.filter(value -> value.getLocalizationKey().getKey() != null)
+				.filter(value -> value.getCurrentDisplayValue() != null)
+				.collect(Collectors.groupingBy(value -> {
 			if (value.getLocalizationKey().getApplication() != null) {
 				return value.getLocalizationKey().getApplication().getName();
 			} else {
@@ -375,7 +378,7 @@ public class LocalizationUtil {
 				for (LocalizationValue value : values) {
 					sb.append(value.getLocalizationKey().getKey())
 							.append("=")
-							.append(value.getCurrentDisplayValue())
+							.append(value.getCurrentDisplayValue() != null ? value.getCurrentDisplayValue().replace("\r", "").replace("\n", "\\n") : null)
 							.append("\n");
 				}
 				zos.write(sb.toString().getBytes(StandardCharsets.UTF_8));
