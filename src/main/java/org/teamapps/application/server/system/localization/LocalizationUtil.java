@@ -387,8 +387,8 @@ public class LocalizationUtil {
 	}
 
 	public static File createTranslationExport(Application application) throws IOException {
-		Stream<LocalizationKey> keyStream = LocalizationKey.getAll().stream();
-				//.filter(LocalizationKey::isUsed);
+		Stream<LocalizationKey> keyStream = LocalizationKey.getAll().stream()
+				.filter(key -> key.getKey() != null);
 		if (application != null) {
 			keyStream = keyStream
 					.filter(key -> key.getApplication() != null)
