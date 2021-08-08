@@ -25,6 +25,7 @@ import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.api.privilege.PrivilegeObject;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.api.ui.FormMetaFields;
+import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
@@ -35,12 +36,15 @@ import org.teamapps.application.server.system.utils.ValueConverterUtils;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.combo.ComboBoxUtils;
 import org.teamapps.application.tools.EntityModelBuilder;
+import org.teamapps.application.ux.form.FormController;
+import org.teamapps.application.ux.view.MasterDetailController;
 import org.teamapps.common.format.Color;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.databinding.MutableValue;
 import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
+import org.teamapps.universaldb.pojo.Query;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.view.View;
 import org.teamapps.ux.component.field.CheckBox;
@@ -60,11 +64,11 @@ import org.teamapps.ux.model.ComboBoxModel;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class AccessControlPerspective extends AbstractManagedApplicationPerspective {
 
-	private final TwoWayBindableValue<RolePrivilegeAssignment> selectedRolePrivilegeAssignment = TwoWayBindableValue.create();
 	private final PerspectiveSessionData perspectiveSessionData;
 	private final UserSessionData userSessionData;
 
@@ -77,19 +81,17 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 	}
 
 	private void createUi() {
-		View masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.KEYS, getLocalized("accessControl.accessControlListEntries"), null));
-		View detailView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.KEYS, getLocalized("accessControl.accessControlListEntry"), null));
-		detailView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
+		Supplier<Query<RolePrivilegeAssignment>> querySupplier = () -> isAppFilter() ? RolePrivilegeAssignment.filter().organizationFieldFilter(NumericFilter.equalsFilter(getOrganizationField().getId())) : RolePrivilegeAssignment.filter();
+		MasterDetailController<RolePrivilegeAssignment> masterDetailController = new MasterDetailController<>(ApplicationIcons.KEYS, getLocalized("accessControl.accessControlListEntries"), getApplicationInstanceData(), querySupplier, Privileges.ACCESS_CONTROL_PERSPECTIVE);
+		EntityModelBuilder<RolePrivilegeAssignment> entityModelBuilder = masterDetailController.getEntityModelBuilder();
+		FormController<RolePrivilegeAssignment> formController = masterDetailController.getFormController();
+		ResponsiveForm<RolePrivilegeAssignment> form = masterDetailController.getResponsiveForm();
 
-		EntityModelBuilder<RolePrivilegeAssignment> rolePrivilegeAssignmentModelBuilder = new EntityModelBuilder<>(() -> isAppFilter() ? RolePrivilegeAssignment.filter().organizationFieldFilter(NumericFilter.equalsFilter(getOrganizationField().getId())) : RolePrivilegeAssignment.filter(), getApplicationInstanceData());
-		rolePrivilegeAssignmentModelBuilder.attachViewCountHandler(masterView, () -> getLocalized("accessControl.accessControlListEntries"));
-		rolePrivilegeAssignmentModelBuilder.attachSearchField(masterView);
-		rolePrivilegeAssignmentModelBuilder.onSelectedRecordChanged.addListener(selectedRolePrivilegeAssignment::set);
-		Table<RolePrivilegeAssignment> table = rolePrivilegeAssignmentModelBuilder.createTable();
+		Table<RolePrivilegeAssignment> table = entityModelBuilder.createTable();
 		table.setDisplayAsList(true);
 		table.setRowHeight(28);
 		table.setStripedRows(false);
-		rolePrivilegeAssignmentModelBuilder.updateModels();
+		entityModelBuilder.updateModels();
 
 
 		TemplateField<Role> roleTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createRolePropertyProvider(getApplicationInstanceData()));
@@ -112,13 +114,6 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 			case RolePrivilegeAssignment.FIELD_FIXED_ORGANIZATION_ROOT -> rolePrivilegeAssignment.getFixedOrganizationRoot();
 			default -> null;
 		});
-		masterView.setComponent(table);
-
-		ToolbarButtonGroup buttonGroup = detailView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton addButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.ADD, getLocalized(Dictionary.ADD), getLocalized(Dictionary.ADD_RECORD)));
-
-		buttonGroup = detailView.addLocalButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton saveButton = buttonGroup.addButton(ToolbarButton.createSmall(ApplicationIcons.FLOPPY_DISK, getLocalized(Dictionary.SAVE_CHANGES)));
 
 		ComboBox<Role> roleComboBox = ComboBoxUtils.createRecordComboBox(
 				() -> isAppFilter() ? Role.filter().organizationField(NumericFilter.equalsFilter(getOrganizationField().getId())).execute() : Role.getAll(),
@@ -136,7 +131,6 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 		TagComboBox<OrganizationUnitType> organizationUnitTypeFilterTagComboBox = OrganizationUtils.createOrganizationUnitTypeTagComboBox(50, getApplicationInstanceData());
 
 
-		ResponsiveForm form = new ResponsiveForm(120, 120, 0);
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(450);
 		formLayout.addSection().setCollapsible(false).setDrawHeaderLine(false);
 		formLayout.addLabelAndField(null, getLocalized("roles.role"), roleComboBox);
@@ -151,12 +145,6 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 		formLayout.addLabelAndField(null, getLocalized("accessControl.customOrganizationUnit"), organizationFilterComboBox);
 		formLayout.addLabelAndField(null, getLocalized("accessControl.organizationUnitTypeFilter"), organizationUnitTypeFilterTagComboBox);
 
-		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
-		formMetaFields.addMetaFields(formLayout, false);
-		selectedRolePrivilegeAssignment.onChanged().addListener(formMetaFields::updateEntity);
-
-		detailView.setComponent(form);
-
 		applicationComboBox.onValueChanged.addListener(() -> {
 			privilegeGroupComboBox.setValue(null);
 			privilegesTagComboBox.setValue(null);
@@ -168,31 +156,30 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 			privilegeObjectTagComboBox.setValue(null);
 		});
 
-		addButton.onClick.addListener(() -> selectedRolePrivilegeAssignment.set(RolePrivilegeAssignment.create()));
+		masterDetailController.createViews(getPerspective(), table, formLayout);
 
-		saveButton.onClick.addListener(() -> {
-			RolePrivilegeAssignment rolePrivilegeAssignment = selectedRolePrivilegeAssignment.get();
+		formController.addNotNull(roleComboBox);
+		formController.addNotNull(applicationComboBox);
+		formController.addNotNull(privilegeGroupComboBox);
+		formController.addNotNull(roleComboBox);
+
+
+		formController.setSaveEntityHandler(rolePrivilegeAssignment -> {
 			OrganizationField organizationField = isOrgFieldFilterApplied() ? getOrganizationField() : organizationFieldFilterComboBox.getValue();
-			if (rolePrivilegeAssignment != null && roleComboBox.getValue() != null && applicationComboBox.getValue() != null && privilegeGroupComboBox.getValue() != null) {
-				rolePrivilegeAssignment
-						.setRole(roleComboBox.getValue())
-						.setApplication(applicationComboBox.getValue())
-						.setPrivilegeGroup(privilegeGroupComboBox.getValue())
-						.setPrivileges(privilegesTagComboBox.getValue())
-						.setPrivilegeObjects(privilegeObjectTagComboBox.getValue() != null ? ValueConverterUtils.compressStringList(privilegeObjectTagComboBox.getValue().stream().map(p -> "" + p.getId()).collect(Collectors.toList())) : null)
-						.setPrivilegeObjectInheritance(privilegeObjectInheritanceCheckBox.getValue())
-						.setOrganizationFieldFilter(organizationField)
-						.setFixedOrganizationRoot(organizationFilterComboBox.getValue())
-						.setOrganizationUnitTypeFilter(organizationUnitTypeFilterTagComboBox.getValue())
-						.save();
-				UiUtils.showSaveNotification(true, getApplicationInstanceData());
-				rolePrivilegeAssignmentModelBuilder.updateModels();
-			} else {
-				UiUtils.showSaveNotification(false, getApplicationInstanceData());
-			}
+			rolePrivilegeAssignment
+					.setRole(roleComboBox.getValue())
+					.setApplication(applicationComboBox.getValue())
+					.setPrivilegeGroup(privilegeGroupComboBox.getValue())
+					.setPrivileges(privilegesTagComboBox.getValue())
+					.setPrivilegeObjects(privilegeObjectTagComboBox.getValue() != null ? ValueConverterUtils.compressStringList(privilegeObjectTagComboBox.getValue().stream().map(p -> "" + p.getId()).collect(Collectors.toList())) : null)
+					.setPrivilegeObjectInheritance(privilegeObjectInheritanceCheckBox.getValue())
+					.setOrganizationFieldFilter(organizationField)
+					.setFixedOrganizationRoot(organizationFilterComboBox.getValue())
+					.setOrganizationUnitTypeFilter(organizationUnitTypeFilterTagComboBox.getValue());
+			return true;
 		});
 
-		selectedRolePrivilegeAssignment.onChanged().addListener(rolePrivilegeAssignment -> {
+		entityModelBuilder.getOnSelectionEvent().addListener(rolePrivilegeAssignment -> {
 			roleComboBox.setValue(rolePrivilegeAssignment.getRole());
 			applicationComboBox.setValue(rolePrivilegeAssignment.getApplication());
 			privilegeGroupComboBox.setValue(rolePrivilegeAssignment.getPrivilegeGroup());
@@ -204,7 +191,7 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 			organizationUnitTypeFilterTagComboBox.setValue(rolePrivilegeAssignment.getOrganizationUnitTypeFilter());
 		});
 
-		selectedRolePrivilegeAssignment.set(RolePrivilegeAssignment.create());
+		entityModelBuilder.setSelectedRecord(RolePrivilegeAssignment.create());
 	}
 
 	private ComboBox<OrganizationField> createOrganizationFieldComboBox() {

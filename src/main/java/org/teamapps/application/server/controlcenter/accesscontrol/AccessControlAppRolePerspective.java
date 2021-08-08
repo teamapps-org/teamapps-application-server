@@ -25,6 +25,7 @@ import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.privilege.ApplicationRole;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.api.ui.FormMetaFields;
+import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
@@ -34,12 +35,15 @@ import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.tools.EntityModelBuilder;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.combo.ComboBoxUtils;
+import org.teamapps.application.ux.form.FormController;
+import org.teamapps.application.ux.view.MasterDetailController;
 import org.teamapps.common.format.Color;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.databinding.MutableValue;
 import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
+import org.teamapps.universaldb.pojo.Query;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.view.View;
 import org.teamapps.ux.component.field.TemplateField;
@@ -64,7 +68,6 @@ import java.util.stream.Collectors;
 
 public class AccessControlAppRolePerspective extends AbstractManagedApplicationPerspective {
 
-	private final TwoWayBindableValue<RoleApplicationRoleAssignment> selectedRoleApplicationRoleAssignment = TwoWayBindableValue.create();
 	private final PerspectiveSessionData perspectiveSessionData;
 	private final UserSessionData userSessionData;
 
@@ -77,25 +80,22 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 	}
 
 	private void createUi() {
-		View masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.KEYS, getLocalized("accessControl.accessControlListEntries"), null));
-		View detailView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.KEYS, getLocalized("accessControl.accessControlListEntry"), null));
-		detailView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
+		Supplier<Query<RoleApplicationRoleAssignment>> querySupplier = () -> isAppFilter() ? RoleApplicationRoleAssignment.filter().organizationFieldFilter(NumericFilter.equalsFilter(getOrganizationField().getId())) : RoleApplicationRoleAssignment.filter();
+		MasterDetailController<RoleApplicationRoleAssignment> masterDetailController = new MasterDetailController<>(ApplicationIcons.KEYS, getLocalized("accessControl.accessControlListEntries"), getApplicationInstanceData(), querySupplier, Privileges.ACCESS_CONTROL_APP_ROLE_PERSPECTIVE);
+		EntityModelBuilder<RoleApplicationRoleAssignment> entityModelBuilder = masterDetailController.getEntityModelBuilder();
+		FormController<RoleApplicationRoleAssignment> formController = masterDetailController.getFormController();
+		ResponsiveForm<RoleApplicationRoleAssignment> form = masterDetailController.getResponsiveForm();
 
-		EntityModelBuilder<RoleApplicationRoleAssignment> rolePrivilegeAssignmentModelBuilder = new EntityModelBuilder<>(() -> isAppFilter() ? RoleApplicationRoleAssignment.filter().organizationFieldFilter(NumericFilter.equalsFilter(getOrganizationField().getId())) : RoleApplicationRoleAssignment.filter(), getApplicationInstanceData());
-		rolePrivilegeAssignmentModelBuilder.attachViewCountHandler(masterView, () -> getLocalized("accessControl.accessControlListEntries"));
-		rolePrivilegeAssignmentModelBuilder.attachSearchField(masterView);
-		rolePrivilegeAssignmentModelBuilder.onSelectedRecordChanged.addListener(selectedRoleApplicationRoleAssignment::set);
-		Table<RoleApplicationRoleAssignment> table = rolePrivilegeAssignmentModelBuilder.createTable();
+		Table<RoleApplicationRoleAssignment> table = entityModelBuilder.createTable();
 		table.setDisplayAsList(true);
 		table.setRowHeight(28);
 		table.setStripedRows(false);
-		rolePrivilegeAssignmentModelBuilder.updateModels();
+		entityModelBuilder.updateModels();
 
 
 		TemplateField<Role> roleTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createRolePropertyProvider(getApplicationInstanceData()));
 		TemplateField<Application> applicationTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createApplicationPropertyProvider(userSessionData));
 		TemplateField<RoleApplicationRoleAssignment> applicationRoleTemplateField = createApplicationRoleTemplateField();
-
 
 		TemplateField<OrganizationUnit> customOrganizationUnitTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.creatOrganizationUnitPropertyProvider(getApplicationInstanceData()));
 
@@ -111,13 +111,6 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 			case RoleApplicationRoleAssignment.FIELD_FIXED_ORGANIZATION_ROOT -> rolePrivilegeAssignment.getFixedOrganizationRoot();
 			default -> null;
 		});
-		masterView.setComponent(table);
-
-		ToolbarButtonGroup buttonGroup = detailView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton addButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.ADD, getLocalized(Dictionary.ADD), getLocalized(Dictionary.ADD_RECORD)));
-
-		buttonGroup = detailView.addLocalButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton saveButton = buttonGroup.addButton(ToolbarButton.createSmall(ApplicationIcons.FLOPPY_DISK, getLocalized(Dictionary.SAVE_CHANGES)));
 
 		ComboBox<Role> roleComboBox = ComboBoxUtils.createRecordComboBox(
 				() -> isAppFilter() ? Role.filter().organizationField(NumericFilter.equalsFilter(getOrganizationField().getId())).execute() : Role.getAll(),
@@ -132,7 +125,6 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 		TagComboBox<OrganizationUnitType> organizationUnitTypeFilterTagComboBox = OrganizationUtils.createOrganizationUnitTypeTagComboBox(50, getApplicationInstanceData());
 
 
-		ResponsiveForm form = new ResponsiveForm(120, 120, 0);
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(450);
 		formLayout.addSection().setCollapsible(false).setDrawHeaderLine(false);
 		formLayout.addLabelAndField(null, getLocalized("roles.role"), roleComboBox);
@@ -144,39 +136,29 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 		formLayout.addLabelAndField(null, getLocalized("accessControl.customOrganizationUnit"), organizationFilterComboBox);
 		formLayout.addLabelAndField(null, getLocalized("accessControl.organizationUnitTypeFilter"), organizationUnitTypeFilterTagComboBox);
 
-		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
-		formMetaFields.addMetaFields(formLayout, false);
-		selectedRoleApplicationRoleAssignment.onChanged().addListener(formMetaFields::updateEntity);
-
-		detailView.setComponent(form);
-
 		applicationComboBox.onValueChanged.addListener(() -> {
 			applicationRoleComboBox.setValue(null);
 		});
 
 
-		addButton.onClick.addListener(() -> selectedRoleApplicationRoleAssignment.set(RoleApplicationRoleAssignment.create()));
+		masterDetailController.createViews(getPerspective(), table, formLayout);
 
-		saveButton.onClick.addListener(() -> {
-			RoleApplicationRoleAssignment roleApplicationRoleAssignment = selectedRoleApplicationRoleAssignment.get();
+		formController.addNotNull(roleComboBox);
+		formController.addNotNull(applicationComboBox);
+		formController.addNotNull(applicationRoleComboBox);
+		formController.setSaveEntityHandler(roleApplicationRoleAssignment -> {
 			OrganizationField organizationField = isAppFilter() ? getOrganizationField() : organizationFieldFilterComboBox.getValue();
-			if (roleApplicationRoleAssignment != null && roleComboBox.getValue() != null && applicationComboBox.getValue() != null && applicationRoleComboBox.getValue() != null) {
-				roleApplicationRoleAssignment
-						.setRole(roleComboBox.getValue())
-						.setApplication(applicationComboBox.getValue())
-						.setApplicationRoleName(applicationRoleComboBox.getValue().getName())
-						.setOrganizationFieldFilter(organizationField)
-						.setFixedOrganizationRoot(organizationFilterComboBox.getValue())
-						.setOrganizationUnitTypeFilter(organizationUnitTypeFilterTagComboBox.getValue())
-						.save();
-				UiUtils.showSaveNotification(true, getApplicationInstanceData());
-				rolePrivilegeAssignmentModelBuilder.updateModels();
-			} else {
-				UiUtils.showSaveNotification(false, getApplicationInstanceData());
-			}
+			roleApplicationRoleAssignment
+					.setRole(roleComboBox.getValue())
+					.setApplication(applicationComboBox.getValue())
+					.setApplicationRoleName(applicationRoleComboBox.getValue().getName())
+					.setOrganizationFieldFilter(organizationField)
+					.setFixedOrganizationRoot(organizationFilterComboBox.getValue())
+					.setOrganizationUnitTypeFilter(organizationUnitTypeFilterTagComboBox.getValue());
+			return true;
 		});
 
-		selectedRoleApplicationRoleAssignment.onChanged().addListener(roleApplicationRoleAssignment -> {
+		entityModelBuilder.getOnSelectionEvent().addListener(roleApplicationRoleAssignment -> {
 			roleComboBox.setValue(roleApplicationRoleAssignment.getRole());
 			applicationComboBox.setValue(roleApplicationRoleAssignment.getApplication());
 			applicationRoleComboBox.setValue(getApplicationRole(roleApplicationRoleAssignment));
@@ -185,7 +167,7 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 			organizationUnitTypeFilterTagComboBox.setValue(roleApplicationRoleAssignment.getOrganizationUnitTypeFilter());
 		});
 
-		selectedRoleApplicationRoleAssignment.set(RoleApplicationRoleAssignment.create());
+		entityModelBuilder.setSelectedRecord(RoleApplicationRoleAssignment.create());
 	}
 
 	private ComboBox<OrganizationField> createOrganizationFieldComboBox() {

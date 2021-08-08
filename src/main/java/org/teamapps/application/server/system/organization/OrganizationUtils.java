@@ -52,6 +52,19 @@ public class OrganizationUtils {
 				.collect(Collectors.toList());
 	}
 
+	public static Set<OrganizationUnit> convertViewSet(Collection<OrganizationUnitView> organizationUnits) {
+		return organizationUnits.stream()
+				.map(unit -> OrganizationUnit.getById(unit.getId()))
+				.collect(Collectors.toSet());
+	}
+
+	public static List<OrganizationUnit> convertViewList(Collection<OrganizationUnitView> organizationUnits) {
+		return organizationUnits.stream()
+				.map(unit -> OrganizationUnit.getById(unit.getId()))
+				.collect(Collectors.toList());
+	}
+
+
 	public static OrganizationUnitView convert(OrganizationUnit organizationUnit) {
 		return organizationUnit != null ? OrganizationUnitView.getById(organizationUnit.getId()) : null;
 	}

@@ -54,7 +54,6 @@ import org.teamapps.ux.resource.ByteArrayResource;
 public class ChatPerspective extends AbstractManagedApplicationPerspective {
 
 
-	private final TwoWayBindableValue<ChatMessage> selectedUser = TwoWayBindableValue.create();
 	private final PerspectiveSessionData perspectiveSessionData;
 	private final UserSessionData userSessionData;
 
@@ -77,7 +76,6 @@ public class ChatPerspective extends AbstractManagedApplicationPerspective {
 		TimeGraph timeGraph = userModelBuilder.createTimeGraph(ChatMessage::getMetaCreationDateAsEpochMilli, SystemLog.FIELD_META_CREATION_DATE);
 		userModelBuilder.attachViewCountHandler(masterView, () -> getLocalized("chat.title"));
 		userModelBuilder.attachSearchField(masterView);
-		userModelBuilder.onSelectedRecordChanged.addListener(selectedUser::set);
 		Table<ChatMessage> table = userModelBuilder.createTable();
 		table.setDisplayAsList(true);
 		table.setRowHeight(32);
@@ -118,11 +116,11 @@ public class ChatPerspective extends AbstractManagedApplicationPerspective {
 
 		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
 		formMetaFields.addMetaFields(formLayout, false);
-		selectedUser.onChanged().addListener(formMetaFields::updateEntity);
+		userModelBuilder.getOnSelectionEvent().addListener(formMetaFields::updateEntity);
 
 		detailView.setComponent(form);
 
-		selectedUser.onChanged().addListener(message -> {
+		userModelBuilder.getOnSelectionEvent().addListener(message -> {
 			channelTitle.setValue(message.getChatChannel().getTitle());
 			author.setValue(message.getAuthor());
 			dateTimeField.setValue(message.getMetaCreationDate());

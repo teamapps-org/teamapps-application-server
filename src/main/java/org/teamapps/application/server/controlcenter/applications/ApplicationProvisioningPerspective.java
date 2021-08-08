@@ -23,6 +23,7 @@ import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.api.ui.FormMetaFields;
+import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
@@ -33,10 +34,12 @@ import org.teamapps.application.server.ui.localize.LocalizationTranslationKeyFie
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.combo.RecordComboBox;
+import org.teamapps.application.ux.form.FormController;
 import org.teamapps.application.ux.form.FormPanel;
 import org.teamapps.application.ux.form.FormWindow;
 import org.teamapps.application.tools.EntityListModelBuilder;
 import org.teamapps.application.tools.EntityModelBuilder;
+import org.teamapps.application.ux.view.MasterDetailController;
 import org.teamapps.common.format.Color;
 import org.teamapps.databinding.MutableValue;
 import org.teamapps.databinding.TwoWayBindableValue;
@@ -63,37 +66,27 @@ import java.util.stream.Collectors;
 
 public class ApplicationProvisioningPerspective extends AbstractManagedApplicationPerspective {
 
-	private final PerspectiveSessionData perspectiveSessionData;
 	private final UserSessionData userSessionData;
-	private final TwoWayBindableValue<ManagedApplication> selectedApplication = TwoWayBindableValue.create();
 
 
 	public ApplicationProvisioningPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
 		super(applicationInstanceData, perspectiveInfoBadgeValue);
-		perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
+		PerspectiveSessionData perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
 		userSessionData = perspectiveSessionData.getManagedApplicationSessionData().getUserSessionData();
 		createUi();
 	}
 
 	private void createUi() {
-		View applicationsView = View.createView(StandardLayout.CENTER, ApplicationIcons.INSTALL, getLocalized("applicationProvisioning.provisionedApplications"), null);
-		View applicationDetailsView = View.createView(StandardLayout.RIGHT, ApplicationIcons.INSTALL, getLocalized("applicationProvisioning.provisionedApplication"), null);
-		applicationDetailsView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
+		MasterDetailController<ManagedApplication> masterDetailController = new MasterDetailController<>(ApplicationIcons.INSTALL, getLocalized("applicationProvisioning.provisionedApplications"), getApplicationInstanceData(), ManagedApplication::filter, Privileges.APPLICATION_PROVISIONING_PERSPECTIVE);
+		EntityModelBuilder<ManagedApplication> entityModelBuilder = masterDetailController.getEntityModelBuilder();
+		FormController<ManagedApplication> formController = masterDetailController.getFormController();
+		ResponsiveForm<ManagedApplication> form = masterDetailController.getResponsiveForm();
 
-		EntityModelBuilder<ManagedApplication> applicationModelBuilder = new EntityModelBuilder<>(ManagedApplication::filter, getApplicationInstanceData());
-		Table<ManagedApplication> applicationsTable = applicationModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES, PropertyProviders.createManagedApplicationPropertyProvider(userSessionData), 60);
+		Table<ManagedApplication> applicationsTable = entityModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES, PropertyProviders.createManagedApplicationPropertyProvider(userSessionData), 60);
 		applicationsTable.setStripedRows(false);
-		applicationsView.setComponent(applicationsTable);
-		applicationModelBuilder.onDataChanged.fire();
-		applicationModelBuilder.attachSearchField(applicationsView);
-		applicationModelBuilder.attachViewCountHandler(applicationsView, () -> getLocalized("applicationProvisioning.provisionedApplications"));
-		applicationModelBuilder.onSelectedRecordChanged.addListener(selectedApplication::set);
+		entityModelBuilder.updateModels();
 
-		getPerspective().addView(applicationsView);
-		getPerspective().addView(applicationDetailsView);
-
-		ResponsiveForm<?> applicationForm = new ResponsiveForm<>(100, 150, 0);
-		ResponsiveFormLayout formLayout = applicationForm.addResponsiveFormLayout(400);
+		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(400);
 
 		ComboBox<Application> applicationComboBox = ApplicationUiUtils.createApplicationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, userSessionData);
 		ComboBox<OrganizationField> organizationFieldCombo = OrganizationUtils.createOrganizationFieldCombo(getApplicationInstanceData());
@@ -139,41 +132,32 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		Arrays.asList(applicationComboBox, iconComboBox, titleKeyField.getKeyDisplayField(), descriptionKeyField.getKeyDisplayField(), applicationGroupComboBox).forEach(f -> f.setRequired(true));
 
 		formLayout.addSection().setDrawHeaderLine(false).setCollapsible(false);
-		formLayout.addLabelAndComponent(null, getLocalized("applications.mainApplication"), applicationComboBox);
-		formLayout.addLabelAndComponent(null, getLocalized(Dictionary.HIDDEN), hideApplicationCheckBox);
-		formLayout.addLabelAndComponent(null, getLocalized("applications.organizationField"), organizationFieldCombo);
-		formLayout.addLabelAndComponent(null, getLocalized("applications.applicationIcon"), iconComboBox);
-		formLayout.addLabelAndComponent(null, getLocalized("applications.appTitle"), titleKeyField.getSelectionField());
+		formLayout.addLabelAndField(null, getLocalized("applications.mainApplication"), applicationComboBox);
+		formLayout.addLabelAndField(null, getLocalized(Dictionary.HIDDEN), hideApplicationCheckBox);
+		formLayout.addLabelAndField(null, getLocalized("applications.organizationField"), organizationFieldCombo);
+		formLayout.addLabelAndField(null, getLocalized("applications.applicationIcon"), iconComboBox);
+		formLayout.addLabelAndField(null, getLocalized("applications.appTitle"), titleKeyField.getSelectionField());
 		formLayout.addLabelAndComponent(null, null, titleKeyField.getKeyLinkButton());
-		formLayout.addLabelAndComponent(null, getLocalized("applications.appDescription"), descriptionKeyField.getSelectionField());
+		formLayout.addLabelAndField(null, getLocalized("applications.appDescription"), descriptionKeyField.getSelectionField());
 		formLayout.addLabelAndComponent(null, null, descriptionKeyField.getKeyLinkButton());
-		formLayout.addLabelAndComponent(null, getLocalized("applications.darkTheme"), darkThemeCheckBox);
-		formLayout.addLabelAndComponent(null, getLocalized("applications.toolbarAppMenu"), toolbarAppMenuCheckbox);
-		formLayout.addLabelAndComponent(null, getLocalized("applications.startOnLogin"), startOnLoginCheckbox);
+		formLayout.addLabelAndField(null, getLocalized("applications.darkTheme"), darkThemeCheckBox);
+		formLayout.addLabelAndField(null, getLocalized("applications.toolbarAppMenu"), toolbarAppMenuCheckbox);
+		formLayout.addLabelAndField(null, getLocalized("applications.startOnLogin"), startOnLoginCheckbox);
 		formLayout.addLabelAndComponent(null, getLocalized("applications.perspectives"), formPanel.getPanel());
-		formLayout.addLabelAndComponent(null, getLocalized("applications.applicationGroup"), applicationGroupComboBox);
-
-		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
-		formMetaFields.addMetaFields(formLayout, false);
-		selectedApplication.onChanged().addListener(formMetaFields::updateEntity);
-
-		ToolbarButtonGroup buttonGroup = applicationDetailsView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton addApplicationButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.ADD, getLocalized("applications.addApplication"), getLocalized("applications.addApplication.desc")));
-
-		buttonGroup = applicationDetailsView.addLocalButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton saveApplicationButton = buttonGroup.addButton(ToolbarButton.createSmall(ApplicationIcons.FLOPPY_DISK, getLocalized(Dictionary.SAVE_CHANGES)));
+		formLayout.addLabelAndField(null, getLocalized("applications.applicationGroup"), applicationGroupComboBox);
 
 		formPanel.getAddButton().onClick.addListener(() -> showPerspectiveFormWindow(null, perspectiveModelBuilder));
 		formPanel.getEditButton().onClick.addListener(() -> showPerspectiveFormWindow(perspectivesList.getSelectedRecord(), perspectiveModelBuilder));
 		formPanel.getDeleteButton().onClick.addListener(() -> perspectiveModelBuilder.removeRecord(perspectivesList.getSelectedRecord()));
-		addApplicationButton.onClick.addListener(() -> selectedApplication.set(ManagedApplication.create()));
 
-		saveApplicationButton.onClick.addListener(() -> {
-			ManagedApplication application = selectedApplication.get();
-			if (application == null) {
-				return;
-			}
-			if (Fields.validateAll(applicationComboBox, iconComboBox, titleKeyField.getSelectionField(), descriptionKeyField.getSelectionField(), applicationGroupComboBox) && (!perspectiveModelBuilder.getRecords().isEmpty() || application.isSingleApplication() || application.getMainApplication().isUnmanagedApplication())) {
+		masterDetailController.createViews(getPerspective(), applicationsTable, formLayout);
+
+		formController.addNotNull(applicationComboBox);
+		formController.addNotNull(titleKeyField.getSelectionField());
+		formController.addNotNull(descriptionKeyField.getSelectionField());
+		formController.addNotNull(applicationGroupComboBox);
+		formController.setSaveEntityHandler(application -> {
+			if (!perspectiveModelBuilder.getRecords().isEmpty() || application.isSingleApplication() || application.getMainApplication().isUnmanagedApplication()) {
 				Application mainApplication = applicationComboBox.getValue();
 				application.setMainApplication(mainApplication);
 				application.setHidden(hideApplicationCheckBox.getValue());
@@ -191,10 +175,9 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 				for (ManagedApplicationPerspective perspective : perspectiveModelBuilder.getRecords()) {
 					perspective.setListingPosition(pos++).save();
 				}
-				applicationModelBuilder.onDataChanged.fire();
-				UiUtils.showSaveNotification(true, getApplicationInstanceData());
+				return true;
 			} else {
-				UiUtils.showSaveNotification(false, getApplicationInstanceData());
+				return false;
 			}
 		});
 
@@ -205,13 +188,14 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 			iconComboBox.setValue(app != null ? IconUtils.decodeIcon(app.getIcon()) : null);
 			titleKeyField.setKey(app != null ? app.getTitleKey() : null);
 			descriptionKeyField.setKey(app != null ? app.getDescriptionKey() : null);
-			if (selectedApplication.get() != null && !selectedApplication.get().isStored()) {
+			ManagedApplication selectedRecord = entityModelBuilder.getSelectedRecord();
+			if (selectedRecord != null && !selectedRecord.isStored()) {
 				List<ManagedApplicationPerspective> perspectives = app.getPerspectives().stream().filter(ApplicationPerspective::getAutoProvision).map(p -> ManagedApplicationPerspective.create().setApplicationPerspective(p)).collect(Collectors.toList());
 				perspectiveModelBuilder.setRecords(perspectives);
 			}
 		});
 
-		selectedApplication.onChanged().addListener(app -> {
+		entityModelBuilder.getOnSelectionEvent().addListener(app -> {
 			applicationComboBox.setValue(app.getMainApplication());
 			hideApplicationCheckBox.setValue(app.getHidden());
 			organizationFieldCombo.setValue(app.getOrganizationField());
@@ -224,8 +208,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 			perspectiveModelBuilder.setRecords(app.getPerspectives().stream().filter(perspective -> perspective.getApplicationPerspective() != null).sorted((Comparator.comparingInt(ManagedApplicationPerspective::getListingPosition))).collect(Collectors.toList()));
 			applicationGroupComboBox.setValue(app.getApplicationGroup());
 		});
-		applicationDetailsView.setComponent(applicationForm);
-		selectedApplication.set(ManagedApplication.create());
+		entityModelBuilder.setSelectedRecord(ManagedApplication.create());
 	}
 
 	private void showPerspectiveFormWindow(ManagedApplicationPerspective managedApplicationPerspective, EntityListModelBuilder<ManagedApplicationPerspective> perspectiveModelBuilder) {

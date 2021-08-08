@@ -54,7 +54,6 @@ public class ApplicationUpdatesPerspective extends AbstractManagedApplicationPer
 
 	private final PerspectiveSessionData perspectiveSessionData;
 	private final UserSessionData userSessionData;
-	private final TwoWayBindableValue<ApplicationVersion> selectedApplicationVersion = TwoWayBindableValue.create();
 	private final TwoWayBindableValue<Application> selectedApplication = TwoWayBindableValue.create();
 	private final ApplicationsPerspectiveComponents perspectiveComponents;
 
@@ -76,16 +75,15 @@ public class ApplicationUpdatesPerspective extends AbstractManagedApplicationPer
 
 		EntityListModelBuilder<ApplicationVersion> applicationVersionModelBuilder = new EntityListModelBuilder<>(getApplicationInstanceData());
 		applicationVersionModelBuilder.setRecords(selectedApplication.get().getVersions());
-		applicationVersionModelBuilder.setEntityStringFunction(ApplicationVersion::getVersion);
+		applicationVersionModelBuilder.setRecordStringFunction(ApplicationVersion::getVersion);
 		Table<ApplicationVersion> applicationsTable = applicationVersionModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, PropertyProviders.createApplicationVersionPropertyProvider(userSessionData), 36);
 		applicationVersionModelBuilder.attachSearchField(applicationVersionsView);
 		applicationVersionModelBuilder.attachViewCountHandler(applicationVersionsView, () -> getLocalized("applications.versions"));
-		applicationVersionModelBuilder.onSelectedRecordChanged.addListener(selectedApplicationVersion::set);
 		applicationVersionModelBuilder.updateModels();
 		applicationVersionsView.setComponent(applicationsTable);
 
 
-		ResponsiveForm form = new ResponsiveForm(100, 0, 0);
+		ResponsiveForm<?> form = new ResponsiveForm<>(100, 0, 0);
 		applicationDetailsView.setComponent(form);
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(400);
 		TextField appNameField = new TextField();
@@ -160,9 +158,9 @@ public class ApplicationUpdatesPerspective extends AbstractManagedApplicationPer
 
 		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
 		formMetaFields.addMetaFields(formLayout, false);
-		selectedApplicationVersion.onChanged().addListener(formMetaFields::updateEntity);
+		applicationVersionModelBuilder.getOnSelectionEvent().addListener(formMetaFields::updateEntity);
 
-		selectedApplicationVersion.onChanged().addListener(version -> {
+		applicationVersionModelBuilder.getOnSelectionEvent().addListener(version -> {
 			Application app = version.getApplication();
 			applicationVersionModelBuilder.setRecords(app.getVersions());
 			appNameField.setValue(app.getName());
@@ -205,7 +203,7 @@ public class ApplicationUpdatesPerspective extends AbstractManagedApplicationPer
 		});
 
 		selectedApplication.set(getMainApplication());
-		selectedApplicationVersion.set(getMainApplication().getInstalledVersion());
+		applicationVersionModelBuilder.setSelectedRecord(getMainApplication().getInstalledVersion());
 	}
 
 }

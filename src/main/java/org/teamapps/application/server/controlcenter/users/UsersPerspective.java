@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,8 +24,9 @@ import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.application.perspective.PerspectiveMenuPanel;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.localization.Language;
+import org.teamapps.application.api.privilege.Privilege;
 import org.teamapps.application.api.theme.ApplicationIcons;
-import org.teamapps.application.api.ui.FormMetaFields;
+import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.application.server.controlcenter.roles.UserRoleAssignmentPerspectiveBuilder;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
@@ -34,23 +35,20 @@ import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.server.system.utils.ValueConverterUtils;
-import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.server.ui.address.AddressForm;
-import org.teamapps.application.ux.combo.ComboBoxUtils;
 import org.teamapps.application.tools.EntityModelBuilder;
-import org.teamapps.common.format.Color;
+import org.teamapps.application.ux.UiUtils;
+import org.teamapps.application.ux.combo.ComboBoxUtils;
+import org.teamapps.application.ux.form.FormController;
+import org.teamapps.application.ux.view.MasterDetailController;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.databinding.MutableValue;
-import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.*;
-import org.teamapps.ux.application.layout.StandardLayout;
-import org.teamapps.ux.application.view.View;
+import org.teamapps.universaldb.pojo.Entity;
+import org.teamapps.universaldb.pojo.Query;
 import org.teamapps.ux.component.dialogue.FormDialogue;
-import org.teamapps.ux.component.field.FieldEditingMode;
-import org.teamapps.ux.component.field.PasswordField;
-import org.teamapps.ux.component.field.TemplateField;
-import org.teamapps.ux.component.field.TextField;
+import org.teamapps.ux.component.field.*;
 import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.field.combobox.TagBoxWrappingMode;
 import org.teamapps.ux.component.field.combobox.TagComboBox;
@@ -58,6 +56,7 @@ import org.teamapps.ux.component.field.datetime.InstantDateTimeField;
 import org.teamapps.ux.component.field.upload.PictureChooser;
 import org.teamapps.ux.component.form.ResponsiveForm;
 import org.teamapps.ux.component.form.ResponsiveFormLayout;
+import org.teamapps.ux.component.format.Spacing;
 import org.teamapps.ux.component.table.Table;
 import org.teamapps.ux.component.table.TableColumn;
 import org.teamapps.ux.component.template.BaseTemplate;
@@ -67,22 +66,18 @@ import org.teamapps.ux.resource.ByteArrayResource;
 import org.teamapps.ux.resource.Resource;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class UsersPerspective extends AbstractManagedApplicationPerspective {
 
-	private final TwoWayBindableValue<User> selectedUser = TwoWayBindableValue.create();
-	private final PerspectiveSessionData perspectiveSessionData;
 	private final UserSessionData userSessionData;
 
 
 	public UsersPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
 		super(applicationInstanceData, perspectiveInfoBadgeValue);
-		perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
+		PerspectiveSessionData perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
 		userSessionData = perspectiveSessionData.getManagedApplicationSessionData().getUserSessionData();
 		createUi();
 	}
@@ -97,20 +92,20 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		menuPanel.addInstantiatedPerspective(usersPerspectiveBuilder, this);
 		setPerspectiveMenuPanel(menuPanel.getComponent());
 
-		View masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.USERS_CROWD, getLocalized("users.users"), null));
-		View detailView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.USER, getLocalized("users.user"), null));
-		detailView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
+		List<OrganizationUnitView> allowedUnits = getAllowedUnits(Privileges.USERS_PERSPECTIVE, Privilege.READ);
+		Set<Integer> unitIdSet = allowedUnits.stream().map(Entity::getId).collect(Collectors.toSet());
 
-		EntityModelBuilder<User> userModelBuilder = new EntityModelBuilder<>(() -> User.filter(), getApplicationInstanceData());
-		userModelBuilder.attachViewCountHandler(masterView, () -> getLocalized("users.users"));
-		userModelBuilder.attachSearchField(masterView);
-		userModelBuilder.onSelectedRecordChanged.addListener(selectedUser::set);
-		Table<User> table = userModelBuilder.createTable();
+		Supplier<Query<User>> querySupplier = () -> User.filter().customFilter(user -> user.getOrganizationUnit() == null || unitIdSet.contains(user.getOrganizationUnit().getId()));
+		MasterDetailController<User> masterDetailController = new MasterDetailController<>(ApplicationIcons.USERS_CROWD, getLocalized("users.users"), getApplicationInstanceData(), querySupplier, Privileges.USERS_PERSPECTIVE);
+		EntityModelBuilder<User> entityModelBuilder = masterDetailController.getEntityModelBuilder();
+		FormController<User> formController = masterDetailController.getFormController();
+		ResponsiveForm<User> form = masterDetailController.getResponsiveForm();
+
+		Table<User> table = entityModelBuilder.createTable();
 		table.setDisplayAsList(true);
 		table.setRowHeight(32);
 		table.setStripedRows(false);
-		userModelBuilder.updateModels();
-
+		entityModelBuilder.updateModels();
 
 		TemplateField<User> userTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(getApplicationInstanceData()));
 		TemplateField<UserAccountStatus> accountStatusTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, createAccountStatusPropertyProvider());
@@ -132,16 +127,14 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 			case User.FIELD_ROLE_ASSIGNMENTS -> getRolesString(user.getRoleAssignments(), 5);
 			default -> null;
 		});
-		masterView.setComponent(table);
 
-		ToolbarButtonGroup buttonGroup = detailView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton addButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.ADD, getLocalized(Dictionary.ADD), getLocalized(Dictionary.ADD_RECORD)));
 
-		buttonGroup = detailView.addLocalButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton saveButton = buttonGroup.addButton(ToolbarButton.createSmall(ApplicationIcons.FLOPPY_DISK, getLocalized(Dictionary.SAVE_CHANGES)));
+		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(450);
 
-		buttonGroup = detailView.addLocalButtonGroup(new ToolbarButtonGroup());
+
+		ToolbarButtonGroup buttonGroup = new ToolbarButtonGroup();
 		ToolbarButton updatePasswordButton = buttonGroup.addButton(ToolbarButton.createSmall(ApplicationIcons.KEYS, getLocalized(Dictionary.RESET_PASSWORD)));
+		formController.addToolbarButtonGroup(buttonGroup);
 
 		PictureChooser pictureChooser = new PictureChooser();
 		pictureChooser.setImageDisplaySize(120, 120);
@@ -160,11 +153,10 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		PasswordField passwordField = new PasswordField();
 		ComboBox<UserAccountStatus> accountStatusComboBox = createAccountStatusComboBox();
 		TagComboBox<UserRoleAssignment> userRoleAssignmentTagCombo = createUserRoleAssignmentTagCombo();
-		ComboBox<OrganizationUnit> orgUnitComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), true, getApplicationInstanceData());
+		AbstractField<OrganizationUnitView> organizationUnitViewField = formController.getOrganizationUnitViewField();
 
+		userRoleAssignmentTagCombo.setMargin(new Spacing(0, 5, 0, -4));
 
-		ResponsiveForm form = new ResponsiveForm(120, 120, 0);
-		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(450);
 		formLayout.addSection().setCollapsible(false).setDrawHeaderLine(false);
 		formLayout.addLabelAndField(null, getLocalized("users.profilePicture"), pictureChooser);
 		formLayout.addLabelAndField(null, getLocalized(Dictionary.FIRST_NAME), firstNameField);
@@ -175,68 +167,54 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		formLayout.addLabelAndField(null, getLocalized(Dictionary.USER_NAME), loginField);
 		formLayout.addLabelAndField(null, getLocalized("users.accountStatus"), accountStatusComboBox);
 		formLayout.addLabelAndField(null, getLocalized("users.roles"), userRoleAssignmentTagCombo);
-		formLayout.addLabelAndField(null, getLocalized("users.organizationUnit"), orgUnitComboBox);
+		formLayout.addLabelAndField(null, getLocalized("users.organizationUnit"), organizationUnitViewField);
 
 		AddressForm addressForm = new AddressForm(getApplicationInstanceData());
 		addressForm.createAddressSection(formLayout);
 		addressForm.addFields(formLayout);
 
-		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
-		formMetaFields.addMetaFields(formLayout, false);
-		selectedUser.onChanged().addListener(formMetaFields::updateEntity);
+		formController.addNotBlank(firstNameField);
+		formController.addNotBlank(lastNameField);
+		formController.addEmailOrEmpty(emailField);
+		formController.addPhoneOrEmptyNumber(mobileField);
+		formController.addMinCharactersOrEmpty(loginField, 2);
+		formController.addMinCharactersOrEmpty(passwordField, 9);
+		formController.addNotEmptyList(languagesField);
+		formController.addValidator(organizationUnitViewField, unit -> unit != null && OrganizationUtils.convert(unit).getType().isAllowUsers() ? null : getLocalized("users.wrongOrMissingOrgUnit"));
 
-		detailView.setComponent(form);
-
-		addButton.onClick.addListener(() -> selectedUser.set(User.create().setAddress(Address.create()).setUserAccountStatus(UserAccountStatus.ACTIVE)));
+		masterDetailController.createViews(getPerspective(), table, formLayout);
 
 		updatePasswordButton.onClick.addListener(() -> {
-			User user = selectedUser.get();
+			User user = entityModelBuilder.getSelectedRecord();
 			if (user != null) {
 				showUpdatePasswordDialogue(user);
 			}
 		});
 
-		saveButton.onClick.addListener(() -> {
-			User user = selectedUser.get();
-			OrganizationUnit organizationUnit = orgUnitComboBox.getValue();
-			if (organizationUnit == null || !organizationUnit.getType().isAllowUsers()) {
-				UiUtils.showNotification(ApplicationIcons.ERROR, getLocalized("users.wrongOrMissingOrgUnit"));
-				return;
+		formController.setSaveEntityHandler(user -> {
+			if (!addressForm.validateAddress() || !addressForm.getAddress().equals(user.getAddress())) {
+				return false;
 			}
-			if (!addressForm.validateAddress()) {
-				UiUtils.showSaveNotification(false, getApplicationInstanceData());
-				return;
+			OrganizationUnit organizationUnit = OrganizationUtils.convert(organizationUnitViewField.getValue());
+			byte[] picture = readUserPicture(pictureChooser);
+			addressForm.getAddress().save();
+			user
+					.setFirstName(firstNameField.getValue())
+					.setLastName(lastNameField.getValue())
+					.setLanguages(getCompressedLanguages(languagesField.getValue()))
+					.setEmail(emailField.getValue())
+					.setMobile(mobileField.getValue())
+					.setLogin(loginField.getValue())
+					.setUserAccountStatus(accountStatusComboBox.getValue())
+					.setOrganizationUnit(organizationUnit)
+			;
+			if (picture != null && picture.length != user.getProfilePictureLength()) {
+				user.setProfilePicture(picture);
 			}
-			if (!addressForm.getAddress().equals(user.getAddress())) {
-				UiUtils.showSaveNotification(false, getApplicationInstanceData());
-				return;
-			}
-
-			if (user != null && firstNameField.getValue() != null && lastNameField.getValue() != null) {
-				byte[] picture = readUserPicture(pictureChooser);
-				addressForm.getAddress().save();
-				user
-						.setFirstName(firstNameField.getValue())
-						.setLastName(lastNameField.getValue())
-						.setLanguages(getCompressedLanguages(languagesField.getValue()))
-						.setEmail(emailField.getValue())
-						.setMobile(mobileField.getValue())
-						.setLogin(loginField.getValue())
-						.setUserAccountStatus(accountStatusComboBox.getValue())
-						.setOrganizationUnit(organizationUnit)
-				;
-				if (picture != null && picture.length != user.getProfilePictureLength()) {
-					user.setProfilePicture(picture);
-				}
-				user.save();
-				UiUtils.showSaveNotification(true, getApplicationInstanceData());
-				userModelBuilder.updateModels();
-			} else {
-				UiUtils.showSaveNotification(false, getApplicationInstanceData());
-			}
+			return true;
 		});
 
-		selectedUser.onChanged().addListener(user -> {
+		entityModelBuilder.getOnSelectionEvent().addListener(user -> {
 			pictureChooser.setValue(user.getProfilePicture() != null ? new ByteArrayResource(user.getProfilePicture(), "image.jpg") : null);
 			firstNameField.setValue(user.getFirstName());
 			lastNameField.setValue(user.getLastName());
@@ -247,12 +225,13 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 			passwordField.setValue(user.getPassword());
 			accountStatusComboBox.setValue(user.getUserAccountStatus());
 			userRoleAssignmentTagCombo.setValue(user.getRoleAssignments());
-			orgUnitComboBox.setValue(user.getOrganizationUnit());
 			addressForm.setAddress(user.getAddress());
+			formController.clearMessages();
 		});
 
-		selectedUser.set(User.create().setAddress(Address.create()).setUserAccountStatus(UserAccountStatus.ACTIVE));
-
+		Supplier<User> createNewEntitySupplier = () -> User.create().setAddress(Address.create()).setUserAccountStatus(UserAccountStatus.ACTIVE);
+		formController.setCreateNewEntitySupplier(createNewEntitySupplier);
+		entityModelBuilder.setSelectedRecord(createNewEntitySupplier.get());
 	}
 
 	private void showUpdatePasswordDialogue(User user) {
@@ -317,7 +296,7 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 	}
 
 	private TagComboBox<UserRoleAssignment> createUserRoleAssignmentTagCombo() {
-		TagComboBox<UserRoleAssignment> tagComboBox = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, PropertyProviders.createUserRoleAssignmentPropertyProviderNoUserDisplay(userSessionData));
+		TagComboBox<UserRoleAssignment> tagComboBox = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_MEDIUM_ICON_TWO_LINES, PropertyProviders.createUserRoleAssignmentPropertyProviderNoUserDisplay(userSessionData));
 		tagComboBox.setEditingMode(FieldEditingMode.READONLY);
 		return tagComboBox;
 	}

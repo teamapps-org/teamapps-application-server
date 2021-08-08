@@ -22,7 +22,7 @@ package org.teamapps.application.server.messaging.newsboard.views;
 import org.teamapps.application.api.application.AbstractApplicationView;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.server.messaging.newsboard.NewsBoardUtils;
-import org.teamapps.application.tools.EntityListModelBuilder;
+import org.teamapps.application.tools.RecordListModelBuilder;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.event.Event;
 import org.teamapps.ux.component.Component;
@@ -36,15 +36,15 @@ public class LanguageSelectionView extends AbstractApplicationView {
 
 	public Event<String> onLanguageSelection = new Event<>();
 	private Table<String> table;
-	private final EntityListModelBuilder<String> modelBuilder;
+	private final RecordListModelBuilder<String> modelBuilder;
 
 	public LanguageSelectionView(ApplicationInstanceData applicationInstanceData) {
 		super(applicationInstanceData);
 		PropertyProvider<String> propertyProvider = NewsBoardUtils.createLanguageSelectionPropertyProvider(applicationInstanceData);
-		modelBuilder = new EntityListModelBuilder<>(applicationInstanceData);
-		modelBuilder.setEntityStringFunction(s -> (String) propertyProvider.getValues(s, null).get(BaseTemplate.PROPERTY_CAPTION));
+		modelBuilder = new RecordListModelBuilder<>(applicationInstanceData);
+		modelBuilder.setRecordStringFunction(s -> (String) propertyProvider.getValues(s, null).get(BaseTemplate.PROPERTY_CAPTION));
 		table = modelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, propertyProvider, 30);
-		modelBuilder.onSelectedRecordChanged.addListener(language -> onLanguageSelection.fire(language));
+		modelBuilder.getOnSelectionEvent().addListener(language -> onLanguageSelection.fire(language));
 	}
 
 	public Component getComponent() {

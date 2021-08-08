@@ -47,29 +47,28 @@ import java.lang.invoke.MethodHandles;
 public class ApplicationConfigurationPerspective extends AbstractManagedApplicationPerspective {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private final PerspectiveSessionData perspectiveSessionData;
 	private final UserSessionData userSessionData;
 	private final TwoWayBindableValue<Application> selectedApplication = TwoWayBindableValue.create();
 
 	public ApplicationConfigurationPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
 		super(applicationInstanceData, perspectiveInfoBadgeValue);
-		perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
+		PerspectiveSessionData perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
 		userSessionData = perspectiveSessionData.getManagedApplicationSessionData().getUserSessionData();
 		createUi();
 	}
 
 	private void createUi() {
-		View masterView = null;
+		View masterView;
 		View detailsView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.CODE_LINE, getLocalized("applicationConfiguration.title"), null));
 
 		if (!isAppFilter()) {
 			masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.CODE_LINE, getLocalized("applications.title"), null));
-			EntityModelBuilder<Application> applicationModelBuilder = new EntityModelBuilder<>(Application::filter, getApplicationInstanceData());
-			Table<Application> applicationsTable = applicationModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES, PropertyProviders.createApplicationPropertyProvider(userSessionData), 60);
-			applicationModelBuilder.attachSearchField(masterView);
-			applicationModelBuilder.attachViewCountHandler(masterView, () -> getLocalized(Dictionary.APPLICATIONS));
-			applicationModelBuilder.onSelectedRecordChanged.addListener(app -> selectedApplication.set(app));
-			applicationModelBuilder.updateModels();
+			EntityModelBuilder<Application> entityModelBuilder = new EntityModelBuilder<>(Application::filter, getApplicationInstanceData());
+			Table<Application> applicationsTable = entityModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES, PropertyProviders.createApplicationPropertyProvider(userSessionData), 60);
+			entityModelBuilder.attachSearchField(masterView);
+			entityModelBuilder.attachViewCountHandler(masterView, () -> getLocalized(Dictionary.APPLICATIONS));
+			entityModelBuilder.getOnSelectionEvent().addListener(selectedApplication::set);
+			entityModelBuilder.updateModels();
 			masterView.setComponent(applicationsTable);
 		}
 

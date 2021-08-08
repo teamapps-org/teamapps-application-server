@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,13 +28,12 @@ import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.server.ui.localize.LocalizationTranslationKeyField;
+import org.teamapps.application.tools.EntityListModelBuilder;
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.form.FormPanel;
-import org.teamapps.application.tools.EntityListModelBuilder;
 import org.teamapps.common.format.Color;
 import org.teamapps.databinding.MutableValue;
-import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.ManagedApplication;
 import org.teamapps.model.controlcenter.ManagedApplicationGroup;
@@ -58,7 +57,6 @@ public class ApplicationGroupsPerspective extends AbstractManagedApplicationPers
 
 	private final PerspectiveSessionData perspectiveSessionData;
 	private final UserSessionData userSessionData;
-	private final TwoWayBindableValue<ManagedApplicationGroup> selectedGroup = TwoWayBindableValue.create();
 
 
 	public ApplicationGroupsPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
@@ -84,15 +82,15 @@ public class ApplicationGroupsPerspective extends AbstractManagedApplicationPers
 		ToolbarButton saveGroupButton = buttonGroup.addButton(ToolbarButton.createSmall(ApplicationIcons.FLOPPY_DISK, getLocalized(Dictionary.SAVE_CHANGES)));
 
 
-		EntityListModelBuilder<ManagedApplicationGroup> groupModelBuilder = new EntityListModelBuilder<>(getApplicationInstanceData(), group -> getLocalized(group.getTitleKey()));
-		groupModelBuilder.setRecords(ManagedApplicationGroup.getAll().stream().sorted((Comparator.comparingInt(ManagedApplicationGroup::getListingPosition))).collect(Collectors.toList()));
-		Table<ManagedApplicationGroup> groupTable = groupModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationGroupPropertyProvider(getApplicationInstanceData()), 40);
+		EntityListModelBuilder<ManagedApplicationGroup> entityListModelBuilder = new EntityListModelBuilder<>(getApplicationInstanceData(), group -> getLocalized(group.getTitleKey()));
+		entityListModelBuilder.setRecords(ManagedApplicationGroup.getAll().stream().sorted((Comparator.comparingInt(ManagedApplicationGroup::getListingPosition))).collect(Collectors.toList()));
+		Table<ManagedApplicationGroup> groupTable = entityListModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationGroupPropertyProvider(getApplicationInstanceData()), 40);
 		groupTable.setStripedRows(false);
 		groupsView.setComponent(groupTable);
-		groupModelBuilder.onDataChanged.fire();
-		groupModelBuilder.attachSearchField(groupsView);
-		groupModelBuilder.attachViewCountHandler(groupsView, () -> getLocalized("applicationGroups.title"));
-		groupModelBuilder.onSelectedRecordChanged.addListener(selectedGroup::set);
+		entityListModelBuilder.onDataChanged.fire();
+		entityListModelBuilder.attachSearchField(groupsView);
+		entityListModelBuilder.attachViewCountHandler(groupsView, () -> getLocalized("applicationGroups.title"));
+
 
 		getPerspective().addView(groupsView);
 		getPerspective().addView(applicationDetailsView);
@@ -119,27 +117,27 @@ public class ApplicationGroupsPerspective extends AbstractManagedApplicationPers
 
 		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
 		formMetaFields.addMetaFields(formLayout, false);
-		selectedGroup.onChanged().addListener(formMetaFields::updateEntity);
+		entityListModelBuilder.getOnSelectionEvent().addListener(formMetaFields::updateEntity);
 
 		Arrays.asList(iconComboBox, titleKeyField.getSelectionField()).forEach(f -> f.setRequired(true));
 		applicationDetailsView.setComponent(groupForm);
 
-		addGroupButton.onClick.addListener(() -> selectedGroup.set(ManagedApplicationGroup.create()));
+		addGroupButton.onClick.addListener(() -> entityListModelBuilder.setSelectedRecord(ManagedApplicationGroup.create()));
 
 		moveUpButton.onClick.addListener(() -> changeApplicationOrder(applicationModelBuilder, applicationTable, true));
 		moveDownButton.onClick.addListener(() -> changeApplicationOrder(applicationModelBuilder, applicationTable, false));
 
-		groupMoveUpButton.onClick.addListener(() -> changeGroupOrder(groupModelBuilder, selectedGroup.get(), true));
-		groupMoveDownButton.onClick.addListener(() -> changeGroupOrder(groupModelBuilder, selectedGroup.get(), false));
+		groupMoveUpButton.onClick.addListener(() -> changeGroupOrder(entityListModelBuilder, entityListModelBuilder.getSelectedRecord(), true));
+		groupMoveDownButton.onClick.addListener(() -> changeGroupOrder(entityListModelBuilder, entityListModelBuilder.getSelectedRecord(), false));
 
-		selectedGroup.onChanged().addListener(group -> {
+		entityListModelBuilder.getOnSelectionEvent().addListener(group -> {
 			iconComboBox.setValue(IconUtils.decodeIcon(group.getIcon()));
 			titleKeyField.setKey(group.getTitleKey());
 			applicationModelBuilder.setRecords(group.getApplications());
 		});
 
 		saveGroupButton.onClick.addListener(() -> {
-			ManagedApplicationGroup group = selectedGroup.get();
+			ManagedApplicationGroup group = entityListModelBuilder.getSelectedRecord();
 			if (group == null) {
 				return;
 			}
@@ -151,13 +149,13 @@ public class ApplicationGroupsPerspective extends AbstractManagedApplicationPers
 				for (ManagedApplication application : applicationModelBuilder.getRecords()) {
 					application.setListingPosition(pos++).save();
 				}
-				groupModelBuilder.setRecords(ManagedApplicationGroup.getAll().stream().sorted((Comparator.comparingInt(ManagedApplicationGroup::getListingPosition))).collect(Collectors.toList()));
+				entityListModelBuilder.setRecords(ManagedApplicationGroup.getAll().stream().sorted((Comparator.comparingInt(ManagedApplicationGroup::getListingPosition))).collect(Collectors.toList()));
 				UiUtils.showSaveNotification(true, getApplicationInstanceData());
 			} else {
 				UiUtils.showSaveNotification(false, getApplicationInstanceData());
 			}
 		});
-		selectedGroup.set(ManagedApplicationGroup.create());
+		entityListModelBuilder.setSelectedRecord(ManagedApplicationGroup.create());
 	}
 
 	private void changeApplicationOrder(EntityListModelBuilder<ManagedApplication> applicationModelBuilder, Table<ManagedApplication> applicationTable, boolean moveUp) {

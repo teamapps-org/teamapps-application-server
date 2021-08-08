@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,22 +23,25 @@ import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.api.ui.FormMetaFields;
+import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
+import org.teamapps.application.tools.EntityModelBuilder;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.combo.ComboBoxUtils;
-import org.teamapps.application.tools.EntityModelBuilder;
+import org.teamapps.application.ux.form.FormController;
+import org.teamapps.application.ux.view.MasterDetailController;
 import org.teamapps.common.format.Color;
 import org.teamapps.databinding.MutableValue;
-import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.model.controlcenter.OrganizationUnit;
 import org.teamapps.model.controlcenter.Role;
 import org.teamapps.model.controlcenter.User;
 import org.teamapps.model.controlcenter.UserRoleAssignment;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
+import org.teamapps.universaldb.pojo.Query;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.view.View;
 import org.teamapps.ux.component.field.TemplateField;
@@ -52,36 +55,33 @@ import org.teamapps.ux.component.toolbar.ToolbarButton;
 import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
 
 import java.time.Instant;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPerspective {
 
-	private final TwoWayBindableValue<UserRoleAssignment> selectedUserRoleAssignment = TwoWayBindableValue.create();
-	private final PerspectiveSessionData perspectiveSessionData;
 	private final UserSessionData userSessionData;
 
 
 	public UserRoleAssignmentPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
 		super(applicationInstanceData, perspectiveInfoBadgeValue);
-		perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
+		PerspectiveSessionData perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
 		userSessionData = perspectiveSessionData.getManagedApplicationSessionData().getUserSessionData();
 		createUi();
 	}
 
 	private void createUi() {
-		View masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.USERS_THREE_RELATION, getLocalized("userRoleAssignment.userRoleAssignments"), null));
-		View detailView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.USERS_THREE_RELATION, getLocalized("userRoleAssignment.userRoleAssignment"), null));
-		detailView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
+		Supplier<Query<UserRoleAssignment>> querySupplier = () -> isAppFilter() ? UserRoleAssignment.filter().filterRole(Role.filter().organizationField(NumericFilter.equalsFilter(getOrganizationField().getId()))) : UserRoleAssignment.filter();
+		MasterDetailController<UserRoleAssignment> masterDetailController = new MasterDetailController<>(ApplicationIcons.USERS_THREE_RELATION, getLocalized("userRoleAssignment.userRoleAssignments"), getApplicationInstanceData(), querySupplier, Privileges.USER_ROLE_ASSIGNMENT_PERSPECTIVE);
+		EntityModelBuilder<UserRoleAssignment> entityModelBuilder = masterDetailController.getEntityModelBuilder();
+		FormController<UserRoleAssignment> formController = masterDetailController.getFormController();
+		ResponsiveForm<UserRoleAssignment> form = masterDetailController.getResponsiveForm();
 
-		EntityModelBuilder<UserRoleAssignment> roleModelBuilder = new EntityModelBuilder<>(() -> isAppFilter() ? UserRoleAssignment.filter().filterRole(Role.filter().organizationField(NumericFilter.equalsFilter(getOrganizationField().getId()))) : UserRoleAssignment.filter(), getApplicationInstanceData());
-		roleModelBuilder.attachViewCountHandler(masterView, () -> getLocalized("userRoleAssignment.userRoleAssignments"));
-		roleModelBuilder.attachSearchField(masterView);
-		roleModelBuilder.onSelectedRecordChanged.addListener(selectedUserRoleAssignment::set);
-		Table<UserRoleAssignment> table = roleModelBuilder.createTable();
+		Table<UserRoleAssignment> table = entityModelBuilder.createTable();
 		table.setDisplayAsList(true);
 		table.setRowHeight(28);
 		table.setStripedRows(false);
-		roleModelBuilder.updateModels();
+		entityModelBuilder.updateModels();
 
 		TemplateField<User> userTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(getApplicationInstanceData()));
 		TemplateField<Role> roleTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createRolePropertyProvider(getApplicationInstanceData()));
@@ -97,14 +97,6 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 			case UserRoleAssignment.FIELD_ORGANIZATION_UNIT -> userRoleAssignment.getOrganizationUnit();
 			default -> null;
 		});
-		masterView.setComponent(table);
-
-		ToolbarButtonGroup buttonGroup = detailView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton addButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.ADD, getLocalized(Dictionary.ADD), getLocalized(Dictionary.ADD_RECORD)));
-
-		buttonGroup = detailView.addLocalButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton saveButton = buttonGroup.addButton(ToolbarButton.createSmall(ApplicationIcons.FLOPPY_DISK, getLocalized(Dictionary.SAVE_CHANGES)));
-
 
 		ComboBox<User> userCombobox = ComboBoxUtils.createComboBox(query -> query == null || query.isBlank() ?
 						User.getAll().stream().limit(50).collect(Collectors.toList()) :
@@ -119,43 +111,32 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 		ComboBox<OrganizationUnit> organizationComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), true, getApplicationInstanceData());
 
 
-		ResponsiveForm form = new ResponsiveForm(120, 120, 0);
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(450);
 		formLayout.addSection().setCollapsible(false).setDrawHeaderLine(false);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.user"), userCombobox);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.role"), roleComboBox);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.orgUnit"), organizationComboBox);
 
-		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
-		formMetaFields.addMetaFields(formLayout, false);
-		selectedUserRoleAssignment.onChanged().addListener(formMetaFields::updateEntity);
+		masterDetailController.createViews(getPerspective(), table, formLayout);
 
-		detailView.setComponent(form);
-
-		addButton.onClick.addListener(() -> selectedUserRoleAssignment.set(UserRoleAssignment.create()));
-
-		saveButton.onClick.addListener(() -> {
-			UserRoleAssignment userRoleAssignment = selectedUserRoleAssignment.get();
-			if (userRoleAssignment != null && userCombobox.getValue() != null && roleComboBox.getValue() != null && organizationComboBox.getValue() != null) {
-				userRoleAssignment
-						.setUser(userCombobox.getValue())
-						.setRole(roleComboBox.getValue())
-						.setOrganizationUnit(organizationComboBox.getValue())
-						.setLastVerified(Instant.now())
-						.save();
-				UiUtils.showSaveNotification(true, getApplicationInstanceData());
-				roleModelBuilder.updateModels();
-			} else {
-				UiUtils.showSaveNotification(false, getApplicationInstanceData());
-			}
+		formController.addNotNull(userCombobox);
+		formController.addNotNull(roleComboBox);
+		formController.addNotNull(organizationComboBox);
+		formController.setSaveEntityHandler(userRoleAssignment -> {
+			userRoleAssignment
+					.setUser(userCombobox.getValue())
+					.setRole(roleComboBox.getValue())
+					.setOrganizationUnit(organizationComboBox.getValue())
+					.setLastVerified(Instant.now());
+			return true;
 		});
 
-		selectedUserRoleAssignment.onChanged().addListener(userRoleAssignment -> {
+		entityModelBuilder.getOnSelectionEvent().addListener(userRoleAssignment -> {
 			userCombobox.setValue(userRoleAssignment.getUser());
 			roleComboBox.setValue(userRoleAssignment.getRole());
 			organizationComboBox.setValue(userRoleAssignment.getOrganizationUnit());
 		});
-		selectedUserRoleAssignment.set(UserRoleAssignment.create());
+		entityModelBuilder.setSelectedRecord(UserRoleAssignment.create());
 	}
 
 }

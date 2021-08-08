@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,21 +22,24 @@ package org.teamapps.application.server.controlcenter.systemlog;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.server.system.utils.ApplicationUiUtils;
+import org.teamapps.application.tools.EntityModelBuilder;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.combo.ComboBoxUtils;
-import org.teamapps.application.tools.EntityModelBuilder;
+import org.teamapps.application.ux.form.FormController;
+import org.teamapps.application.ux.view.MasterDetailController;
 import org.teamapps.common.format.Color;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.databinding.MutableValue;
-import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
+import org.teamapps.universaldb.pojo.Query;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.view.View;
 import org.teamapps.ux.component.field.DisplayField;
@@ -56,27 +59,26 @@ import org.teamapps.ux.component.timegraph.TimeGraph;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SystemLogPerspective extends AbstractManagedApplicationPerspective {
 
-	private final PerspectiveSessionData perspectiveSessionData;
 	private final UserSessionData userSessionData;
-	private final TwoWayBindableValue<SystemLog> selectedLog = TwoWayBindableValue.create();
 
 	public SystemLogPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
 		super(applicationInstanceData, perspectiveInfoBadgeValue);
-		perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
+		PerspectiveSessionData perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
 		userSessionData = perspectiveSessionData.getManagedApplicationSessionData().getUserSessionData();
 		createUi();
 	}
 
 	private void createUi() {
-		View masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.CONSOLE, getLocalized("systemLog.systemLogs"), null));
-		View timeLineView = getPerspective().addView(View.createView(StandardLayout.TOP, ApplicationIcons.FORM, getLocalized(Dictionary.TIMELINE), null));
-		View detailView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.CONSOLE, getLocalized("systemLog.logMessage"), null));
-		masterView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
-		detailView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
+		Supplier<Query<SystemLog>> querySupplier = () -> isAppFilter() ? SystemLog.filter().application(NumericFilter.equalsFilter(getMainApplication().getId())) : SystemLog.filter();
+		MasterDetailController<SystemLog> masterDetailController = new MasterDetailController<>(ApplicationIcons.CONSOLE, getLocalized("systemLog.systemLogs"), getApplicationInstanceData(), querySupplier, Privileges.SYSTEM_LOG_PERSPECTIVE);
+		EntityModelBuilder<SystemLog> entityModelBuilder = masterDetailController.getEntityModelBuilder();
+		FormController<SystemLog> formController = masterDetailController.getFormController();
+		ResponsiveForm<SystemLog> form = masterDetailController.getResponsiveForm();
 
 		ComboBox<LogLevel> logLeveComboBox = createLogLeveComboBox();
 		//todo use managed application
@@ -89,7 +91,7 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 		userComboBox.setShowClearButton(true);
 		exceptionClassComboBox.setShowClearButton(true);
 
-		ResponsiveForm selectionForm = new ResponsiveForm(50, 75, 200);
+		ResponsiveForm<?> selectionForm = new ResponsiveForm<>(50, 75, 200);
 		selectionForm.setMargin(Spacing.px(0));
 		ResponsiveFormLayout formLayout = selectionForm.addResponsiveFormLayout(500);
 		formLayout.addSection().setCollapsible(false).setPadding(new Spacing(0, 5)).setMargin(new Spacing(4, 2, 4, 2));
@@ -104,14 +106,9 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 		//todo add thread
 
 
-		EntityModelBuilder<SystemLog> logModelBuilder = new EntityModelBuilder<>(() -> isAppFilter() ? SystemLog.filter().application(NumericFilter.equalsFilter(getMainApplication().getId())) : SystemLog.filter(), getApplicationInstanceData());
-		logModelBuilder.attachSearchField(masterView);
-		logModelBuilder.attachViewCountHandler(masterView, () -> getLocalized("systemLog.systemLogs"));
-		logModelBuilder.onSelectedRecordChanged.addListener(selectedLog::set);
-		TimeGraph timeGraph = logModelBuilder.createTimeGraph(SystemLog::getMetaCreationDateAsEpochMilli, SystemLog.FIELD_META_CREATION_DATE);
-		logModelBuilder.updateModels();
+		entityModelBuilder.updateModels();
 
-		Table<SystemLog> table = logModelBuilder.createTable();
+		Table<SystemLog> table = entityModelBuilder.createTable();
 		table.setDisplayAsList(true);
 		table.setStripedRows(false);
 		table.setRowHeight(28);
@@ -146,7 +143,6 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 		verticalLayout.addComponentFillRemaining(table);
 
 		VerticalLayout detailsVerticalLayout = new VerticalLayout();
-		ResponsiveForm form = new ResponsiveForm(120, 120, 0);
 		detailsVerticalLayout.addComponent(form);
 		formLayout = form.addResponsiveFormLayout(450);
 
@@ -174,14 +170,15 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 
 		detailsVerticalLayout.addComponentFillRemaining(detailsFormField);
 
+		detailsFormField.setValue("orifj3iofefoiaewjioawjfoiawefiowejwioaiwojoaiwj");
 
-		timeLineView.setComponent(timeGraph);
-		masterView.setComponent(verticalLayout);
-		detailView.setComponent(detailsVerticalLayout);
+
+		masterDetailController.createViews(getPerspective(), verticalLayout, formLayout, false);
+		masterDetailController.setDetailComponent(detailsVerticalLayout);
 
 		Runnable onFilterChange = () -> {
 			Predicate<SystemLog> filter = createFilter(logLeveComboBox.getValue(), applicationComboBox.getValue(), userComboBox.getValue(), exceptionClassComboBox.getValue());
-			logModelBuilder.setCustomFilter(filter);
+			entityModelBuilder.setCustomFilter(filter);
 		};
 
 		logLeveComboBox.onValueChanged.addListener(value -> onFilterChange.run());
@@ -189,7 +186,7 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 		userComboBox.onValueChanged.addListener(value -> onFilterChange.run());
 		exceptionClassComboBox.onValueChanged.addListener(value -> onFilterChange.run());
 
-		selectedLog.onChanged().addListener(log -> {
+		entityModelBuilder.getOnSelectionEvent().addListener(log -> {
 			managedApplicationFormField.setValue(log.getManagedApplication());
 			applicationFormField.setValue(log.getApplication());
 			perspectiveFormField.setValue(log.getManagedPerspective());
@@ -200,7 +197,6 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 			detailsFormField.setValue(log.getDetails());
 			timeFormField.setValue(log.getMetaCreationDate());
 		});
-
 	}
 
 	private Predicate<SystemLog> createFilter(LogLevel logLevel, Application application, User user, String exceptionClass) {

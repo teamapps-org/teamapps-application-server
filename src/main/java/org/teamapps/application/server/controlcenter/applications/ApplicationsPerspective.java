@@ -58,8 +58,6 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 
 	private final PerspectiveSessionData perspectiveSessionData;
 	private final UserSessionData userSessionData;
-	private final TwoWayBindableValue<Application> selectedApplication = TwoWayBindableValue.create();
-	private final TwoWayBindableValue<ApplicationVersion> selectedApplicationVersion = TwoWayBindableValue.create();
 	private final ApplicationsPerspectiveComponents perspectiveComponents;
 
 	public ApplicationsPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
@@ -67,7 +65,6 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 		perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
 		userSessionData = perspectiveSessionData.getManagedApplicationSessionData().getUserSessionData();
 		perspectiveComponents = new ApplicationsPerspectiveComponents(getApplicationInstanceData(), perspectiveInfoBadgeValue);
-		selectedApplication.onChanged().addListener(app -> perspectiveComponents.getSelectedApplication().set(app));
 		createUI();
 		createMenu();
 	}
@@ -95,15 +92,14 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 		Table<Application> applicationsTable = applicationModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES, PropertyProviders.createApplicationPropertyProvider(userSessionData), 60);
 		applicationModelBuilder.attachSearchField(applicationsView);
 		applicationModelBuilder.attachViewCountHandler(applicationsView, () -> getLocalized(Dictionary.APPLICATIONS));
-		applicationModelBuilder.onSelectedRecordChanged.addListener(app -> selectedApplication.set(app));
 		applicationModelBuilder.updateModels();
 		applicationsView.setComponent(applicationsTable);
+		applicationModelBuilder.getOnSelectionEvent().addListener(app -> perspectiveComponents.getSelectedApplication().set(app));
 
 		EntityListModelBuilder<ApplicationVersion> applicationVersionModelBuilder = new EntityListModelBuilder<>(getApplicationInstanceData());
 		Table<ApplicationVersion> applicationVersinTable = applicationVersionModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, PropertyProviders.createApplicationVersionPropertyProvider(userSessionData), 36);
 		applicationVersionModelBuilder.attachSearchField(applicationVersionsView);
 		applicationVersionModelBuilder.attachViewCountHandler(applicationVersionsView, () -> getLocalized("applications.versions"));
-		applicationVersionModelBuilder.onSelectedRecordChanged.addListener(selectedApplicationVersion::set);
 		applicationVersionModelBuilder.updateModels();
 		applicationVersionsView.setComponent(applicationVersinTable);
 
@@ -182,9 +178,9 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 
 		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
 		formMetaFields.addMetaFields(formLayout, false);
-		selectedApplication.onChanged().addListener(formMetaFields::updateEntity);
+		applicationModelBuilder.getOnSelectionEvent().addListener(formMetaFields::updateEntity);
 
-		selectedApplicationVersion.onChanged().addListener(version -> {
+		applicationVersionModelBuilder.getOnSelectionEvent().addListener(version -> {
 			dataModelChangesField.setValue(ApplicationInfoDataElement.getChangeString(version.getDataModelData()));
 			localizationChangesField.setValue(ApplicationInfoDataElement.getChangeString(version.getLocalizationData()));
 			privilegeChangesField.setValue(ApplicationInfoDataElement.getChangeString(version.getPrivilegeData()));
@@ -195,7 +191,7 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 			perspectiveChangesDisplayField.setValue(ApplicationInfoDataElement.getMultiLineChangeHtml(version.getPerspectiveData(), getLocalized("applications.addedData"), getLocalized("applications.removedData")));
 		});
 
-		selectedApplication.onChanged().addListener(app -> {
+		applicationModelBuilder.getOnSelectionEvent().addListener(app -> {
 			applicationVersionModelBuilder.setRecords(app.getVersions());
 			appNameField.setValue(app.getName());
 			appTitleField.setValue(getLocalized(app.getTitleKey()));
@@ -215,13 +211,13 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 			applicationDetailsView.getPanel().setTitle(userSessionData.getApplicationLocalizationProvider(app).getLocalized(app.getTitleKey()));
 			applicationDetailsView.focus();
 
-			selectedApplicationVersion.set(app.getInstalledVersion());
+			applicationVersionModelBuilder.setSelectedRecord(app.getInstalledVersion());
 		});
 
 
 		ToolbarButtonGroup buttonGroup = applicationDetailsView.addLocalButtonGroup(new ToolbarButtonGroup());
 		buttonGroup.addButton(ToolbarButton.createSmall(ApplicationIcons.UPLOAD, getLocalized("applications.installUpdate"))).onClick.addListener(() -> {
-			perspectiveComponents.showInstallApplicationDialogue(selectedApplication.get());
+			perspectiveComponents.showInstallApplicationDialogue(applicationModelBuilder.getSelectedRecord());
 		});
 
 		buttonGroup = applicationDetailsView.addLocalButtonGroup(new ToolbarButtonGroup());
@@ -242,8 +238,8 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 
 		rollbackButton.setVisible(false);
 
-		selectedApplication.onChanged().addListener(() -> {
-			Application application = selectedApplication.get();
+		applicationModelBuilder.getOnSelectionEvent().addListener(() -> {
+			Application application = applicationModelBuilder.getSelectedRecord();
 			rollbackButton.setVisible(application.getVersionsCount() > 1);
 		});
 

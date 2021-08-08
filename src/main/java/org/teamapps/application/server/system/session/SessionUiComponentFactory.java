@@ -39,7 +39,9 @@ import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.field.combobox.TagComboBox;
 import org.teamapps.ux.component.template.BaseTemplate;
 
+import java.util.Collection;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class SessionUiComponentFactory implements UiComponentFactory {
 
@@ -53,6 +55,11 @@ public class SessionUiComponentFactory implements UiComponentFactory {
 		this.systemRegistry = systemRegistry;
 		this.baseResourceLinkProvider = systemRegistry.getBaseResourceLinkProvider();
 		this.application = application;
+	}
+
+	@Override
+	public ComboBox<OrganizationUnitView> createOrganizationUnitComboBox(Supplier<Collection<OrganizationUnitView>> allowedUnitsSupplier) {
+		return OrganizationViewUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, allowedUnitsSupplier, applicationInstanceData);
 	}
 
 	@Override

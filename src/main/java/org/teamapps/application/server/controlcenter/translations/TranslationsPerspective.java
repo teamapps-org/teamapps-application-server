@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,7 +39,6 @@ import org.teamapps.common.format.Color;
 import org.teamapps.data.extract.PropertyExtractor;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.databinding.MutableValue;
-import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.icons.Icon;
 import org.teamapps.icons.composite.CompositeIcon;
 import org.teamapps.model.controlcenter.*;
@@ -70,22 +69,15 @@ import java.util.function.Predicate;
 
 public class TranslationsPerspective extends AbstractManagedApplicationPerspective {
 
-	private final PerspectiveSessionData perspectiveSessionData;
 	private final UserSessionData userSessionData;
-	private final TwoWayBindableValue<LocalizationKey> selectedKey = TwoWayBindableValue.create();
 
 	private String currentTranslationLanguage;
 	private String currentTemplate1;
 	private String currentTemplate2;
 
-	private boolean language1Visible;
-	private boolean language2Visible;
-	private boolean machineTranslationVisible;
-
-
 	public TranslationsPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
 		super(applicationInstanceData, perspectiveInfoBadgeValue);
-		perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
+		PerspectiveSessionData perspectiveSessionData = (PerspectiveSessionData) getApplicationInstanceData();
 		userSessionData = perspectiveSessionData.getManagedApplicationSessionData().getUserSessionData();
 		createUi();
 	}
@@ -147,7 +139,7 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		currentTemplate1 = "en";
 		currentTemplate2 = "de";
 
-		ResponsiveForm selectionForm = new ResponsiveForm(50, 75, 200);
+		ResponsiveForm<?> selectionForm = new ResponsiveForm<>(50, 75, 200);
 		selectionForm.setMargin(Spacing.px(0));
 		ResponsiveFormLayout formLayout = selectionForm.addResponsiveFormLayout(500);
 		formLayout.addSection().setCollapsible(false).setPadding(new Spacing(0, 5)).setMargin(new Spacing(4, 2, 4, 2));
@@ -160,12 +152,11 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		formLayout.addLabelAndField(null, getLocalized("translations.mode"), modeComboBox, false);
 
 
-		EntityModelBuilder<LocalizationKey> keyModelBuilder = new EntityModelBuilder<>(() -> isAppFilter() ? LocalizationKey.filter().application(NumericFilter.equalsFilter(getMainApplication().getId())) : LocalizationKey.filter(), getApplicationInstanceData());
-		keyModelBuilder.updateModels();
-		keyModelBuilder.attachSearchField(localizationKeyView);
-		keyModelBuilder.attachViewCountHandler(localizationKeyView, () -> getLocalized("translations.overView"));
-		keyModelBuilder.onSelectedRecordChanged.addListener(selectedKey::set);
-		Table<LocalizationKey> keyTable = keyModelBuilder.createTable();
+		EntityModelBuilder<LocalizationKey> entityModelBuilder = new EntityModelBuilder<>(() -> isAppFilter() ? LocalizationKey.filter().application(NumericFilter.equalsFilter(getMainApplication().getId())) : LocalizationKey.filter(), getApplicationInstanceData());
+		entityModelBuilder.updateModels();
+		entityModelBuilder.attachSearchField(localizationKeyView);
+		entityModelBuilder.attachViewCountHandler(localizationKeyView, () -> getLocalized("translations.overView"));
+		Table<LocalizationKey> keyTable = entityModelBuilder.createTable();
 		keyTable.setDisplayAsList(true);
 		keyTable.setStripedRows(false);
 
@@ -201,7 +192,7 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 			case "language" -> currentTranslationLanguage;
 			default -> null;
 		};
-		keyModelBuilder.setCustomFieldSorter(fieldName -> {
+		entityModelBuilder.setCustomFieldSorter(fieldName -> {
 			if (fieldName.equals("key")) {
 				return Comparator.comparing(LocalizationKey::getKey, Comparator.nullsFirst(String::compareToIgnoreCase));
 			}
@@ -212,11 +203,10 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 			Comparator<String> userStringComparator = getUser().getComparator(true);
 			if (language != null) {
 				return (k1, k2) -> userStringComparator.compare(TranslationUtils.getDisplayValueNonNull(k1, language), TranslationUtils.getDisplayValueNonNull(k2, language));
-				//return (k1, k2) -> TranslationUtils.getDisplayValueNonNull(k1, language).compareToIgnoreCase(TranslationUtils.getDisplayValueNonNull(k2, language));
 			}
 			return null;
 		});
-		keyModelBuilder.setCustomFullTextFilter((localizationKey, s) -> {
+		entityModelBuilder.setCustomFullTextFilter((localizationKey, s) -> {
 			if (localizationKey.getKey().toLowerCase().contains(s)) {
 				return true;
 			}
@@ -295,7 +285,7 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 
 		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
 		formMetaFields.addMetaFields(formLayout, false);
-		selectedKey.onChanged().addListener(formMetaFields::updateEntity);
+		entityModelBuilder.getOnSelectionEvent().addListener(formMetaFields::updateEntity);
 
 		translationView.setComponent(form);
 
@@ -348,7 +338,7 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 				}
 			}
 			Predicate<LocalizationKey> filterPredicate = TranslationUtils.getFilterPredicate(workStateComboBox.getValue(), currentTranslationLanguage, topicComboBox.getValue());
-			keyModelBuilder.setCustomFilter(filterPredicate);
+			entityModelBuilder.setCustomFilter(filterPredicate);
 		};
 		translationModeChangeHandler.accept(getAvailableModes().get(0));
 
@@ -404,12 +394,13 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 
 		modeComboBox.onValueChanged.addListener(translationModeChangeHandler);
 
-		previousButton.onClick.addListener(keyModelBuilder::selectPreviousRecord);
-		nextButton.onClick.addListener(keyModelBuilder::selectNextRecord);
+		previousButton.onClick.addListener(entityModelBuilder::selectPreviousRecord);
+		nextButton.onClick.addListener(entityModelBuilder::selectNextRecord);
 
 		doneButton.onClick.addListener(() -> {
-			LocalizationValue value = TranslationUtils.getValue(selectedKey.get(), currentTranslationLanguage);
-			LocalizationValue templateValue = TranslationUtils.getValue(selectedKey.get(), currentTemplate1);
+			LocalizationKey selectedRecord = entityModelBuilder.getSelectedRecord();
+			LocalizationValue value = TranslationUtils.getValue(selectedRecord, currentTranslationLanguage);
+			LocalizationValue templateValue = TranslationUtils.getValue(selectedRecord, currentTemplate1);
 			String translation = translationField.getValue();
 			if (translation != null && value != null && templateValue != null && templateValue.getCurrentDisplayValue() != null &&
 					(TranslationUtils.createTranslationStates(TranslationState.TRANSLATION_REQUESTED, TranslationState.UNCLEAR)).contains(value.getTranslationState())) {
@@ -423,13 +414,13 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 						.setTranslationState(TranslationState.OK)
 						.setTranslationVerificationState(TranslationVerificationState.VERIFICATION_REQUESTED)
 						.save();
-				keyModelBuilder.selectNextRecord();
+				entityModelBuilder.selectNextRecord();
 				UiUtils.showSaveNotification(true, getApplicationInstanceData());
 			}
 		});
 
 		saveAdminValuesButton.onClick.addListener(() -> {
-			LocalizationValue value = TranslationUtils.getValue(selectedKey.get(), currentTranslationLanguage);
+			LocalizationValue value = TranslationUtils.getValue(entityModelBuilder.getSelectedRecord(), currentTranslationLanguage);
 			if (value != null) {
 				if (keyCommentsField.getValue() != null) {
 					value.getLocalizationKey().setComments(keyCommentsField.getValue()).save();
@@ -449,31 +440,31 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		});
 
 		unclearButton.onClick.addListener(() -> {
-			LocalizationValue value = TranslationUtils.getValue(selectedKey.get(), currentTranslationLanguage);
+			LocalizationValue value = TranslationUtils.getValue(entityModelBuilder.getSelectedRecord(), currentTranslationLanguage);
 			if (value != null && value.getTranslationState() == TranslationState.TRANSLATION_REQUESTED) {
 				value.setTranslationState(TranslationState.UNCLEAR).save();
-				keyModelBuilder.selectNextRecord();
-				keyModelBuilder.updateModels();
+				entityModelBuilder.selectNextRecord();
+				entityModelBuilder.updateModels();
 				UiUtils.showNotification(ApplicationIcons.OK, getLocalized("translations.translationSuccessfullyRejected"));
 			}
 		});
 
 		copyTranslationButton.onClick.addListener(() -> {
-			LocalizationValue value = TranslationUtils.getValue(selectedKey.get(), currentTranslationLanguage);
+			LocalizationValue value = TranslationUtils.getValue(entityModelBuilder.getSelectedRecord(), currentTranslationLanguage);
 			translationField.setValue(value.getMachineTranslation());
 		});
 
 		verifiedButton.onClick.addListener(() -> {
-			LocalizationValue value = TranslationUtils.getValue(selectedKey.get(), currentTranslationLanguage);
+			LocalizationValue value = TranslationUtils.getValue(entityModelBuilder.getSelectedRecord(), currentTranslationLanguage);
 			if (value != null && value.getTranslation() != null && value.getTranslationState() == TranslationState.OK) {
 				value.setTranslationVerificationState(TranslationVerificationState.OK).save();
-				keyModelBuilder.selectNextRecord();
+				entityModelBuilder.selectNextRecord();
 				UiUtils.showSaveNotification(true, getApplicationInstanceData());
 			}
 		});
 
 		incorrectButton.onClick.addListener(() -> {
-			LocalizationValue value = TranslationUtils.getValue(selectedKey.get(), currentTranslationLanguage);
+			LocalizationValue value = TranslationUtils.getValue(entityModelBuilder.getSelectedRecord(), currentTranslationLanguage);
 			String notes = proofReadNotesField.getValue();
 			if (notes != null && value != null && value.getTranslation() != null && value.getTranslationState() == TranslationState.OK) {
 				value
@@ -481,13 +472,13 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 						.setTranslationState(TranslationState.TRANSLATION_REQUESTED)
 						.setNotes(notes)
 						.save();
-				keyModelBuilder.selectNextRecord();
+				entityModelBuilder.selectNextRecord();
 				UiUtils.showNotification(ApplicationIcons.OK, getLocalized("translations.translationSuccessfullyRejected"));
 			}
 		});
 
 
-		selectedKey.onChanged().addListener(key -> {
+		entityModelBuilder.getOnSelectionEvent().addListener(key -> {
 			Map<String, LocalizationValue> valueMap = TranslationUtils.getValueMap(key);
 			translationField.clearCustomFieldMessages();
 			LocalizationValue languageValue = valueMap.get(currentTranslationLanguage);
@@ -518,30 +509,28 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		languageCombo.onValueChanged.addListener(language -> {
 			currentTranslationLanguage = language != null ? language.getIsoCode() : null;
 			Predicate<LocalizationKey> filterPredicate = TranslationUtils.getFilterPredicate(workStateComboBox.getValue(), currentTranslationLanguage, topicComboBox.getValue());
-			keyModelBuilder.setCustomFilter(filterPredicate);
+			entityModelBuilder.setCustomFilter(filterPredicate);
 		});
 
 		template1Combo.onValueChanged.addListener(language -> {
 			currentTemplate1 = language != null ? language.getIsoCode() : null;
-			keyModelBuilder.updateModels();
+			entityModelBuilder.updateModels();
 		});
 
 		template2Combo.onValueChanged.addListener(language -> {
 			currentTemplate2 = language != null ? language.getIsoCode() : null;
-			keyModelBuilder.updateModels();
+			entityModelBuilder.updateModels();
 		});
 
 		workStateComboBox.onValueChanged.addListener(state -> {
 			Predicate<LocalizationKey> filterPredicate = state != null ? TranslationUtils.getFilterPredicate(state, currentTranslationLanguage, topicComboBox.getValue()) : null;
-			keyModelBuilder.setCustomFilter(filterPredicate);
+			entityModelBuilder.setCustomFilter(filterPredicate);
 		});
 
 		topicComboBox.onValueChanged.addListener(topic -> {
 			Predicate<LocalizationKey> filterPredicate = TranslationUtils.getFilterPredicate(workStateComboBox.getValue(), currentTranslationLanguage, topic);
-			keyModelBuilder.setCustomFilter(filterPredicate);
+			entityModelBuilder.setCustomFilter(filterPredicate);
 		});
-
-
 	}
 
 	private Boolean matchLocalizationValue(String query, String language, Map<String, LocalizationValue> valueMap) {

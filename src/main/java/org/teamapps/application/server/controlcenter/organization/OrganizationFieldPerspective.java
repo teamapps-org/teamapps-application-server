@@ -23,18 +23,22 @@ import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.api.ui.FormMetaFields;
+import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.application.ux.UiUtils;
+import org.teamapps.application.ux.form.FormController;
 import org.teamapps.application.ux.localize.TranslatableField;
 import org.teamapps.application.ux.localize.TranslatableTextUtils;
 import org.teamapps.application.tools.EntityModelBuilder;
+import org.teamapps.application.ux.view.MasterDetailController;
 import org.teamapps.common.format.Color;
 import org.teamapps.databinding.MutableValue;
 import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.OrganizationField;
+import org.teamapps.model.controlcenter.OrganizationUnit;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.view.View;
 import org.teamapps.ux.component.field.combobox.ComboBox;
@@ -47,69 +51,46 @@ import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
 
 public class OrganizationFieldPerspective extends AbstractManagedApplicationPerspective {
 
-	private final TwoWayBindableValue<OrganizationField> selectedField = TwoWayBindableValue.create();
-
 	public OrganizationFieldPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
 		super(applicationInstanceData, perspectiveInfoBadgeValue);
 		createUi();
 	}
 
 	private void createUi() {
-		View masterView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.ELEMENTS_TREE, getLocalized("organizationField.organizationFields"), null));
-		View detailView = getPerspective().addView(View.createView(StandardLayout.RIGHT, ApplicationIcons.ELEMENTS_TREE, getLocalized("organizationField.organizationField"), null));
-		detailView.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.9f));
+		MasterDetailController<OrganizationField> masterDetailController = new MasterDetailController<>(ApplicationIcons.ELEMENTS_TREE, getLocalized("organizationField.organizationFields"), getApplicationInstanceData(), OrganizationField::filter, Privileges.ORGANIZATION_FIELD_PERSPECTIVE);
+		EntityModelBuilder<OrganizationField> entityModelBuilder = masterDetailController.getEntityModelBuilder();
+		FormController<OrganizationField> formController = masterDetailController.getFormController();
+		ResponsiveForm<OrganizationField> form = masterDetailController.getResponsiveForm();
 
-		EntityModelBuilder<OrganizationField> orgFieldModelBuilder = new EntityModelBuilder<>(OrganizationField::filter, getApplicationInstanceData());
-		orgFieldModelBuilder.attachViewCountHandler(masterView, () -> getLocalized("organizationField.organizationFields"));
-		orgFieldModelBuilder.attachSearchField(masterView);
-		orgFieldModelBuilder.onSelectedRecordChanged.addListener(selectedField::set);
-		Table<OrganizationField> table = orgFieldModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, PropertyProviders.createOrganizationFieldPropertyProvider(getApplicationInstanceData()), 38);
-		orgFieldModelBuilder.updateModels();
-		masterView.setComponent(table);
-
-		ToolbarButtonGroup buttonGroup = detailView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton addButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.ADD, getLocalized(Dictionary.ADD), getLocalized(Dictionary.ADD_RECORD)));
-
-		buttonGroup = detailView.addLocalButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton saveButton = buttonGroup.addButton(ToolbarButton.createSmall(ApplicationIcons.FLOPPY_DISK, getLocalized(Dictionary.SAVE_CHANGES)));
+		Table<OrganizationField> table = entityModelBuilder.createTemplateFieldTableList(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, PropertyProviders.createOrganizationFieldPropertyProvider(getApplicationInstanceData()), 38);
+		entityModelBuilder.updateModels();
 
 		TranslatableField translatableNameField = TranslatableTextUtils.createTranslatableField(getApplicationInstanceData());
 		ComboBox<Icon> iconComboBox = ApplicationIcons.createIconComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, true);
 		iconComboBox.setDropDownTemplate(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE);
 
-		ResponsiveForm form = new ResponsiveForm(120, 120, 0);
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(450);
 		formLayout.addSection().setCollapsible(false).setDrawHeaderLine(false);
 		formLayout.addLabelAndField(null, getLocalized("organizationField.organizationFieldName"), translatableNameField);
 		formLayout.addLabelAndField(null, getLocalized("organizationField.icon"), iconComboBox);
 
-		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
-		formMetaFields.addMetaFields(formLayout, false);
-		selectedField.onChanged().addListener(formMetaFields::updateEntity);
+		formController.addNotNull(translatableNameField);
+		formController.addNotNull(iconComboBox);
 
-		detailView.setComponent(form);
+		masterDetailController.createViews(getPerspective(), table, formLayout);
 
-		addButton.onClick.addListener(() -> selectedField.set(OrganizationField.create()));
-
-		saveButton.onClick.addListener(() -> {
-			OrganizationField field = selectedField.get();
-			if (field != null && translatableNameField.getValue() != null && iconComboBox.getValue() != null) {
-				field
-						.setTitle(translatableNameField.getValue())
-						.setIcon(IconUtils.encodeNoStyle(iconComboBox.getValue()))
-						.save();
-				UiUtils.showSaveNotification(true, getApplicationInstanceData());
-				orgFieldModelBuilder.updateModels();
-			} else {
-				UiUtils.showSaveNotification(false, getApplicationInstanceData());
-			}
+		formController.setSaveEntityHandler(field -> {
+			field
+					.setTitle(translatableNameField.getValue())
+					.setIcon(IconUtils.encodeNoStyle(iconComboBox.getValue()));
+			return true;
 		});
 
-		selectedField.onChanged().addListener(type -> {
+		entityModelBuilder.getOnSelectionEvent().addListener(type -> {
 			translatableNameField.setValue(type.getTitle());
 			iconComboBox.setValue(IconUtils.decodeIcon(type.getIcon()));
 		});
-		selectedField.set(OrganizationField.create());
+		entityModelBuilder.setSelectedRecord(OrganizationField.create());
 	}
 
 

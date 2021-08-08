@@ -25,8 +25,6 @@ import org.teamapps.icons.composite.CompositeIcon;
 
 import java.util.List;
 
-import static org.teamapps.application.api.privilege.Privilege.*;
-
 public class Privileges {
 
 	private final static ApplicationPrivilegeBuilder PRIVILEGE_BUILDER = new ApplicationPrivilegeBuilder();
@@ -56,7 +54,23 @@ public class Privileges {
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_MONITORING = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveMonitoring", ApplicationIcons.CHART_LINE, "monitoring.launch", "monitoring.desc");
 
 
-	public final static StandardPrivilegeGroup ABC = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("test", null, null, null, CREATE, READ, UPDATE, DELETE, RESTORE, SHOW_RECYCLE_BIN, EXECUTE, PRINT);
+
+
+	public final static OrganizationalPrivilegeGroup USERS_PERSPECTIVE = PRIVILEGE_BUILDER.addDefaultOrganizationalPrivilegeGroup("usersPerspective", ApplicationIcons.USERS_CROWD, "users.title", "users.desc");
+	public final static OrganizationalPrivilegeGroup USER_ROLE_ASSIGNMENT_PERSPECTIVE = PRIVILEGE_BUILDER.addDefaultOrganizationalPrivilegeGroup("userRoleAssignmentPerspective", ApplicationIcons.USERS_THREE_RELATION, "userRoleAssignment.title", "userRoleAssignment.desc");
+	public final static OrganizationalPrivilegeGroup ORGANIZATION_UNIT_PERSPECTIVE = PRIVILEGE_BUILDER.addDefaultOrganizationalPrivilegeGroup("organizationUnitPerspective", ApplicationIcons.ELEMENTS_HIERARCHY, "organization.title", "organization.desc");
+	public final static StandardPrivilegeGroup ORGANIZATION_UNIT_TYPE_PERSPECTIVE = PRIVILEGE_BUILDER.addDefaultStandardPrivilegeGroup("organizationUnitTypePerspective", ApplicationIcons.ELEMENTS_CASCADE, "organizationUnitType.title", "organizationUnitType.desc");
+	public final static StandardPrivilegeGroup ORGANIZATION_FIELD_PERSPECTIVE = PRIVILEGE_BUILDER.addDefaultStandardPrivilegeGroup("organizationFieldPerspective", ApplicationIcons.ELEMENTS_TREE, "organizationField.title", "organizationField.desc");
+	public final static StandardPrivilegeGroup ROLES_PERSPECTIVE = PRIVILEGE_BUILDER.addDefaultStandardPrivilegeGroup("rolesPerspective", ApplicationIcons.WORKER, "roles.title", "roles.desc");
+	public final static StandardPrivilegeGroup ACCESS_CONTROL_PERSPECTIVE = PRIVILEGE_BUILDER.addDefaultStandardPrivilegeGroup("accessControlPerspective", ApplicationIcons.KEYS, "accessControl.title", "accessControl.desc");
+	public final static StandardPrivilegeGroup ACCESS_CONTROL_APP_ROLE_PERSPECTIVE = PRIVILEGE_BUILDER.addDefaultStandardPrivilegeGroup("accessControlAppRolePerspective", CompositeIcon.of(ApplicationIcons.KEY, ApplicationIcons.WORKER), "accessControlAppRole.title", "accessControlAppRole.desc");
+	//public final static StandardPrivilegeGroup APPLICATIONS_PERSPECTIVE = PRIVILEGE_BUILDER.addDefaultStandardPrivilegeGroup("applications", ApplicationIcons.BOX_SOFTWARE, "applications.title", "applications.desc");
+	public final static StandardPrivilegeGroup APPLICATION_PROVISIONING_PERSPECTIVE = PRIVILEGE_BUILDER.addDefaultStandardPrivilegeGroup("applicationProvisioning", ApplicationIcons.INSTALL, "applicationProvisioning.title", "applicationProvisioning.desc");
+	//public final static StandardPrivilegeGroup APPLICATION_GROUPS_PERSPECTIVE = PRIVILEGE_BUILDER.addDefaultStandardPrivilegeGroup("applicationGroups", ApplicationIcons.WINDOWS, "applicationGroups.title", "applicationGroups.desc");
+	//public final static StandardPrivilegeGroup APPLICATION_GROUPS_PERSPECTIVE = PRIVILEGE_BUILDER.addDefaultStandardPrivilegeGroup("applicationGroups", ApplicationIcons.WINDOWS, "applicationGroups.title", "applicationGroups.desc");
+	//public final static StandardPrivilegeGroup APPLICATION_CONFIGURATION_PERSPECTIVE = PRIVILEGE_BUILDER.addDefaultStandardPrivilegeGroup("applicationConfigurationPerspective", ApplicationIcons.CODE_LINE, "applicationConfiguration.title", "applicationConfiguration.desc");
+	public final static StandardPrivilegeGroup SYSTEM_LOG_PERSPECTIVE = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("systemLogPerspective", ApplicationIcons.CONSOLE, "systemLog.title", "systemLog.desc", Privilege.READ);
+
 
 
 	public final static ApplicationRole APPLICATION_ADMINISTRATOR_ROLE = ROLE_BUILDER.addRole("applicationAdministratorRole", ApplicationIcons.PILOT, "application.roles.applicationAdministrator", "application.roles.applicationAdministrator.desc",

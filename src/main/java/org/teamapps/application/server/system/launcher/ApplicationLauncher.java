@@ -480,7 +480,7 @@ public class ApplicationLauncher {
 		for (ManagedApplicationPerspective managedApplicationPerspective : managedApplicationPerspectives) {
 			if (managedApplicationPerspective.getApplicationPerspective() != null) {
 				PerspectiveSessionData perspectiveSessionData = applicationSessionData.createPerspectiveSessionData(managedApplicationPerspective);
-				if (perspectiveSessionData.getPerspectiveBuilder().isPerspectiveAccessible(perspectiveSessionData)) {
+				if (perspectiveSessionData.getPerspectiveBuilder() !=null &&  perspectiveSessionData.getPerspectiveBuilder().isPerspectiveAccessible(perspectiveSessionData)) {
 					sortedPerspectives.add(perspectiveSessionData);
 				}
 			}
