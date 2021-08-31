@@ -54,7 +54,7 @@ public class AppLocalAdministrationPerspective extends AbstractManagedApplicatio
 				new SystemLogPerspectiveBuilder(),
 				new ApplicationConfigurationPerspectiveBuilder()
 		);
-		setPerspectiveMenuPanel(menuPanel.getComponent());
+		setPerspectiveMenuPanel(menuPanel.getComponent(), menuPanel.getButtonMenu());
 		onPerspectiveInitialized.addListener(() -> menuPanel.openPerspective(translationsPerspectiveBuilder));
 	}
 

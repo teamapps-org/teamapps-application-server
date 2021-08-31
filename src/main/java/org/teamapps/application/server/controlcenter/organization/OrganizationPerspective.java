@@ -69,7 +69,7 @@ public class OrganizationPerspective extends AbstractManagedApplicationPerspecti
 				new OrganizationFieldPerspectiveBuilder()
 		);
 		menuPanel.addInstantiatedPerspective(organizationPerspectiveBuilder, this);
-		setPerspectiveMenuPanel(menuPanel.getComponent());
+		setPerspectiveMenuPanel(menuPanel.getComponent(), menuPanel.getButtonMenu());
 
 		MasterDetailController<OrganizationUnit> masterDetailController = new MasterDetailController<>(ApplicationIcons.ELEMENTS_HIERARCHY, getLocalized("organization.organizationUnits"), getApplicationInstanceData(), OrganizationUnit::filter, Privileges.ORGANIZATION_UNIT_PERSPECTIVE);
 		EntityModelBuilder<OrganizationUnit> entityModelBuilder = masterDetailController.getEntityModelBuilder();

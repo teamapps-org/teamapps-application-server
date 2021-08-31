@@ -78,7 +78,7 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 				new ApplicationUpdatesPerspectiveBuilder()
 		);
 		menuPanel.addInstantiatedPerspective(applicationsPerspectiveBuilder, this);
-		setPerspectiveMenuPanel(menuPanel.getComponent());
+		setPerspectiveMenuPanel(menuPanel.getComponent(), menuPanel.getButtonMenu());
 	}
 
 

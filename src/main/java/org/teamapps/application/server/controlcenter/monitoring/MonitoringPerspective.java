@@ -57,7 +57,7 @@ public class MonitoringPerspective extends AbstractManagedApplicationPerspective
 
 	private void createUi() {
 		Tree<MonitoringLink> perspectiveMenu = createPerspectiveMenu();
-		setPerspectiveMenuPanel(perspectiveMenu);
+		setPerspectiveMenuPanel(perspectiveMenu, null);
 		View centerView = getPerspective().addView(View.createView(StandardLayout.CENTER, ApplicationIcons.CHART_LINE, getLocalized("monitoring.title"), null));
 		IFrame iFrame = new IFrame();
 		centerView.setComponent(iFrame);

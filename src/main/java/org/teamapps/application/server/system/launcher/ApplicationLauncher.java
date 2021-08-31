@@ -486,15 +486,24 @@ public class ApplicationLauncher {
 			}
 		}
 
-		Tree<PerspectiveSessionData> tree = createApplicationMenuTree(sortedPerspectives);
 
 		boolean toolbarApplicationMenu = applicationData.getManagedApplication().getToolbarApplicationMenu();
 		ToolbarButton backButton = toolbarApplicationMenu ? null : new ToolbarButton(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, new BaseTemplateRecord(ApplicationIcons.NAVIGATE_LEFT, getLocalized(Dictionary.BACK), null));
 		MobileLayout mobileLayout = toolbarApplicationMenu ? null : new MobileLayout();
+
+		Map<PerspectiveSessionData, ApplicationPerspective> applicationPerspectiveByPerspectiveBuilder = new HashMap<>();
+
+
 		if (toolbarApplicationMenu) {
-			tree.setCssStyle("height","500px");
-			applicationSessionData.setApplicationToolbarMenuComponent(tree);
+			SimpleItemView<PerspectiveSessionData> applicationMenu = createApplicationMenu(sortedPerspectives);
+			applicationSessionData.setApplicationToolbarMenuComponent(applicationMenu);
+
+			applicationMenu.onItemClicked.addListener(event -> {
+				PerspectiveSessionData perspectiveSessionData = event.getItem().getPayload();
+				showPerspective(perspectiveSessionData, backButton, mobileLayout, applicationPerspectiveByPerspectiveBuilder);
+			});
 		} else {
+			Tree<PerspectiveSessionData> tree = createApplicationMenuTree(sortedPerspectives);
 			View applicationMenu = View.createView(StandardLayout.LEFT, ApplicationIcons.RADIO_BUTTON_GROUP, getLocalized(Dictionary.MENU), null);
 			responsiveApplication.addApplicationView(applicationMenu);
 			applicationMenu.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.84f));
@@ -514,12 +523,13 @@ public class ApplicationLauncher {
 				backButton.setVisible(false);
 				mobileLayout.setContent(tree, PageTransition.MOVE_TO_RIGHT_VS_MOVE_FROM_LEFT, 500);
 			});
+
+			tree.onNodeSelected.addListener(perspectiveSessionData -> {
+				showPerspective(perspectiveSessionData, backButton, mobileLayout, applicationPerspectiveByPerspectiveBuilder);
+			});
 		}
 
-		Map<PerspectiveSessionData, ApplicationPerspective> applicationPerspectiveByPerspectiveBuilder = new HashMap<>();
-		tree.onNodeSelected.addListener(perspectiveSessionData -> {
-			showPerspective(perspectiveSessionData, backButton, mobileLayout, applicationPerspectiveByPerspectiveBuilder);
-		});
+
 
 		if (!sortedPerspectives.isEmpty()) {
 			showPerspective(sortedPerspectives.get(0), backButton, mobileLayout, applicationPerspectiveByPerspectiveBuilder);
@@ -548,6 +558,16 @@ public class ApplicationLauncher {
 			}
 		});
 		return tree;
+	}
+
+	private SimpleItemView<PerspectiveSessionData> createApplicationMenu(List<PerspectiveSessionData> sortedPerspectives) {
+		SimpleItemView<PerspectiveSessionData> itemView = new SimpleItemView<>();
+		SimpleItemGroup<PerspectiveSessionData> itemGroup = itemView.addSingleColumnGroup(null, null);
+		itemGroup.setItemTemplate(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES);
+		sortedPerspectives.forEach(p -> {
+			itemGroup.addItem(p.getIcon(), p.getTitle(), p.getDescription()).setPayload(p);
+		});
+		return itemView;
 	}
 
 	private void showPerspective(PerspectiveSessionData perspectiveSessionData, ToolbarButton backButton, MobileLayout mobileLayout, Map<PerspectiveSessionData, ApplicationPerspective> applicationPerspectiveByPerspectiveBuilder) {
@@ -580,7 +600,7 @@ public class ApplicationLauncher {
 			applicationPerspective.getOnPerspectiveRefreshRequested().fire();
 		}
 		if (applicationPerspective.getPerspectiveMenuPanel() != null && perspectiveSessionData.getManagedApplicationPerspective().getToolbarPerspectiveMenu()) {
-			perspectiveSessionData.getManagedApplicationSessionData().setPerspectiveToolbarMenuComponent(applicationPerspective.getPerspectiveMenuPanel());
+			perspectiveSessionData.getManagedApplicationSessionData().setPerspectiveToolbarMenuComponent(applicationPerspective.getPerspectiveToolbarMenuPanel() != null ? applicationPerspective.getPerspectiveToolbarMenuPanel() : applicationPerspective.getPerspectiveMenuPanel());
 		} else {
 			perspectiveSessionData.getManagedApplicationSessionData().setPerspectiveToolbarMenuComponent(null);
 		}

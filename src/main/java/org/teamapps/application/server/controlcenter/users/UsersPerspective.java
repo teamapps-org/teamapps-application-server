@@ -21,6 +21,7 @@ package org.teamapps.application.server.controlcenter.users;
 
 import org.apache.commons.io.IOUtils;
 import org.teamapps.application.api.application.ApplicationInstanceData;
+import org.teamapps.application.api.application.perspective.AbstractPerspectiveBuilder;
 import org.teamapps.application.api.application.perspective.PerspectiveMenuPanel;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.localization.Language;
@@ -57,6 +58,7 @@ import org.teamapps.ux.component.field.upload.PictureChooser;
 import org.teamapps.ux.component.form.ResponsiveForm;
 import org.teamapps.ux.component.form.ResponsiveFormLayout;
 import org.teamapps.ux.component.format.Spacing;
+import org.teamapps.ux.component.itemview.SimpleItemView;
 import org.teamapps.ux.component.table.Table;
 import org.teamapps.ux.component.table.TableColumn;
 import org.teamapps.ux.component.template.BaseTemplate;
@@ -90,7 +92,8 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		);
 
 		menuPanel.addInstantiatedPerspective(usersPerspectiveBuilder, this);
-		setPerspectiveMenuPanel(menuPanel.getComponent());
+		SimpleItemView<AbstractPerspectiveBuilder> buttonMenu = menuPanel.getButtonMenu();
+		setPerspectiveMenuPanel(menuPanel.getComponent(), buttonMenu);
 
 		List<OrganizationUnitView> allowedUnits = getAllowedUnits(Privileges.USERS_PERSPECTIVE, Privilege.READ);
 		Set<Integer> unitIdSet = allowedUnits.stream().map(Entity::getId).collect(Collectors.toSet());

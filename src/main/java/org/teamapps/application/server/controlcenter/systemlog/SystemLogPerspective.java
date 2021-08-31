@@ -170,9 +170,6 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 
 		detailsVerticalLayout.addComponentFillRemaining(detailsFormField);
 
-		detailsFormField.setValue("orifj3iofefoiaewjioawjfoiawefiowejwioaiwojoaiwj");
-
-
 		masterDetailController.createViews(getPerspective(), verticalLayout, formLayout, false);
 		masterDetailController.setDetailComponent(detailsVerticalLayout);
 
