@@ -418,6 +418,7 @@ public class Model implements SchemaInfoProvider {
 				.addText("icon")
 				.addReference("parent", role, false, "children")
 				.addReference("children", role, true, "parent")
+				.addReference("organizationUnit", organizationUnit, false)
 				.addReference("allowedOrganizationUnitTypes", organizationUnitType, true)
 				.addReference("organizationField", organizationField, false)
 				.addReference("generalizationRoles", role, true, "specializationRoles")
