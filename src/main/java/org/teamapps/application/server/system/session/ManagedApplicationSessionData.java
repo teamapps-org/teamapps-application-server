@@ -69,11 +69,10 @@ public class ManagedApplicationSessionData {
 						new DesktopApplicationAssembler());
 		if (!mobileDevice) {
 			ToolbarButtonGroup buttonGroup = responsiveApplication.addApplicationButtonGroup(new ToolbarButtonGroup());
-			applicationMenuToolbarButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.WINDOWS, dictionary.getLocalized(Dictionary.MENU), dictionary.getLocalized(Dictionary.APPLICATION_MENU)));
+			applicationMenuToolbarButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.WINDOWS, dictionary.getLocalized(Dictionary.PERSPECTIVE), dictionary.getLocalized(Dictionary.SELECT_APPLICATION_PERSPECTIVE)));
 			applicationMenuToolbarButton.setDroDownPanelWidth(350);
 			applicationMenuToolbarButton.setVisible(false);
-			//todo change title
-			perspectiveMenuToolbarButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.WINDOW_EXPLORER, dictionary.getLocalized(Dictionary.MENU), dictionary.getLocalized(Dictionary.APPLICATION_MENU)));
+			perspectiveMenuToolbarButton = buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.WINDOW_EXPLORER, dictionary.getLocalized(Dictionary.VIEWS), dictionary.getLocalized(Dictionary.VIEWS)));
 			perspectiveMenuToolbarButton.setDroDownPanelWidth(350);
 			perspectiveMenuToolbarButton.setVisible(false);
 		}

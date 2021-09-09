@@ -92,7 +92,7 @@ public class MobileAssembler implements ApplicationAssembler {
 		navigationToolbar.setBackgroundColor(Color.WHITE.withAlpha(0.6f));
 
 		leftGroup = navigationToolbar.addButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton backButton = new ToolbarButton(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, new BaseTemplateRecord(MaterialIcon.NAVIGATE_BEFORE, getLocalized(Dictionary.BACK)));
+		ToolbarButton backButton = new ToolbarButton(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, new BaseTemplateRecord<>(MaterialIcon.NAVIGATE_BEFORE, getLocalized(Dictionary.BACK)));
 		leftGroup.addButton(backButton);
 		leftGroup.setShowGroupSeparator(false);
 		backButton.onClick.addListener(() -> {
@@ -119,17 +119,19 @@ public class MobileAssembler implements ApplicationAssembler {
 
 		centerGroup = navigationToolbar.addButtonGroup(new ToolbarButtonGroup());
 		//todo workaround until distribute option is available
-		centerGroup.addButton(new ToolbarButton(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, new BaseTemplateRecord("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")));
+		centerGroup.addButton(new ToolbarButton(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, new BaseTemplateRecord<>("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")));
 		centerGroup.setShowGroupSeparator(false);
-		ToolbarButton viewsButton = new ToolbarButton(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, new BaseTemplateRecord(MaterialIcon.TAB, getLocalized(Dictionary.VIEWS)));
+		ToolbarButton viewsButton = new ToolbarButton(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, new BaseTemplateRecord<>(MaterialIcon.TAB, getLocalized(Dictionary.VIEWS)));
+
 		viewsButton.setDropDownComponent(viewsItemView);
+		viewsButton.onClick.addListener(this::updateViewsDropdown);
 		viewsButton.setDroDownPanelWidth(450);
 		centerGroup.addButton(viewsButton);
 
 		rightGroup = navigationToolbar.addButtonGroup(new ToolbarButtonGroup());
 		rightGroup.setRightSide(true);
 		rightGroup.setShowGroupSeparator(false);
-		navigationToolbarMenuButton = new ToolbarButton(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, new BaseTemplateRecord(MaterialIcon.MENU, getLocalized(Dictionary.MENU)));
+		navigationToolbarMenuButton = new ToolbarButton(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, new BaseTemplateRecord<>(MaterialIcon.MENU, getLocalized(Dictionary.MENU)));
 		rightGroup.addButton(navigationToolbarMenuButton);
 
 		setNavigationToolbarVisible(false);
@@ -255,12 +257,8 @@ public class MobileAssembler implements ApplicationAssembler {
 		applicationViews.remove(view);
 	}
 
-	@Override
-	public void handlePerspectiveChange(ResponsiveApplication application, Perspective perspective, Perspective previousPerspective, List<View> activeViews, List<View> addedViews, List<View> removedViews) {
-		addedViews.forEach(view -> mobileLayout.preloadView(view.getPanel()));
-		perspectiveViews = activeViews;
+	private void updateViewsDropdown() {
 		viewsItemView.removeAllGroups();
-
 		SimpleItemGroup<Void> appGroup = viewsItemView.addSingleColumnGroup(ApplicationIcons.WINDOWS, getLocalized(Dictionary.APPLICATIONS));
 		appGroup.setItemTemplate(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES);
 
@@ -271,6 +269,12 @@ public class MobileAssembler implements ApplicationAssembler {
 		SimpleItemGroup<Void> viewGroup = viewsItemView.addSingleColumnGroup(ApplicationIcons.WINDOWS, getLocalized(Dictionary.APPLICATIONS));
 		viewGroup.setItemTemplate(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES);
 		perspectiveViews.forEach(view -> viewGroup.addItem(createViewButton(view)));
+	}
+
+	@Override
+	public void handlePerspectiveChange(ResponsiveApplication application, Perspective perspective, Perspective previousPerspective, List<View> activeViews, List<View> addedViews, List<View> removedViews) {
+		addedViews.forEach(view -> mobileLayout.preloadView(view.getPanel()));
+		perspectiveViews = activeViews;
 
 		if (!perspectiveViews.isEmpty()) {
 			View view = perspective.getFocusedView() != null ? perspective.getFocusedView() : perspectiveViews.get(0);

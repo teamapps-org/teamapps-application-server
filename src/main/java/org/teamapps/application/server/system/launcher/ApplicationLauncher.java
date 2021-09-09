@@ -562,7 +562,7 @@ public class ApplicationLauncher {
 
 	private SimpleItemView<PerspectiveSessionData> createApplicationMenu(List<PerspectiveSessionData> sortedPerspectives) {
 		SimpleItemView<PerspectiveSessionData> itemView = new SimpleItemView<>();
-		SimpleItemGroup<PerspectiveSessionData> itemGroup = itemView.addSingleColumnGroup(null, null);
+		SimpleItemGroup<PerspectiveSessionData> itemGroup = itemView.addSingleColumnGroup(ApplicationIcons.WINDOWS, getLocalized(Dictionary.APPLICATION_PERSPECTIVE));
 		itemGroup.setItemTemplate(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES);
 		sortedPerspectives.forEach(p -> {
 			itemGroup.addItem(p.getIcon(), p.getTitle(), p.getDescription()).setPayload(p);

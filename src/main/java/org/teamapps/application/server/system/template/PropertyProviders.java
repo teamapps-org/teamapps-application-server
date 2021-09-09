@@ -23,6 +23,8 @@ import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.privilege.ApplicationRole;
+import org.teamapps.application.api.privilege.Privilege;
+import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.api.privilege.PrivilegeObject;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
@@ -82,6 +84,25 @@ public class PropertyProviders {
 			map.put(BaseTemplate.PROPERTY_ICON, userSessionData.decodeIcon(applicationPrivilegeGroup.getIcon()));
 			map.put(BaseTemplate.PROPERTY_CAPTION, localizationProvider.getLocalized(applicationPrivilegeGroup.getTitleKey()));
 			map.put(BaseTemplate.PROPERTY_DESCRIPTION, localizationProvider.getLocalized(applicationPrivilegeGroup.getDescriptionKey()));
+			return map;
+		};
+	}
+
+	public static PropertyProvider<PrivilegeGroup> createPrivilegeGroupPropertyProvider(ApplicationInstanceData applicationInstanceData) {
+		return (privilegeGroup, propertyNames) -> {
+			Map<String, Object> map = new HashMap<>();
+			map.put(BaseTemplate.PROPERTY_ICON, privilegeGroup.getIcon());
+			map.put(BaseTemplate.PROPERTY_CAPTION, applicationInstanceData.getLocalized(privilegeGroup.getTitleKey()));
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, applicationInstanceData.getLocalized(privilegeGroup.getDescriptionKey()));
+			return map;
+		};
+	}
+
+	public static PropertyProvider<Privilege> createPrivilegePropertyProvider(ApplicationInstanceData applicationInstanceData) {
+		return (privilege, propertyNames) -> {
+			Map<String, Object> map = new HashMap<>();
+			map.put(BaseTemplate.PROPERTY_ICON, privilege.getIcon());
+			map.put(BaseTemplate.PROPERTY_CAPTION, applicationInstanceData.getLocalized(privilege.getTitleKey()));
 			return map;
 		};
 	}

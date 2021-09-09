@@ -25,9 +25,9 @@ import org.teamapps.ux.component.Component;
 
 public class MobileApplicationNavigation implements MobileNavigation {
 
-	public Event<Void> onBackOperation = new Event<>();
-	private Event<Void> onShowStartViewRequest = new Event<>();
-	private Event<View> onShowViewRequest = new Event<>();
+	public final Event<Void> onBackOperation = new Event<>();
+	private final Event<Void> onShowStartViewRequest = new Event<>();
+	private final Event<View> onShowViewRequest = new Event<>();
 	private Component applicationLauncher;
 	private View applicationMenu;
 	private boolean backOperationAvailable;
