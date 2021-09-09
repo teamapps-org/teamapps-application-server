@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,9 +20,7 @@
 package org.teamapps.application.server.controlcenter.roles;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
-import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
-import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
@@ -34,7 +32,6 @@ import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.combo.ComboBoxUtils;
 import org.teamapps.application.ux.form.FormController;
 import org.teamapps.application.ux.view.MasterDetailController;
-import org.teamapps.common.format.Color;
 import org.teamapps.databinding.MutableValue;
 import org.teamapps.model.controlcenter.OrganizationUnit;
 import org.teamapps.model.controlcenter.Role;
@@ -42,8 +39,6 @@ import org.teamapps.model.controlcenter.User;
 import org.teamapps.model.controlcenter.UserRoleAssignment;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.pojo.Query;
-import org.teamapps.ux.application.layout.StandardLayout;
-import org.teamapps.ux.application.view.View;
 import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.form.ResponsiveForm;
@@ -51,10 +46,10 @@ import org.teamapps.ux.component.form.ResponsiveFormLayout;
 import org.teamapps.ux.component.table.Table;
 import org.teamapps.ux.component.table.TableColumn;
 import org.teamapps.ux.component.template.BaseTemplate;
-import org.teamapps.ux.component.toolbar.ToolbarButton;
-import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
 
 import java.time.Instant;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -90,6 +85,25 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 		table.addColumn(new TableColumn<UserRoleAssignment>(UserRoleAssignment.FIELD_USER, getLocalized("userRoleAssignment.user"), userTableField).setDefaultWidth(200));
 		table.addColumn(new TableColumn<UserRoleAssignment>(UserRoleAssignment.FIELD_ROLE, getLocalized("userRoleAssignment.role"), roleTableField).setDefaultWidth(200));
 		table.addColumn(new TableColumn<UserRoleAssignment>(UserRoleAssignment.FIELD_ORGANIZATION_UNIT, getLocalized("userRoleAssignment.orgUnit"), orgUnitTableField).setDefaultWidth(200));
+
+		entityModelBuilder.setCustomFieldSorter(fieldName -> {
+			Comparator<String> comparator = getUser().getComparator(true);
+			List<String> rankedLanguages = getUser().getRankedLanguages();
+			return switch (fieldName) {
+				case UserRoleAssignment.FIELD_USER -> (r1, r2) -> comparator.compare(r1.getUser().getLastName(), r2.getUser().getLastName());
+				case UserRoleAssignment.FIELD_ROLE -> (r1, r2) -> comparator.compare(r1.getRole().getTitle().getText(rankedLanguages), r2.getRole().getTitle().getText(rankedLanguages));
+				case UserRoleAssignment.FIELD_ORGANIZATION_UNIT -> (r1, r2) -> comparator.compare(r1.getOrganizationUnit().getName().getText(rankedLanguages), r2.getOrganizationUnit().getName().getText(rankedLanguages));
+				default -> null;
+			};
+		});
+
+		entityModelBuilder.setCustomFullTextFilter((r, query) -> {
+			List<String> rankedLanguages = getUser().getRankedLanguages();
+			return matches(r.getUser().getFirstName(), query) ||
+					matches(r.getUser().getLastName(), query) ||
+					matches(r.getRole().getTitle().getText(rankedLanguages), query) ||
+					matches(r.getOrganizationUnit().getName().getText(rankedLanguages), query);
+		});
 
 		table.setPropertyExtractor((userRoleAssignment, propertyName) -> switch (propertyName) {
 			case UserRoleAssignment.FIELD_USER -> userRoleAssignment.getUser();
@@ -137,6 +151,10 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 			organizationComboBox.setValue(userRoleAssignment.getOrganizationUnit());
 		});
 		entityModelBuilder.setSelectedRecord(UserRoleAssignment.create());
+	}
+
+	private boolean matches(String value, String query) {
+		return value != null && value.toLowerCase().contains(query);
 	}
 
 }
