@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,8 +23,9 @@ import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.privilege.ApplicationRole;
+import org.teamapps.application.api.privilege.Privilege;
+import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.api.theme.ApplicationIcons;
-import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
@@ -33,19 +34,17 @@ import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.tools.EntityModelBuilder;
+import org.teamapps.application.tools.RecordListModelBuilder;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.combo.ComboBoxUtils;
 import org.teamapps.application.ux.form.FormController;
+import org.teamapps.application.ux.form.FormPanel;
 import org.teamapps.application.ux.view.MasterDetailController;
-import org.teamapps.common.format.Color;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.databinding.MutableValue;
-import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.pojo.Query;
-import org.teamapps.ux.application.layout.StandardLayout;
-import org.teamapps.ux.application.view.View;
 import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.field.combobox.TagComboBox;
@@ -54,8 +53,6 @@ import org.teamapps.ux.component.form.ResponsiveFormLayout;
 import org.teamapps.ux.component.table.Table;
 import org.teamapps.ux.component.table.TableColumn;
 import org.teamapps.ux.component.template.BaseTemplate;
-import org.teamapps.ux.component.toolbar.ToolbarButton;
-import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
 import org.teamapps.ux.model.ComboBoxModel;
 
 import java.util.Collections;
@@ -125,6 +122,22 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 		TagComboBox<OrganizationUnitType> organizationUnitTypeFilterTagComboBox = OrganizationUtils.createOrganizationUnitTypeTagComboBox(50, getApplicationInstanceData());
 
 
+		RecordListModelBuilder<PrivilegeGroup> appRoleModelBuilder = new RecordListModelBuilder<>(getApplicationInstanceData());
+		Table<PrivilegeGroup> privilegeGroupTable = appRoleModelBuilder.createListTable(true);
+		TemplateField<PrivilegeGroup> privilegeGroupTemplateField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createPrivilegeGroupPropertyProvider(getApplicationInstanceData()));
+		TagComboBox<Privilege> privilegeTagComboBox = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createPrivilegePropertyProvider(getApplicationInstanceData()));
+
+		privilegeGroupTable.addColumn(new TableColumn<>("group", getLocalized("accessControl.privilegeGroup"), privilegeGroupTemplateField));
+		privilegeGroupTable.addColumn(new TableColumn<>("privileges", getLocalized("accessControl.privileges"), privilegeTagComboBox));
+		privilegeGroupTable.setPropertyExtractor((record, propertyName) -> switch (propertyName) {
+			case "group" -> record;
+			case "privileges" -> record.getPrivileges();
+			default -> null;
+		});
+
+		FormPanel formPanel = new FormPanel(getApplicationInstanceData());
+		formPanel.setTable(privilegeGroupTable, true, false, false);
+
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(450);
 		formLayout.addSection().setCollapsible(false).setDrawHeaderLine(false);
 		formLayout.addLabelAndField(null, getLocalized("roles.role"), roleComboBox);
@@ -136,10 +149,11 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 		formLayout.addLabelAndField(null, getLocalized("accessControl.customOrganizationUnit"), organizationFilterComboBox);
 		formLayout.addLabelAndField(null, getLocalized("accessControl.organizationUnitTypeFilter"), organizationUnitTypeFilterTagComboBox);
 
-		applicationComboBox.onValueChanged.addListener(() -> {
-			applicationRoleComboBox.setValue(null);
-		});
+		formLayout.addSection(ApplicationIcons.SECURITY_BADGE, getLocalized(Dictionary.PRIVILEGES));
+		formLayout.addLabelAndComponent(null, getLocalized("accessControl.applicationRolePrivileges"), formPanel.getPanel());
 
+		applicationComboBox.onValueChanged.addListener(() -> applicationRoleComboBox.setValue(null));
+		applicationRoleComboBox.onValueChanged.addListener(role -> appRoleModelBuilder.setRecords(role.getPrivilegeGroups()));
 
 		masterDetailController.createViews(getPerspective(), table, formLayout);
 
@@ -161,10 +175,12 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 		entityModelBuilder.getOnSelectionEvent().addListener(roleApplicationRoleAssignment -> {
 			roleComboBox.setValue(roleApplicationRoleAssignment.getRole());
 			applicationComboBox.setValue(roleApplicationRoleAssignment.getApplication());
-			applicationRoleComboBox.setValue(getApplicationRole(roleApplicationRoleAssignment));
+			ApplicationRole applicationRole = getApplicationRole(roleApplicationRoleAssignment);
+			applicationRoleComboBox.setValue(applicationRole);
 			organizationFieldFilterComboBox.setValue(roleApplicationRoleAssignment.getOrganizationFieldFilter());
 			organizationFilterComboBox.setValue(roleApplicationRoleAssignment.getFixedOrganizationRoot());
 			organizationUnitTypeFilterTagComboBox.setValue(roleApplicationRoleAssignment.getOrganizationUnitTypeFilter());
+			appRoleModelBuilder.setRecords(applicationRole != null ? applicationRole.getPrivilegeGroups() : Collections.emptyList());
 		});
 
 		entityModelBuilder.setSelectedRecord(RoleApplicationRoleAssignment.create());
