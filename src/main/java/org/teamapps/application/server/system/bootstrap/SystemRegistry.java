@@ -181,6 +181,10 @@ public class SystemRegistry {
 		return loadedApplicationMap.get(application);
 	}
 
+	public List<LoadedApplication> getLoadedApplications() {
+		return new ArrayList<>(loadedApplicationMap.values());
+	}
+
 	public DictionaryLocalizationProvider getDictionary() {
 		return dictionary;
 	}

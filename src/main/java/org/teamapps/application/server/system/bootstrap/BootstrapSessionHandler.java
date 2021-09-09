@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,24 +26,22 @@ import org.teamapps.application.server.chat.ChatApplication;
 import org.teamapps.application.server.controlcenter.ControlCenterAppBuilder;
 import org.teamapps.application.server.controlcenter.dbexplorer.DatabaseExplorerApplicationBuilder;
 import org.teamapps.application.server.messaging.MessagingApplication;
+import org.teamapps.application.server.system.auth.LoginHandler;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
 import org.teamapps.application.server.system.config.SystemConfig;
 import org.teamapps.application.server.system.logging.DatabaseLogAppender;
-import org.teamapps.application.server.system.auth.LoginHandler;
-import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
-import org.teamapps.application.server.system.server.ApplicationServer;
 import org.teamapps.application.server.system.server.SessionHandler;
-import org.teamapps.application.server.system.server.SessionRegistryHandler;
 import org.teamapps.application.server.system.server.SessionManager;
+import org.teamapps.application.server.system.server.SessionRegistryHandler;
 import org.teamapps.application.server.system.template.Templates;
-import org.teamapps.application.server.system.utils.ValueConverterUtils;
 import org.teamapps.event.Event;
 import org.teamapps.icon.antu.AntuIcon;
 import org.teamapps.icon.flags.FlagIcon;
 import org.teamapps.icon.fontawesome.FontAwesomeIcon;
 import org.teamapps.icon.material.MaterialIcon;
 import org.teamapps.model.ControlCenterSchema;
-import org.teamapps.model.controlcenter.*;
+import org.teamapps.model.controlcenter.Application;
+import org.teamapps.model.controlcenter.ApplicationVersion;
 import org.teamapps.universaldb.UniversalDB;
 import org.teamapps.universaldb.index.file.FileValue;
 import org.teamapps.ux.session.SessionContext;
@@ -57,6 +55,7 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private static Class standardIconClass;
+
 	static {
 		try {
 			standardIconClass = Class.forName("org.teamapps.icon.standard.StandardIcon");
@@ -110,9 +109,7 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 		systemRegistry.setSessionRegistryHandler(sessionRegistryHandler);
 
 		systemRegistry.installAndLoadApplication(controlCenterAppBuilder);
-		systemRegistry.installAndLoadApplication(new DatabaseExplorerApplicationBuilder(universalDB));
-		systemRegistry.installAndLoadApplication(new MessagingApplication());
-		systemRegistry.installAndLoadApplication(new ChatApplication());
+		loadSystemApps();
 
 		for (Application application : Application.getAll()) {
 			ApplicationVersion installedVersion = application.getInstalledVersion();
@@ -132,6 +129,14 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 
 	}
 
+	public void loadDatabaseExplorerApp() {
+		systemRegistry.installAndLoadApplication(new DatabaseExplorerApplicationBuilder(universalDB));
+	}
+
+	private void loadSystemApps() {
+		systemRegistry.installAndLoadApplication(new MessagingApplication());
+		systemRegistry.installAndLoadApplication(new ChatApplication());
+	}
 
 	@Override
 	public void handleSessionStart(SessionContext context) {
