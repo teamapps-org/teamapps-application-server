@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ package org.teamapps.application.server.ui.localize;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.ux.IconUtils;
+import org.teamapps.application.ux.PropertyData;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.Application;
 import org.teamapps.model.controlcenter.LocalizationKey;
@@ -30,10 +31,11 @@ import org.teamapps.universaldb.index.enumeration.EnumFilterType;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.index.text.TextFilter;
 import org.teamapps.ux.component.field.combobox.ComboBox;
-import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.component.template.Template;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -46,20 +48,18 @@ public class LocalizationUiUtils {
 	public static ComboBox<String> createLocalizationKeyCombo(Template template, ApplicationLocalizationProvider localizationProvider, Supplier<Application> applicationSupplier) {
 		ComboBox<String> comboBox = new ComboBox<>(template);
 		comboBox.setPropertyProvider((s, propertyNames) -> {
-			Map<String, Object> map = new HashMap<>();
 			if (s == null || s.isBlank()) {
-				return map;
+				return PropertyData.createEmpty();
 			}
 			LocalizationKey localizationKey = LocalizationKey.filter().key(TextFilter.textEqualsFilter(s)).executeExpectSingleton();
 			if (localizationKey == null) {
-				map.put(BaseTemplate.PROPERTY_ICON, ApplicationIcons.SYMBOL_QUESTIONMARK);
-				map.put(BaseTemplate.PROPERTY_CAPTION, s);
-				return map;
+				return PropertyData.create(ApplicationIcons.SYMBOL_QUESTIONMARK, s);
 			}
-			map.put(BaseTemplate.PROPERTY_ICON, getLocalizationKeyIcon(localizationKey));
-			map.put(BaseTemplate.PROPERTY_CAPTION, localizationProvider.getLocalized(localizationKey.getKey()));
-			map.put(BaseTemplate.PROPERTY_DESCRIPTION, localizationKey.getKey());
-			return map;
+			return PropertyData.create(
+					getLocalizationKeyIcon(localizationKey),
+					localizationProvider.getLocalized(localizationKey.getKey()),
+					localizationKey.getKey()
+			);
 		});
 		comboBox.setRecordToStringFunction(localizationProvider::getLocalized);
 		comboBox.setModel(query -> {
