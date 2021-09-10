@@ -435,6 +435,7 @@ public class Model implements SchemaInfoProvider {
 				.addReference("user", user, false, "roleAssignments")
 				.addReference("role", role, false, "userRoleAssignments")
 				.addReference("organizationUnit", organizationUnit, false)
+				.addBoolean("mainResponsible")
 				.addTimestamp("lastVerified")
 				.addReference("lastVerifiedBy", user, false)
 		;
