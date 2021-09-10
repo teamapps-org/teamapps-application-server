@@ -42,11 +42,9 @@ import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.pojo.Query;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.view.View;
-import org.teamapps.ux.component.field.DisplayField;
-import org.teamapps.ux.component.field.FieldEditingMode;
-import org.teamapps.ux.component.field.MultiLineTextField;
-import org.teamapps.ux.component.field.TemplateField;
+import org.teamapps.ux.component.field.*;
 import org.teamapps.ux.component.field.combobox.ComboBox;
+import org.teamapps.ux.component.field.combobox.TagComboBox;
 import org.teamapps.ux.component.field.datetime.InstantDateTimeField;
 import org.teamapps.ux.component.flexcontainer.VerticalLayout;
 import org.teamapps.ux.component.form.ResponsiveForm;
@@ -81,15 +79,24 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 		ResponsiveForm<SystemLog> form = masterDetailController.getResponsiveForm();
 
 		ComboBox<LogLevel> logLeveComboBox = createLogLeveComboBox();
-		//todo use managed application
-		ComboBox<Application> applicationComboBox = ApplicationUiUtils.createApplicationComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, userSessionData);
 		ComboBox<User> userComboBox = createUserComboBox();
 		ComboBox<String> exceptionClassComboBox = createExceptionClassComboBox();
 
+		ComboBox<ManagedApplication> applicationComboBox = ComboBoxUtils.createRecordComboBox(() -> isAppFilter() ? Collections.singletonList(getManagedApplication()) : ManagedApplication.getAll(), PropertyProviders.createManagedApplicationPropertyProvider(userSessionData), BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
+		ComboBox<ManagedApplicationPerspective> perspectiveComboBox = ComboBoxUtils.createRecordComboBox(() -> applicationComboBox.getValue() == null ? Collections.emptyList() : applicationComboBox.getValue().getPerspectives(), PropertyProviders.createManagedApplicationPerspectivePropertyProvider(userSessionData), BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
+		ComboBox<ApplicationVersion> applicationVersionComboBox = ComboBoxUtils.createRecordComboBox(() -> applicationComboBox.getValue() == null ? Collections.emptyList() : applicationComboBox.getValue().getMainApplication().getVersions(), PropertyProviders.createApplicationVersionPropertyProvider(userSessionData), BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
+
+		if (isAppFilter()) {
+			applicationComboBox.setValue(getManagedApplication());
+			applicationComboBox.setVisible(false);
+		}
+
 		logLeveComboBox.setShowClearButton(true);
-		applicationComboBox.setShowClearButton(true);
 		userComboBox.setShowClearButton(true);
 		exceptionClassComboBox.setShowClearButton(true);
+		applicationComboBox.setShowClearButton(true);
+		perspectiveComboBox.setShowClearButton(true);
+		applicationVersionComboBox.setShowClearButton(true);
 
 		ResponsiveForm<?> selectionForm = new ResponsiveForm<>(50, 75, 200);
 		selectionForm.setMargin(Spacing.px(0));
@@ -97,14 +104,11 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 		formLayout.addSection().setCollapsible(false).setPadding(new Spacing(0, 5)).setMargin(new Spacing(4, 2, 4, 2));
 
 		formLayout.addLabelAndField(null, getLocalized("systemLog.logLevel"), logLeveComboBox);
-		formLayout.addLabelAndField(null, getLocalized("systemLog.user"), userComboBox, false);
-		formLayout.addLabelAndField(null, getLocalized("applications.application"), applicationComboBox);
-		formLayout.addLabelAndField(null, getLocalized("systemLog.exceptionClass"), exceptionClassComboBox, false);
-		//todo change app to managed app
-		//todo add managed perspective
-		//todo add application version
-		//todo add thread
-
+		formLayout.addLabelAndField(null, getLocalized("applications.application"), applicationComboBox, false);
+		formLayout.addLabelAndField(null, getLocalized("systemLog.user"), userComboBox);
+		formLayout.addLabelAndField(null, getLocalized("applications.perspective"), perspectiveComboBox, false);
+		formLayout.addLabelAndField(null, getLocalized("systemLog.exceptionClass"), exceptionClassComboBox);
+		formLayout.addLabelAndField(null, getLocalized("applications.installedVersion"), applicationVersionComboBox, false);
 
 		entityModelBuilder.updateModels();
 
@@ -116,25 +120,31 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 		table.setCssStyle("border-top", "1px solid " + Color.MATERIAL_GREY_400.toHtmlColorString());
 
 
+		InstantDateTimeField timeField = new InstantDateTimeField();
+		TemplateField<LogLevel> logLevelField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, createLogLevelPropertyProvider());
+		TemplateField<SystemLog> messageField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, createSystemLogPropertyProvider());
 		TemplateField<ManagedApplication> managedApplicationField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationPropertyProvider(userSessionData));
 		TemplateField<ManagedApplicationPerspective> perspectiveField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createManagedApplicationPerspectivePropertyProvider(userSessionData));
-		TemplateField<Application> applicationField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createApplicationPropertyProvider(userSessionData));
-		TemplateField<SystemLog> messageField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, createSystemLogPropertyProvider());
-		InstantDateTimeField timeField = new InstantDateTimeField();
+		TemplateField<User> userField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(getApplicationInstanceData()));
 
 
-		table.addColumn(new TableColumn<>(SystemLog.FIELD_MANAGED_APPLICATION, getLocalized("applicationProvisioning.provisionedApplication"), managedApplicationField));
-		table.addColumn(new TableColumn<>(SystemLog.FIELD_MANAGED_PERSPECTIVE, getLocalized("applications.perspective"), perspectiveField));
-		//table.addColumn(new TableColumn<>(SystemLog.FIELD_APPLICATION, getLocalized("applications.application"), applicationField));
-		table.addColumn(new TableColumn<SystemLog>(SystemLog.FIELD_MESSAGE, getLocalized("systemLog.logMessage"), messageField).setDefaultWidth(230));
 		table.addColumn(new TableColumn<>(SystemLog.FIELD_META_CREATION_DATE, getLocalized(Dictionary.DATE), timeField));
+		table.addColumn(new TableColumn<SystemLog>(SystemLog.FIELD_LOG_LEVEL, getLocalized("systemLog.logLevel"), logLevelField).setDefaultWidth(75));
+		table.addColumn(new TableColumn<SystemLog>(SystemLog.FIELD_MESSAGE, getLocalized("systemLog.logMessage"), messageField).setDefaultWidth(230));
+		table.addColumn(new TableColumn<>(SystemLog.FIELD_MANAGED_APPLICATION, getLocalized("applicationProvisioning.provisionedApplication"), managedApplicationField));
+		table.addColumn(new TableColumn<>(SystemLog.FIELD_MANAGED_PERSPECTIVE, getLocalized("systemLog.provisionedPerspective"), perspectiveField));
+		table.addColumn(new TableColumn<>(SystemLog.FIELD_META_CREATED_BY, getLocalized("systemLog.user"), userField));
+		table.addColumn(new TableColumn<>(SystemLog.FIELD_APPLICATION_VERSION, getLocalized("applications.installedVersion"), new TextField()));
 
 		table.setPropertyExtractor((systemLog, propertyName) -> switch (propertyName) {
+			case SystemLog.FIELD_META_CREATION_DATE -> systemLog.getMetaCreationDate();
+			case SystemLog.FIELD_META_CREATED_BY -> systemLog.getMetaCreatedBy() > 0 ? User.getById(systemLog.getMetaCreatedBy()) : null;
+			case SystemLog.FIELD_LOG_LEVEL -> systemLog.getLogLevel();
+			case SystemLog.FIELD_MESSAGE -> systemLog;
 			case SystemLog.FIELD_MANAGED_APPLICATION -> systemLog.getManagedApplication();
 			case SystemLog.FIELD_MANAGED_PERSPECTIVE -> systemLog.getManagedPerspective();
 			case SystemLog.FIELD_APPLICATION -> systemLog.getApplication();
-			case SystemLog.FIELD_MESSAGE -> systemLog;
-			case SystemLog.FIELD_META_CREATION_DATE -> systemLog.getMetaCreationDate();
+			case SystemLog.FIELD_APPLICATION_VERSION -> systemLog.getApplicationVersion() != null ? systemLog.getApplicationVersion().getVersion() : null;
 			default -> null;
 		});
 
@@ -174,14 +184,16 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 		masterDetailController.setDetailComponent(detailsVerticalLayout);
 
 		Runnable onFilterChange = () -> {
-			Predicate<SystemLog> filter = createFilter(logLeveComboBox.getValue(), applicationComboBox.getValue(), userComboBox.getValue(), exceptionClassComboBox.getValue());
+			Predicate<SystemLog> filter = createFilter(logLeveComboBox.getValue(), userComboBox.getValue(), exceptionClassComboBox.getValue(), applicationComboBox.getValue(), perspectiveComboBox.getValue(), applicationVersionComboBox.getValue());
 			entityModelBuilder.setCustomFilter(filter);
 		};
 
 		logLeveComboBox.onValueChanged.addListener(value -> onFilterChange.run());
-		applicationComboBox.onValueChanged.addListener(value -> onFilterChange.run());
 		userComboBox.onValueChanged.addListener(value -> onFilterChange.run());
 		exceptionClassComboBox.onValueChanged.addListener(value -> onFilterChange.run());
+		applicationComboBox.onValueChanged.addListener(value -> onFilterChange.run());
+		perspectiveComboBox.onValueChanged.addListener(value -> onFilterChange.run());
+		applicationVersionComboBox.onValueChanged.addListener(value -> onFilterChange.run());
 
 		entityModelBuilder.getOnSelectionEvent().addListener(log -> {
 			managedApplicationFormField.setValue(log.getManagedApplication());
@@ -196,13 +208,10 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 		});
 	}
 
-	private Predicate<SystemLog> createFilter(LogLevel logLevel, Application application, User user, String exceptionClass) {
-		if (logLevel == null && application == null && user == null && exceptionClass == null) return null;
+	private Predicate<SystemLog> createFilter(LogLevel logLevel, User user, String exceptionClass, ManagedApplication managedApplication, ManagedApplicationPerspective managedApplicationPerspective, ApplicationVersion applicationVersion) {
+		if (logLevel == null && managedApplication == null && managedApplicationPerspective == null && applicationVersion == null && user == null && exceptionClass == null) return null;
 		return systemLog -> {
 			if (logLevel != null && !logLevel.equals(systemLog.getLogLevel())) {
-				return false;
-			}
-			if (application != null && !application.equals(systemLog.getApplication())) {
 				return false;
 			}
 			if (user != null && systemLog.getMetaCreatedBy() != user.getId()) {
@@ -211,9 +220,37 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 			if (exceptionClass != null && !exceptionClass.equals(systemLog.getExceptionClass())) {
 				return false;
 			}
+			if (managedApplication != null && !managedApplication.equals(systemLog.getManagedApplication())) {
+				return false;
+			}
+			if (managedApplicationPerspective != null && !managedApplicationPerspective.equals(systemLog.getManagedPerspective())) {
+				return false;
+			}
+			if (applicationVersion != null && !applicationVersion.equals(systemLog.getApplicationVersion())) {
+				return false;
+			}
 			return true;
 		};
 	}
+
+//	private Predicate<SystemLog> createFilter(LogLevel logLevel, Application application, User user, String exceptionClass) {
+//		if (logLevel == null && application == null && user == null && exceptionClass == null) return null;
+//		return systemLog -> {
+//			if (logLevel != null && !logLevel.equals(systemLog.getLogLevel())) {
+//				return false;
+//			}
+//			if (application != null && !application.equals(systemLog.getApplication())) {
+//				return false;
+//			}
+//			if (user != null && systemLog.getMetaCreatedBy() != user.getId()) {
+//				return false;
+//			}
+//			if (exceptionClass != null && !exceptionClass.equals(systemLog.getExceptionClass())) {
+//				return false;
+//			}
+//			return true;
+//		};
+//	}
 
 	private ComboBox<LogLevel> createLogLeveComboBox() {
 		ComboBox<LogLevel> comboBox = ComboBoxUtils.createRecordComboBox(Arrays.asList(LogLevel.values()), createLogLevelPropertyProvider(), BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
