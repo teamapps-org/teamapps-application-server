@@ -20,6 +20,7 @@
 package org.teamapps.application.server.controlcenter.roles;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
+import org.teamapps.application.api.privilege.Privilege;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
@@ -28,17 +29,16 @@ import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.tools.EntityModelBuilder;
+import org.teamapps.application.tools.PrivilegeUtils;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.combo.ComboBoxUtils;
 import org.teamapps.application.ux.form.FormController;
 import org.teamapps.application.ux.view.MasterDetailController;
 import org.teamapps.databinding.MutableValue;
-import org.teamapps.model.controlcenter.OrganizationUnit;
-import org.teamapps.model.controlcenter.Role;
-import org.teamapps.model.controlcenter.User;
-import org.teamapps.model.controlcenter.UserRoleAssignment;
+import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.pojo.Query;
+import org.teamapps.ux.component.field.CheckBox;
 import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.form.ResponsiveForm;
@@ -67,7 +67,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 
 	private void createUi() {
 		Supplier<Query<UserRoleAssignment>> querySupplier = () -> isAppFilter() ? UserRoleAssignment.filter().filterRole(Role.filter().organizationField(NumericFilter.equalsFilter(getOrganizationField().getId()))) : UserRoleAssignment.filter();
-		MasterDetailController<UserRoleAssignment> masterDetailController = new MasterDetailController<>(ApplicationIcons.USERS_THREE_RELATION, getLocalized("userRoleAssignment.userRoleAssignments"), getApplicationInstanceData(), querySupplier, Privileges.USER_ROLE_ASSIGNMENT_PERSPECTIVE);
+		MasterDetailController<UserRoleAssignment> masterDetailController = new MasterDetailController<>(ApplicationIcons.USERS_THREE_RELATION, getLocalized("userRoleAssignment.userRoleAssignments"), getApplicationInstanceData(), querySupplier, Privileges.USER_ROLE_ASSIGNMENT_PERSPECTIVE, UserRoleAssignment.FIELD_ORGANIZATION_UNIT);
 		EntityModelBuilder<UserRoleAssignment> entityModelBuilder = masterDetailController.getEntityModelBuilder();
 		FormController<UserRoleAssignment> formController = masterDetailController.getFormController();
 		ResponsiveForm<UserRoleAssignment> form = masterDetailController.getResponsiveForm();
@@ -123,6 +123,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 		);
 
 		ComboBox<OrganizationUnit> organizationComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), true, getApplicationInstanceData());
+		CheckBox mainResponsibleField = new CheckBox(getLocalized("userRoleAssignment.mainResponsible"));
 
 
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(450);
@@ -130,17 +131,30 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.user"), userCombobox);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.role"), roleComboBox);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.orgUnit"), organizationComboBox);
+		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.mainResponsible"), mainResponsibleField);
 
 		masterDetailController.createViews(getPerspective(), table, formLayout);
 
 		formController.addNotNull(userCombobox);
 		formController.addNotNull(roleComboBox);
 		formController.addNotNull(organizationComboBox);
+		formController.addValidator(roleComboBox, role -> {
+			OrganizationUnit organizationUnit = organizationComboBox.getValue();
+			if (organizationUnit != null && role != null) {
+				OrganizationUnitType type = organizationUnit.getType();
+				List<OrganizationUnitType> unitTypes = role.getAllowedOrganizationUnitTypes();
+				if (!unitTypes.isEmpty() && !unitTypes.contains(type)) {
+					return getLocalized("userRoleAssignment.wrongOrgUnitForThisRole");
+				}
+			}
+			return null;
+		});
 		formController.setSaveEntityHandler(userRoleAssignment -> {
 			userRoleAssignment
 					.setUser(userCombobox.getValue())
 					.setRole(roleComboBox.getValue())
 					.setOrganizationUnit(organizationComboBox.getValue())
+					.setMainResponsible(mainResponsibleField.getValue())
 					.setLastVerified(Instant.now());
 			return true;
 		});
@@ -149,6 +163,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 			userCombobox.setValue(userRoleAssignment.getUser());
 			roleComboBox.setValue(userRoleAssignment.getRole());
 			organizationComboBox.setValue(userRoleAssignment.getOrganizationUnit());
+			mainResponsibleField.setValue(userRoleAssignment.isMainResponsible());
 		});
 		entityModelBuilder.setSelectedRecord(UserRoleAssignment.create());
 	}
