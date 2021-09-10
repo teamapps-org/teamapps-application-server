@@ -32,6 +32,8 @@ import org.teamapps.application.server.controlcenter.roles.UserRoleAssignmentPer
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
+import org.teamapps.application.server.system.privilege.UserPrivileges;
+import org.teamapps.application.server.system.privilege.UserPrivilegesView;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
@@ -42,6 +44,7 @@ import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.combo.ComboBoxUtils;
 import org.teamapps.application.ux.form.FormController;
 import org.teamapps.application.ux.view.MasterDetailController;
+import org.teamapps.application.ux.window.ApplicationWindow;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.databinding.MutableValue;
 import org.teamapps.icons.Icon;
@@ -99,15 +102,13 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		Set<Integer> unitIdSet = allowedUnits.stream().map(Entity::getId).collect(Collectors.toSet());
 
 		Supplier<Query<User>> querySupplier = () -> User.filter().customFilter(user -> user.getOrganizationUnit() == null || unitIdSet.contains(user.getOrganizationUnit().getId()));
-		MasterDetailController<User> masterDetailController = new MasterDetailController<>(ApplicationIcons.USERS_CROWD, getLocalized("users.users"), getApplicationInstanceData(), querySupplier, Privileges.USERS_PERSPECTIVE);
+		MasterDetailController<User> masterDetailController = new MasterDetailController<>(ApplicationIcons.USERS_CROWD, getLocalized("users.users"), getApplicationInstanceData(), querySupplier, Privileges.USERS_PERSPECTIVE, User.FIELD_ORGANIZATION_UNIT);
 		EntityModelBuilder<User> entityModelBuilder = masterDetailController.getEntityModelBuilder();
 		FormController<User> formController = masterDetailController.getFormController();
 		ResponsiveForm<User> form = masterDetailController.getResponsiveForm();
 
-		Table<User> table = entityModelBuilder.createTable();
-		table.setDisplayAsList(true);
+		Table<User> table = entityModelBuilder.createListTable(false);
 		table.setRowHeight(32);
-		table.setStripedRows(false);
 		entityModelBuilder.updateModels();
 
 		TemplateField<User> userTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(getApplicationInstanceData()));
@@ -138,6 +139,11 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		ToolbarButtonGroup buttonGroup = new ToolbarButtonGroup();
 		ToolbarButton updatePasswordButton = buttonGroup.addButton(ToolbarButton.createSmall(ApplicationIcons.KEYS, getLocalized(Dictionary.RESET_PASSWORD)));
 		formController.addToolbarButtonGroup(buttonGroup);
+
+		buttonGroup = new ToolbarButtonGroup();
+		ToolbarButton userPrivilegesButton = buttonGroup.addButton(ToolbarButton.createSmall(ApplicationIcons.LOCK_OPEN, getLocalized(Dictionary.PRIVILEGES)));
+		formController.addToolbarButtonGroup(buttonGroup);
+
 
 		PictureChooser pictureChooser = new PictureChooser();
 		pictureChooser.setImageDisplaySize(120, 120);
@@ -191,6 +197,13 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 			User user = entityModelBuilder.getSelectedRecord();
 			if (user != null) {
 				showUpdatePasswordDialogue(user);
+			}
+		});
+
+		userPrivilegesButton.onClick.addListener(() -> {
+			User user = entityModelBuilder.getSelectedRecord();
+			if (user != null) {
+				showUserPrivilegesWindow(user);
 			}
 		});
 
@@ -256,6 +269,16 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		formDialogue.setCloseOnEscape(true);
 		formDialogue.setMaximizable(true);
 		formDialogue.show();
+	}
+
+	private void showUserPrivilegesWindow(User user) {
+		UserPrivileges userPrivileges = new UserPrivileges(user, userSessionData.getRegistry());
+		UserPrivilegesView userPrivilegesView = new UserPrivilegesView(userPrivileges, getApplicationInstanceData());
+		ApplicationWindow window = new ApplicationWindow(ApplicationIcons.LOCK_OPEN, getLocalized(Dictionary.PRIVILEGES), getApplicationInstanceData());
+		window.setContent(userPrivilegesView.getResponsiveForm());
+		window.addCancelButton();
+		window.setWindowPreferredSize(1000, 800, 0.1f);
+		window.show();
 	}
 
 

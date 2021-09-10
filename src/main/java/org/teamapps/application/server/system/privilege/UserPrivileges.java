@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,12 +21,12 @@ package org.teamapps.application.server.system.privilege;
 
 
 import org.teamapps.application.api.privilege.*;
-import org.teamapps.model.controlcenter.*;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.utils.RoleUtils;
 import org.teamapps.application.server.system.utils.ValueConverterUtils;
+import org.teamapps.model.controlcenter.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,6 +48,46 @@ public class UserPrivileges {
 		this.user = user;
 		this.systemRegistry = systemRegistry;
 		calculatePrivileges();
+	}
+
+	public Set<PrivilegeApplicationKey> getKeys() {
+		Set<PrivilegeApplicationKey> keySet = new HashSet<>();
+		keySet.addAll(simplePrivilegesMap.keySet());
+		keySet.addAll(simpleOrganizationPrivilegeMap.keySet());
+		keySet.addAll(simpleCustomObjectPrivilegeMap.keySet());
+		keySet.addAll(standardPrivilegeMap.keySet());
+		keySet.addAll(organizationPrivilegeGroupMap.keySet());
+		keySet.addAll(customObjectPrivilegeGroupMap.keySet());
+		return keySet;
+	}
+
+	public List<Application> getApplications() {
+		return getKeys()
+				.stream()
+				.map(PrivilegeApplicationKey::getApplication)
+				.collect(Collectors.toList());
+	}
+
+	public Map<Application, List<PrivilegeApplicationKey>> getApplicationKeyMap() {
+		return getKeys()
+				.stream()
+				.collect(Collectors.groupingBy(PrivilegeApplicationKey::getApplication));
+	}
+
+	public List<PrivilegeGroup> getPrivilegeGroups(PrivilegeApplicationKey applicationKey) {
+		List<PrivilegeGroup> groups = new ArrayList<>();
+		if (simplePrivilegesMap.containsKey(applicationKey)) groups.addAll(simplePrivilegesMap.get(applicationKey));
+		if (simpleOrganizationPrivilegeMap.containsKey(applicationKey))
+			groups.addAll(simpleOrganizationPrivilegeMap.get(applicationKey).keySet());
+		if (simpleCustomObjectPrivilegeMap.containsKey(applicationKey))
+			groups.addAll(simpleCustomObjectPrivilegeMap.get(applicationKey).keySet());
+		if (standardPrivilegeMap.containsKey(applicationKey))
+			groups.addAll(standardPrivilegeMap.get(applicationKey).keySet());
+		if (organizationPrivilegeGroupMap.containsKey(applicationKey))
+			groups.addAll(organizationPrivilegeGroupMap.get(applicationKey).keySet());
+		if (customObjectPrivilegeGroupMap.containsKey(applicationKey))
+			groups.addAll(customObjectPrivilegeGroupMap.get(applicationKey).keySet());
+		return groups;
 	}
 
 	private void calculatePrivileges() {
