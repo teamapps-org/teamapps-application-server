@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,16 +19,14 @@
  */
 package org.teamapps.application.server.system.utils;
 
+import org.teamapps.application.api.privilege.ApplicationRole;
+import org.teamapps.application.api.privilege.PrivilegeGroup;
+import org.teamapps.application.server.system.bootstrap.LoadedApplication;
+import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
-import org.teamapps.model.controlcenter.OrganizationUnit;
-import org.teamapps.model.controlcenter.OrganizationUnitType;
-import org.teamapps.model.controlcenter.Role;
-import org.teamapps.model.controlcenter.UserRoleAssignment;
+import org.teamapps.model.controlcenter.*;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class RoleUtils {
@@ -70,12 +68,7 @@ public class RoleUtils {
 		if (role == null || organizationUnit == null) {
 			return Collections.emptyList();
 		}
-		Set<Role> roleSet = new HashSet<>();
-		if (withSpecializationRoles) {
-			roleSet = getAllRoleInstances(role);
-		} else {
-			roleSet.add(role);
-		}
+		Set<Role> roleSet = withSpecializationRoles ? getAllRoleInstances(role) : new HashSet<>(Collections.singletonList(role));
 		Set<OrganizationUnit> allUnits = OrganizationUtils.getAllUnits(organizationUnit, organizationUnitTypesFilter);
 		return getUserRoleAssignments(roleSet, allUnits);
 	}
@@ -85,5 +78,61 @@ public class RoleUtils {
 				.filter(assignment -> roleSet.contains(assignment.getRole()))
 				.filter(assignment -> organizationUnits.contains(assignment.getOrganizationUnit()))
 				.collect(Collectors.toList());
+	}
+
+	public static int getMemberCount(Role role, boolean withSpecializationRoles) {
+		Set<Role> roleSet = withSpecializationRoles ? getAllRoleInstances(role) : new HashSet<>(Collections.singletonList(role));
+		return (int) UserRoleAssignment.getAll().stream()
+				.filter(assignment -> roleSet.contains(assignment.getRole()))
+				.count();
+	}
+
+	public static List<UserRoleAssignment> getMembers(Role role, boolean withSpecializationRoles) {
+		Set<Role> roleSet = withSpecializationRoles ? getAllRoleInstances(role) : new HashSet<>(Collections.singletonList(role));
+		return UserRoleAssignment.getAll().stream()
+				.filter(assignment -> roleSet.contains(assignment.getRole()))
+				.collect(Collectors.toList());
+	}
+
+	public static List<ApplicationPrivilegeGroup> calculateRolePrivileges(Role role, SystemRegistry systemRegistry) {
+		Map<String, ApplicationRole> applicationRoleMap = new HashMap<>();
+		for (LoadedApplication loadedApplication : systemRegistry.getLoadedApplications()) {
+			String name = loadedApplication.getApplication().getName();
+			List<ApplicationRole> applicationRoles = loadedApplication.getBaseApplicationBuilder().getApplicationRoles();
+			if (applicationRoles != null) {
+				for (ApplicationRole applicationRole : applicationRoles) {
+					applicationRoleMap.put(name + "." + applicationRole.getName(), applicationRole);
+				}
+			}
+		}
+		Map<String, ApplicationPrivilegeGroup> groupMap = new HashMap<>();
+		ApplicationPrivilegeGroup.getAll().forEach(group -> groupMap.put(group.getApplication().getName() + "." + group.getName(), group));
+
+		Set<Role> privilegeRoles = getAllPrivilegeRoles(role);
+		for (Role privilegeRole : privilegeRoles) {
+			for (RoleApplicationRoleAssignment roleApplicationRoleAssignment : privilegeRole.getApplicationRoleAssignments()) {
+				String applicationRoleName = roleApplicationRoleAssignment.getApplicationRoleName();
+				String applicationName = roleApplicationRoleAssignment.getApplication().getName();
+				ApplicationRole applicationRole = applicationRoleMap.get(applicationName + "." + applicationRoleName);
+				if (applicationRole != null) {
+					for (PrivilegeGroup privilegeGroup : applicationRole.getPrivilegeGroups()) {
+						ApplicationPrivilegeGroup applicationPrivilegeGroup = groupMap.get(applicationName + "." + privilegeGroup.getName());
+
+					}
+
+				}
+				OrganizationField organizationField = roleApplicationRoleAssignment.getOrganizationFieldFilter();
+				OrganizationUnit organizationRoot = roleApplicationRoleAssignment.getFixedOrganizationRoot();
+				List<OrganizationUnitType> organizationUnitTypeFilter = roleApplicationRoleAssignment.getOrganizationUnitTypeFilter();
+
+				//calculatePrivilegesFromApplicationRoleAssignment(organizationUnit, roleApplicationRoleAssignment);
+			}
+
+			for (RolePrivilegeAssignment privilegeAssignment : privilegeRole.getPrivilegeAssignments()) {
+//				privilegeAssignment.get
+//				calculatePrivilegesFromRolePrivilegeAssignment(organizationUnit, privilegeAssignment);
+			}
+		}
+		return null;
 	}
 }
