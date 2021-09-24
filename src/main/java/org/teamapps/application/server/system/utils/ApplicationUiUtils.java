@@ -24,7 +24,9 @@ import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.model.controlcenter.Application;
+import org.teamapps.model.controlcenter.ManagedApplication;
 import org.teamapps.model.controlcenter.ManagedApplicationGroup;
+import org.teamapps.model.controlcenter.ManagedApplicationPerspective;
 import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.component.template.Template;
@@ -43,6 +45,28 @@ public class ApplicationUiUtils {
 		Function<Application, String> recordToStringFunction = application -> (String) propertyProvider.getValues(application, null).get(BaseTemplate.PROPERTY_CAPTION);
 		comboBox.setRecordToStringFunction(recordToStringFunction);
 		comboBox.setModel(query -> query == null || query.isBlank() ? Application.getAll() : Application.getAll().stream().filter(app -> recordToStringFunction.apply(app).toLowerCase().contains(query.toLowerCase())).collect(Collectors.toList()));
+		return comboBox;
+	}
+
+	public static ComboBox<ManagedApplication> createManagedApplicationComboBox(Template template, UserSessionData userSessionData) {
+		ComboBox<ManagedApplication> comboBox = new ComboBox<>(template);
+		comboBox.setDropDownTemplate(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
+		PropertyProvider<ManagedApplication> propertyProvider = PropertyProviders.createManagedApplicationPropertyProvider(userSessionData);
+		comboBox.setPropertyProvider(propertyProvider);
+		Function<ManagedApplication, String> recordToStringFunction = application -> (String) propertyProvider.getValues(application, null).get(BaseTemplate.PROPERTY_CAPTION);
+		comboBox.setRecordToStringFunction(recordToStringFunction);
+		comboBox.setModel(query -> query == null || query.isBlank() ? ManagedApplication.getAll() : ManagedApplication.getAll().stream().filter(app -> recordToStringFunction.apply(app).toLowerCase().contains(query.toLowerCase())).collect(Collectors.toList()));
+		return comboBox;
+	}
+
+	public static ComboBox<ManagedApplicationPerspective> createManagedApplicationPerspectiveComboBox(Template template, UserSessionData userSessionData) {
+		ComboBox<ManagedApplicationPerspective> comboBox = new ComboBox<>(template);
+		comboBox.setDropDownTemplate(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
+		PropertyProvider<ManagedApplicationPerspective> propertyProvider = PropertyProviders.createManagedApplicationPerspectivePropertyProvider(userSessionData);
+		comboBox.setPropertyProvider(propertyProvider);
+		Function<ManagedApplicationPerspective, String> recordToStringFunction = application -> (String) propertyProvider.getValues(application, null).get(BaseTemplate.PROPERTY_CAPTION);
+		comboBox.setRecordToStringFunction(recordToStringFunction);
+		comboBox.setModel(query -> query == null || query.isBlank() ? ManagedApplicationPerspective.getAll() : ManagedApplicationPerspective.getAll().stream().filter(app -> recordToStringFunction.apply(app).toLowerCase().contains(query.toLowerCase())).collect(Collectors.toList()));
 		return comboBox;
 	}
 

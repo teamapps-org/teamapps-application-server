@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,28 +21,33 @@ package org.teamapps.application.server.controlcenter.roles;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
+import org.teamapps.application.api.privilege.Privilege;
+import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.api.theme.ApplicationIcons;
-import org.teamapps.application.api.ui.FormMetaFields;
 import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.template.PropertyProviders;
+import org.teamapps.application.server.system.utils.RoleUtils;
+import org.teamapps.application.tools.EntityListModelBuilder;
 import org.teamapps.application.tools.EntityModelBuilder;
+import org.teamapps.application.tools.RecordListModelBuilder;
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.combo.ComboBoxUtils;
 import org.teamapps.application.ux.form.FormController;
+import org.teamapps.application.ux.form.FormPanel;
 import org.teamapps.application.ux.localize.TranslatableField;
 import org.teamapps.application.ux.localize.TranslatableTextUtils;
 import org.teamapps.application.ux.view.MasterDetailController;
 import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.databinding.MutableValue;
 import org.teamapps.icons.Icon;
-import org.teamapps.model.controlcenter.OrganizationField;
-import org.teamapps.model.controlcenter.OrganizationUnitType;
-import org.teamapps.model.controlcenter.Role;
+import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.pojo.Query;
 import org.teamapps.ux.component.field.CheckBox;
+import org.teamapps.ux.component.field.FieldEditingMode;
+import org.teamapps.ux.component.field.NumberField;
 import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.field.combobox.TagBoxWrappingMode;
@@ -116,6 +121,40 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 		TagComboBox<Role> privilegesSendingRolesTagCombo = createRoleTagComboBox();
 		CheckBox noDirectMembershipsCheckBox = new CheckBox(getLocalized("roles.noDirectMemberships"));
 
+		EntityListModelBuilder<UserRoleAssignment> userRoleAssignmentModelBuilder = new EntityListModelBuilder<>(getApplicationInstanceData(), userRoleAssignment ->  userRoleAssignment.getUser().getFirstName() + " " + userRoleAssignment.getUser().getLastName());
+		Table<UserRoleAssignment> roleMemberTable = userRoleAssignmentModelBuilder.createListTable(true);
+		roleMemberTable.setHideHeaders(true);
+
+		TemplateField<User> userTemplateField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(getApplicationInstanceData()));
+		TemplateField<OrganizationUnit> organizationUnitTemplateField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.creatOrganizationUnitPropertyProvider(getApplicationInstanceData()));
+		roleMemberTable.addColumn(new TableColumn<>("user", userTemplateField));
+		roleMemberTable.addColumn(new TableColumn<>("orgUnit", organizationUnitTemplateField));
+		roleMemberTable.setPropertyExtractor((userRoleAssignment, propertyName) -> switch (propertyName){
+			case "user" -> userRoleAssignment.getUser();
+			case "orgUnit" -> userRoleAssignment.getOrganizationUnit();
+			default -> null;
+		});
+
+		FormPanel roleMembersPanel = new FormPanel(getApplicationInstanceData());
+		roleMembersPanel.setTable(roleMemberTable, userRoleAssignmentModelBuilder, ApplicationIcons.USERS, getLocalized("users.users"),  true, false, false);
+
+
+		RecordListModelBuilder<PrivilegeGroup> appRoleModelBuilder = new RecordListModelBuilder<>(getApplicationInstanceData());
+		Table<PrivilegeGroup> privilegeGroupTable = appRoleModelBuilder.createListTable(true);
+		TemplateField<PrivilegeGroup> privilegeGroupTemplateField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createPrivilegeGroupPropertyProvider(getApplicationInstanceData()));
+		TagComboBox<Privilege> privilegeTagComboBox = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createPrivilegePropertyProvider(getApplicationInstanceData()));
+
+		privilegeGroupTable.addColumn(new TableColumn<>("group", getLocalized("accessControl.privilegeGroup"), privilegeGroupTemplateField));
+		privilegeGroupTable.addColumn(new TableColumn<>("privileges", getLocalized("accessControl.privileges"), privilegeTagComboBox));
+		privilegeGroupTable.setPropertyExtractor((record, propertyName) -> switch (propertyName){
+			case "group" -> record;
+			case "privileges" -> record.getPrivileges();
+			default -> null;
+		});
+
+		FormPanel formPanel = new FormPanel(getApplicationInstanceData());
+		formPanel.setTable(privilegeGroupTable, true, false, false);
+
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(450);
 		formLayout.addSection().setCollapsible(false).setDrawHeaderLine(false);
 		formLayout.addLabelAndField(null, getLocalized("roles.role"), titleField);
@@ -130,6 +169,12 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 		formLayout.addLabelAndField(null, getLocalized("roles.privilegesReceivingRoles"), privilegesReceivingRolesTagCombo);
 		formLayout.addLabelAndField(null, getLocalized("roles.privilegesSendingRoles"), privilegesSendingRolesTagCombo);
 		formLayout.addLabelAndField(null, getLocalized("roles.noMemberships"), noDirectMembershipsCheckBox);
+
+		formLayout.addSection(ApplicationIcons.USERS_CROWD, getLocalized("roles.members"));
+		formLayout.addLabelAndComponent(null, getLocalized("applications.privileges"), roleMembersPanel.getPanel());
+
+		formLayout.addSection(ApplicationIcons.SECURITY_BADGE, getLocalized(Dictionary.PRIVILEGES));
+		formLayout.addLabelAndComponent(null, getLocalized("applications.privileges"), formPanel.getPanel());
 
 		masterDetailController.createViews(getPerspective(), table, formLayout);
 
@@ -162,6 +207,7 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 			privilegesReceivingRolesTagCombo.setValue(role.getPrivilegesReceivingRoles());
 			privilegesSendingRolesTagCombo.setValue(role.getPrivilegesSendingRoles());
 			noDirectMembershipsCheckBox.setValue(role.getNoDirectMemberships());
+			userRoleAssignmentModelBuilder.setRecords(RoleUtils.getMembers(role, true));
 		});
 		entityModelBuilder.setSelectedRecord(Role.create());
 	}
