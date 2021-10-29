@@ -162,9 +162,10 @@ public class LocalizationUtil {
 		createRequiredLanguageValues(localizationKeys, localizationConfig);
 	}
 
-	private static void createRequiredLanguageValues(List<LocalizationKey> localizationKeys, LocalizationConfig localizationConfig) {
+	public static int createRequiredLanguageValues(List<LocalizationKey> localizationKeys, LocalizationConfig localizationConfig) {
 		//create translation requests
 		List<String> requiredLanguages = localizationConfig.getRequiredLanguages();
+		int countNewEntries = 0;
 		for (LocalizationKey key : localizationKeys) {
 			Map<String, LocalizationValue> valueByLanguage = key.getLocalizationValues().stream().collect(Collectors.toMap(LocalizationValue::getLanguage, v -> v));
 			for (String language : requiredLanguages) {
@@ -176,9 +177,11 @@ public class LocalizationUtil {
 							.setTranslationState(TranslationState.TRANSLATION_REQUESTED)
 							.setTranslationVerificationState(TranslationVerificationState.NOT_YET_TRANSLATED)
 							.save();
+					countNewEntries++;
 				}
 			}
 		}
+		return countNewEntries;
 	}
 
 	public static void translateAllApplicationValues(TranslationService translationService, Application application, LocalizationConfig localizationConfig) {
@@ -218,9 +221,9 @@ public class LocalizationUtil {
 		executor.shutdown();
 	}
 
-	public static void translateAllValues(TranslationService translationService, LocalizationConfig localizationConfig) {
+	public static int translateAllValues(TranslationService translationService, LocalizationConfig localizationConfig) {
 		if (translationService == null || localizationConfig == null) {
-			return;
+			return -1;
 		}
 		Set<String> allowedSourceTranslationLanguages = new HashSet<>(localizationConfig.getAllowedSourceLanguages());
 		List<LocalizationValue> translationRequests = LocalizationValue.filter()
@@ -231,6 +234,7 @@ public class LocalizationUtil {
 		ExecutorService executor = Executors.newFixedThreadPool(10);
 		translationRequests.forEach(localizationValue -> executor.submit(() -> translateLocalizationValue(localizationValue, translationService, allowedSourceTranslationLanguages)));
 		executor.shutdown();
+		return translationRequests.size();
 	}
 
 	public static void translateLocalizationValue(LocalizationValue missingTranslationValue, TranslationService translationService, Set<String> allowedSourceTranslationLanguages) {
