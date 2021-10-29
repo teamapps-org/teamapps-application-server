@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class PropertyProviders {
 
@@ -88,12 +89,17 @@ public class PropertyProviders {
 		};
 	}
 
-	public static PropertyProvider<PrivilegeGroup> createPrivilegeGroupPropertyProvider(ApplicationInstanceData applicationInstanceData) {
+	public static PropertyProvider<PrivilegeGroup> createPrivilegeGroupPropertyProvider(UserSessionData userSessionData, Supplier<Application> applicationSupplier) {
 		return (privilegeGroup, propertyNames) -> {
+			Application application = applicationSupplier.get();
+			if (application == null) {
+				return new HashMap<>();
+			}
+			ApplicationLocalizationProvider localizationProvider = userSessionData.getApplicationLocalizationProvider(application);
 			Map<String, Object> map = new HashMap<>();
 			map.put(BaseTemplate.PROPERTY_ICON, privilegeGroup.getIcon());
-			map.put(BaseTemplate.PROPERTY_CAPTION, applicationInstanceData.getLocalized(privilegeGroup.getTitleKey()));
-			map.put(BaseTemplate.PROPERTY_DESCRIPTION, applicationInstanceData.getLocalized(privilegeGroup.getDescriptionKey()));
+			map.put(BaseTemplate.PROPERTY_CAPTION, localizationProvider.getLocalized(privilegeGroup.getTitleKey()));
+			map.put(BaseTemplate.PROPERTY_DESCRIPTION, localizationProvider.getLocalized(privilegeGroup.getDescriptionKey()));
 			return map;
 		};
 	}
