@@ -31,11 +31,6 @@ public class Model implements SchemaInfoProvider {
 		schema.setSchemaName("ControlCenterSchema");
 		Database db = schema.addDatabase("controlCenter");
 
-		//api model:
-		Table language = db.addTable("language", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
-		Table country = db.addTable("country", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
-		Table currency = db.addTable("currency", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
-
 		//system model:
 		Table login = db.addTable("login", KEEP_DELETED);
 		Table user = db.addTable("user", TableOption.KEEP_DELETED, TableOption.TRACK_CREATION, TableOption.TRACK_MODIFICATION);
@@ -94,28 +89,6 @@ public class Model implements SchemaInfoProvider {
 		Table newsBoardMessage = db.addTable("newsBoardMessage", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table newsBoardMessageImage = db.addTable("newsBoardMessageImage", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
 		Table newsBoardMessageTranslation = db.addTable("newsBoardMessageTranslation", KEEP_DELETED, TRACK_CREATION, TRACK_MODIFICATION);
-
-
-		language
-				.addText("isoCode")
-				.addText("icon")
-				.addText("englishDisplayName")
-				.addBoolean("nonLatinScript")
-				.addBoolean("rightToLeftLanguage")
-				.addReference("localizationKey", localizationKey, false)
-		;
-
-		country
-				.addText("isoCode")
-				.addText("icon")
-				.addText("englishDisplayName")
-				.addReference("localizationKey", localizationKey, false)
-				.addText("addressFormat")
-				.addReference("mainLanguage", language, false)
-				.addReference("otherLanguages", language, true)
-				.addReference("currency", currency, false)
-				.addReference("otherCurrencies", currency, true)
-		;
 
 		systemSettings
 				.addText("allowedBaseLanguages")
