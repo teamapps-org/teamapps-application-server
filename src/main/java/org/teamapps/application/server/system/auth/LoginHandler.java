@@ -20,11 +20,11 @@
 package org.teamapps.application.server.system.auth;
 
 import org.teamapps.application.api.localization.Dictionary;
+import org.teamapps.application.api.password.SecurePasswordHash;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.bootstrap.LogoutHandler;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.launcher.ApplicationLauncher;
-import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.server.system.template.Templates;

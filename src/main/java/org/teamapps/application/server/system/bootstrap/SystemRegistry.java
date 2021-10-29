@@ -232,4 +232,8 @@ public class SystemRegistry {
 	public List<AuthenticationHandler> getAuthenticationHandlers() {
 		return authenticationHandlers;
 	}
+
+	public UniversalDB getUniversalDB() {
+		return universalDB;
+	}
 }

@@ -56,7 +56,7 @@ public class GoogleTranslation implements TranslationService {
         } else {
             List<Language> languages = translationService.listSupportedLanguages();
             supportedLanguages = languages.stream()
-                    .map(language -> language.getCode())
+                    .map(Language::getCode)
                     .collect(Collectors.toSet());
             return supportedLanguages;
         }

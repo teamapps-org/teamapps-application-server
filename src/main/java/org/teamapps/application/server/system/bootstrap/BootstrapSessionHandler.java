@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.server.chat.ChatApplication;
 import org.teamapps.application.server.controlcenter.ControlCenterAppBuilder;
-import org.teamapps.application.server.controlcenter.dbexplorer.DatabaseExplorerApplicationBuilder;
 import org.teamapps.application.server.messaging.MessagingApplication;
+import org.teamapps.application.server.settings.UserSettingsApp;
 import org.teamapps.application.server.system.auth.LoginHandler;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
 import org.teamapps.application.server.system.config.SystemConfig;
@@ -109,6 +109,7 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 		systemRegistry.setSessionRegistryHandler(sessionRegistryHandler);
 
 		systemRegistry.installAndLoadApplication(controlCenterAppBuilder);
+		systemRegistry.installAndLoadApplication(new UserSettingsApp());
 		loadSystemApps();
 
 		for (Application application : Application.getAll()) {
@@ -129,11 +130,7 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 
 	}
 
-	public void loadDatabaseExplorerApp() {
-		systemRegistry.installAndLoadApplication(new DatabaseExplorerApplicationBuilder(universalDB));
-	}
-
-	private void loadSystemApps() {
+	public void loadSystemApps() {
 		systemRegistry.installAndLoadApplication(new MessagingApplication());
 		systemRegistry.installAndLoadApplication(new ChatApplication());
 	}
