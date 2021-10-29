@@ -95,7 +95,7 @@ public class ControlCenterAppBuilder extends AbstractApplicationBuilder {
 
 	@Override
 	public ApplicationVersion getApplicationVersion() {
-		return ApplicationVersion.create(0, 43);
+		return ApplicationVersion.create(0, 44);
 	}
 
 	@Override
@@ -136,9 +136,28 @@ public class ControlCenterAppBuilder extends AbstractApplicationBuilder {
 						Locale.forLanguageTag("ru"),
 						Locale.forLanguageTag("sk"),
 						Locale.forLanguageTag("sl"),
-						Locale.forLanguageTag("sv")
+						Locale.forLanguageTag("sv"),
+						Locale.forLanguageTag("fa"),
+						Locale.forLanguageTag("iw"), //he
+						Locale.forLanguageTag("hi"),
+						Locale.forLanguageTag("hr"),
+						Locale.forLanguageTag("in"), //id
+						Locale.forLanguageTag("ko"),
+						Locale.forLanguageTag("mk"),
+						Locale.forLanguageTag("mn"),
+						Locale.forLanguageTag("sr"),
+						Locale.forLanguageTag("tr"),
+						Locale.forLanguageTag("vi")
 				)
 		);
+	}
+
+	public static void main(String[] args) {
+		Locale locale = new Locale("id");
+//		Locale locale = Locale.forLanguageTag("id");
+		System.out.println(locale);
+
+		System.out.println(Locale.forLanguageTag("he"));
 	}
 
 	@Override

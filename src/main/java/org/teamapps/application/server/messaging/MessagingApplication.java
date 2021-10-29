@@ -94,7 +94,18 @@ public class MessagingApplication extends AbstractApplicationBuilder {
 						Locale.forLanguageTag("ru"),
 						Locale.forLanguageTag("sk"),
 						Locale.forLanguageTag("sl"),
-						Locale.forLanguageTag("sv")
+						Locale.forLanguageTag("sv"),
+						Locale.forLanguageTag("fa"),
+						Locale.forLanguageTag("iw"), //he
+						Locale.forLanguageTag("hi"),
+						Locale.forLanguageTag("hr"),
+						Locale.forLanguageTag("in"), //id
+						Locale.forLanguageTag("ko"),
+						Locale.forLanguageTag("mk"),
+						Locale.forLanguageTag("mn"),
+						Locale.forLanguageTag("sr"),
+						Locale.forLanguageTag("tr"),
+						Locale.forLanguageTag("vi")
 				)
 		);
 	}
