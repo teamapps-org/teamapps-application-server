@@ -24,6 +24,7 @@ import org.teamapps.application.api.application.perspective.PerspectiveMenuPanel
 import org.teamapps.application.server.controlcenter.accesscontrol.AccessControlAppRolePerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.accesscontrol.AccessControlPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.applications.ApplicationUpdatesPerspectiveBuilder;
+import org.teamapps.application.server.controlcenter.database.DataBasePerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.roles.RolesPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.roles.UserRoleAssignmentPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.systemlog.SystemLogPerspectiveBuilder;
@@ -52,7 +53,8 @@ public class AppLocalAdministrationPerspective extends AbstractManagedApplicatio
 				new AccessControlAppRolePerspectiveBuilder(),
 				new ApplicationUpdatesPerspectiveBuilder(),
 				new SystemLogPerspectiveBuilder(),
-				new ApplicationConfigurationPerspectiveBuilder()
+				new ApplicationConfigurationPerspectiveBuilder(),
+				new DataBasePerspectiveBuilder()
 		);
 		setPerspectiveMenuPanel(menuPanel.getComponent(), menuPanel.getButtonMenu());
 		onPerspectiveInitialized.addListener(() -> menuPanel.openPerspective(translationsPerspectiveBuilder));

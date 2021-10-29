@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -139,21 +139,21 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 		roleMembersPanel.setTable(roleMemberTable, userRoleAssignmentModelBuilder, ApplicationIcons.USERS, getLocalized("users.users"),  true, false, false);
 
 
-		RecordListModelBuilder<PrivilegeGroup> appRoleModelBuilder = new RecordListModelBuilder<>(getApplicationInstanceData());
-		Table<PrivilegeGroup> privilegeGroupTable = appRoleModelBuilder.createListTable(true);
-		TemplateField<PrivilegeGroup> privilegeGroupTemplateField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createPrivilegeGroupPropertyProvider(getApplicationInstanceData()));
-		TagComboBox<Privilege> privilegeTagComboBox = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createPrivilegePropertyProvider(getApplicationInstanceData()));
-
-		privilegeGroupTable.addColumn(new TableColumn<>("group", getLocalized("accessControl.privilegeGroup"), privilegeGroupTemplateField));
-		privilegeGroupTable.addColumn(new TableColumn<>("privileges", getLocalized("accessControl.privileges"), privilegeTagComboBox));
-		privilegeGroupTable.setPropertyExtractor((record, propertyName) -> switch (propertyName){
-			case "group" -> record;
-			case "privileges" -> record.getPrivileges();
-			default -> null;
-		});
-
-		FormPanel formPanel = new FormPanel(getApplicationInstanceData());
-		formPanel.setTable(privilegeGroupTable, true, false, false);
+//		RecordListModelBuilder<PrivilegeGroup> appRoleModelBuilder = new RecordListModelBuilder<>(getApplicationInstanceData());
+//		Table<PrivilegeGroup> privilegeGroupTable = appRoleModelBuilder.createListTable(true);
+//		TemplateField<PrivilegeGroup> privilegeGroupTemplateField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createPrivilegeGroupPropertyProvider());
+//		TagComboBox<Privilege> privilegeTagComboBox = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createPrivilegePropertyProvider(getApplicationInstanceData()));
+//
+//		privilegeGroupTable.addColumn(new TableColumn<>("group", getLocalized("accessControl.privilegeGroup"), privilegeGroupTemplateField));
+//		privilegeGroupTable.addColumn(new TableColumn<>("privileges", getLocalized("accessControl.privileges"), privilegeTagComboBox));
+//		privilegeGroupTable.setPropertyExtractor((record, propertyName) -> switch (propertyName){
+//			case "group" -> record;
+//			case "privileges" -> record.getPrivileges();
+//			default -> null;
+//		});
+//
+//		FormPanel formPanel = new FormPanel(getApplicationInstanceData());
+//		formPanel.setTable(privilegeGroupTable, true, false, false);
 
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(450);
 		formLayout.addSection().setCollapsible(false).setDrawHeaderLine(false);
@@ -173,8 +173,8 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 		formLayout.addSection(ApplicationIcons.USERS_CROWD, getLocalized("roles.members"));
 		formLayout.addLabelAndComponent(null, getLocalized("applications.privileges"), roleMembersPanel.getPanel());
 
-		formLayout.addSection(ApplicationIcons.SECURITY_BADGE, getLocalized(Dictionary.PRIVILEGES));
-		formLayout.addLabelAndComponent(null, getLocalized("applications.privileges"), formPanel.getPanel());
+//		formLayout.addSection(ApplicationIcons.SECURITY_BADGE, getLocalized(Dictionary.PRIVILEGES));
+//		formLayout.addLabelAndComponent(null, getLocalized("applications.privileges"), formPanel.getPanel());
 
 		masterDetailController.createViews(getPerspective(), table, formLayout);
 

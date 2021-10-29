@@ -20,8 +20,10 @@
 package org.teamapps.application.server.controlcenter.applications;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
+import org.teamapps.application.api.privilege.Privilege;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.api.ui.FormMetaFields;
+import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.bootstrap.ApplicationInfoDataElement;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
@@ -145,16 +147,16 @@ public class ApplicationUpdatesPerspective extends AbstractManagedApplicationPer
 		formLayout.addLabelAndComponent(null, getLocalized("applications.perspectivesDataChanges"), perspectiveChangesField);
 
 		formLayout.addSection(ApplicationIcons.DATA_CLOUD, getLocalized("applications.dataModelChanges")).setDrawHeaderLine(true).setCollapsed(true);
-		formLayout.addLabelAndComponent(null, dataModelChangesDisplayField);
+		formLayout.addLabelAndComponent(dataModelChangesDisplayField);
 
 		formLayout.addSection(ApplicationIcons.EARTH, getLocalized("applications.localizationDataChanges")).setDrawHeaderLine(true).setCollapsed(true);
-		formLayout.addLabelAndComponent(null, localizationChangesDisplayField);
+		formLayout.addLabelAndComponent(localizationChangesDisplayField);
 
 		formLayout.addSection(ApplicationIcons.KEYS, getLocalized("applications.privilegesDataChanges")).setDrawHeaderLine(true).setCollapsed(true);
-		formLayout.addLabelAndComponent(null, privilegeChangesDisplayField);
+		formLayout.addLabelAndComponent(privilegeChangesDisplayField);
 
 		formLayout.addSection(ApplicationIcons.WINDOWS, getLocalized("applications.perspectivesDataChanges")).setDrawHeaderLine(true).setCollapsed(true);
-		formLayout.addLabelAndComponent(null, perspectiveChangesDisplayField);
+		formLayout.addLabelAndComponent(perspectiveChangesDisplayField);
 
 		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
 		formMetaFields.addMetaFields(formLayout, false);
@@ -189,18 +191,22 @@ public class ApplicationUpdatesPerspective extends AbstractManagedApplicationPer
 
 
 		ToolbarButtonGroup buttonGroup = applicationDetailsView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
-		buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.UPLOAD, getLocalized("applications.installUpdate"), getLocalized("applications.installUpdate"))).onClick.addListener(() -> {
-			perspectiveComponents.showInstallApplicationDialogue(selectedApplication.get());
-		});
+		if (isAllowed(Privileges.APPLICATION_UPDATES_PERSPECTIVE, Privilege.EXECUTE)) {
+			buttonGroup.addButton(ToolbarButton.create(ApplicationIcons.UPLOAD, getLocalized("applications.installUpdate"), getLocalized("applications.installUpdate"))).onClick.addListener(() -> {
+				perspectiveComponents.showInstallApplicationDialogue(selectedApplication.get());
+			});
+		}
 
 		buttonGroup = applicationDetailsView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
 		perspectiveComponents.createToolbarButtons(buttonGroup);
 
-		buttonGroup = applicationDetailsView.addLocalButtonGroup(new ToolbarButtonGroup());
-		ToolbarButton rollbackButton = buttonGroup.addButton(ToolbarButton.createSmall(ApplicationIcons.SIGN_WARNING_HARMFUL, getLocalized("applications.performRollback")));
-		rollbackButton.onClick.addListener(() -> {
+		if (isAllowed(Privileges.APPLICATION_UPDATES_PERSPECTIVE, Privilege.RESTORE)) {
+			buttonGroup = applicationDetailsView.addLocalButtonGroup(new ToolbarButtonGroup());
+			ToolbarButton rollbackButton = buttonGroup.addButton(ToolbarButton.createSmall(ApplicationIcons.SIGN_WARNING_HARMFUL, getLocalized("applications.performRollback")));
+			rollbackButton.onClick.addListener(() -> {
 
-		});
+			});
+		}
 
 		selectedApplication.set(getMainApplication());
 		applicationVersionModelBuilder.setSelectedRecord(getMainApplication().getInstalledVersion());

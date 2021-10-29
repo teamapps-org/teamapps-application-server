@@ -92,6 +92,7 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		topicImageView.setVisible(false);
 
 		ToolbarButtonGroup buttonGroup = localizationKeyView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
+		ToolbarButton createMissingEntries = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.GEARWHEELS, ApplicationIcons.FORM), getLocalized("translations.createMissingEntries"), getLocalized("translations.createMissingTranslationEntries")));
 		ToolbarButton startMachineTranslationButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.GEARWHEELS, ApplicationIcons.MESSAGES), getLocalized("translations.startMachineTranslation"), getLocalized("translations.translateAllNewEntries")));
 		ToolbarButton createTranslationFilesButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.FOLDER_ZIP, ApplicationIcons.EARTH), getLocalized("translations.createTranslationFiles"), getLocalized("translations.createApplicationResourceFiles")));
 
@@ -342,8 +343,14 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		};
 		translationModeChangeHandler.accept(getAvailableModes().get(0));
 
+		createMissingEntries.onClick.addListener(() -> {
+			int values = LocalizationUtil.createRequiredLanguageValues(LocalizationKey.getAll(), userSessionData.getRegistry().getSystemConfig().getLocalizationConfig());
+			UiUtils.showNotification(values > 0 ? ApplicationIcons.OK : ApplicationIcons.ERROR, getLocalized("translations.createdArg0MissingTranslationEntries", values));
+		});
+
 		startMachineTranslationButton.onClick.addListener(() -> {
-			LocalizationUtil.translateAllValues(userSessionData.getRegistry().getTranslationService(), userSessionData.getRegistry().getSystemConfig().getLocalizationConfig());
+			int values = LocalizationUtil.translateAllValues(userSessionData.getRegistry().getTranslationService(), userSessionData.getRegistry().getSystemConfig().getLocalizationConfig());
+			UiUtils.showNotification(values > 0 ? ApplicationIcons.OK : ApplicationIcons.ERROR, getLocalized("translations.translatingArg0Entries", values));
 		});
 
 		createTranslationFilesButton.onClick.addListener(() -> {

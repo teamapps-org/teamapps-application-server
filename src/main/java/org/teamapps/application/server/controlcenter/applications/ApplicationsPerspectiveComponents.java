@@ -305,16 +305,16 @@ public class ApplicationsPerspectiveComponents extends AbstractManagedApplicatio
 		formLayout.addLabelAndComponent(null, getLocalized("applications.perspectivesDataChanges"), UiUtils.createSingleValueTemplateField(ApplicationIcons.WINDOWS, applicationInfo.getPerspectiveData().getChangeString()));
 
 		formLayout.addSection(ApplicationIcons.DATA_CLOUD, getLocalized("applications.dataModelChanges")).setDrawHeaderLine(false).setCollapsed(true);
-		formLayout.addLabelAndComponent(null, UiUtils.createSingleValueDisplayField(applicationInfo.getDataModelData().getMultiLineChangeHtml(getLocalized("applications.addedData"), getLocalized("applications.removedData"))));
+		formLayout.addLabelAndComponent(UiUtils.createSingleValueDisplayField(applicationInfo.getDataModelData().getMultiLineChangeHtml(getLocalized("applications.addedData"), getLocalized("applications.removedData"))));
 
 		formLayout.addSection(ApplicationIcons.EARTH, getLocalized("applications.localizationDataChanges")).setDrawHeaderLine(false).setCollapsed(true);
-		formLayout.addLabelAndComponent(null, UiUtils.createSingleValueDisplayField(applicationInfo.getLocalizationData().getMultiLineChangeHtml(getLocalized("applications.addedData"), getLocalized("applications.removedData"))));
+		formLayout.addLabelAndComponent(UiUtils.createSingleValueDisplayField(applicationInfo.getLocalizationData().getMultiLineChangeHtml(getLocalized("applications.addedData"), getLocalized("applications.removedData"))));
 
 		formLayout.addSection(ApplicationIcons.KEYS, getLocalized("applications.privilegesDataChanges")).setDrawHeaderLine(false).setCollapsed(true);
-		formLayout.addLabelAndComponent(null, UiUtils.createSingleValueDisplayField(applicationInfo.getPrivilegeData().getMultiLineChangeHtml(getLocalized("applications.addedData"), getLocalized("applications.removedData"))));
+		formLayout.addLabelAndComponent(UiUtils.createSingleValueDisplayField(applicationInfo.getPrivilegeData().getMultiLineChangeHtml(getLocalized("applications.addedData"), getLocalized("applications.removedData"))));
 
 		formLayout.addSection(ApplicationIcons.WINDOWS, getLocalized("applications.perspectivesDataChanges")).setDrawHeaderLine(false).setCollapsed(true);
-		formLayout.addLabelAndComponent(null, UiUtils.createSingleValueDisplayField(applicationInfo.getPerspectiveData().getMultiLineChangeHtml(getLocalized("applications.addedData"), getLocalized("applications.removedData"))));
+		formLayout.addLabelAndComponent(UiUtils.createSingleValueDisplayField(applicationInfo.getPerspectiveData().getMultiLineChangeHtml(getLocalized("applications.addedData"), getLocalized("applications.removedData"))));
 
 		window.setContent(form);
 		ToolbarButtonGroup buttonGroup = window.getToolbar().addButtonGroup(new ToolbarButtonGroup());

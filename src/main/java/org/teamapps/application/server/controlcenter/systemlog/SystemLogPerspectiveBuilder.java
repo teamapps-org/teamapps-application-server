@@ -35,7 +35,7 @@ public class SystemLogPerspectiveBuilder extends AbstractPerspectiveBuilder {
 
 	@Override
 	public boolean isPerspectiveAccessible(ApplicationPrivilegeProvider applicationPrivilegeProvider) {
-		return applicationPrivilegeProvider.isAllowed(Privileges.LAUNCH_PERSPECTIVE_SYSTEM_LOG);
+		return applicationPrivilegeProvider.isReadAccess(Privileges.SYSTEM_LOG_PERSPECTIVE);
 	}
 
 	@Override

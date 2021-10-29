@@ -35,7 +35,7 @@ public class UserRoleAssignmentPerspectiveBuilder extends AbstractPerspectiveBui
 
 	@Override
 	public boolean isPerspectiveAccessible(ApplicationPrivilegeProvider applicationPrivilegeProvider) {
-		return applicationPrivilegeProvider.isAllowed(Privileges.LAUNCH_PERSPECTIVE_USER_ROLE_ASSIGNMENT);
+		return applicationPrivilegeProvider.isAnyReadAccess(Privileges.USER_ROLE_ASSIGNMENT_PERSPECTIVE);
 	}
 
 	@Override

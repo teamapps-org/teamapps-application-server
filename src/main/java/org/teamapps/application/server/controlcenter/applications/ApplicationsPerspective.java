@@ -165,16 +165,16 @@ public class ApplicationsPerspective extends AbstractManagedApplicationPerspecti
 		formLayout.addLabelAndComponent(null, getLocalized("applications.perspectivesDataChanges"), perspectiveChangesField);
 
 		formLayout.addSection(ApplicationIcons.DATA_CLOUD, getLocalized("applications.dataModelChanges")).setDrawHeaderLine(true).setCollapsed(true);
-		formLayout.addLabelAndComponent(null, dataModelChangesDisplayField);
+		formLayout.addLabelAndComponent(dataModelChangesDisplayField);
 
 		formLayout.addSection(ApplicationIcons.EARTH, getLocalized("applications.localizationDataChanges")).setDrawHeaderLine(true).setCollapsed(true);
-		formLayout.addLabelAndComponent(null, localizationChangesDisplayField);
+		formLayout.addLabelAndComponent(localizationChangesDisplayField);
 
 		formLayout.addSection(ApplicationIcons.KEYS, getLocalized("applications.privilegesDataChanges")).setDrawHeaderLine(true).setCollapsed(true);
-		formLayout.addLabelAndComponent(null, privilegeChangesDisplayField);
+		formLayout.addLabelAndComponent(privilegeChangesDisplayField);
 
 		formLayout.addSection(ApplicationIcons.WINDOWS, getLocalized("applications.perspectivesDataChanges")).setDrawHeaderLine(true).setCollapsed(true);
-		formLayout.addLabelAndComponent(null, perspectiveChangesDisplayField);
+		formLayout.addLabelAndComponent(perspectiveChangesDisplayField);
 
 		FormMetaFields formMetaFields = getApplicationInstanceData().getComponentFactory().createFormMetaFields();
 		formMetaFields.addMetaFields(formLayout, false);

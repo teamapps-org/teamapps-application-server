@@ -23,7 +23,7 @@ package org.teamapps.application.server.rest;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
+import org.teamapps.application.api.password.SecurePasswordHash;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.enumeration.EnumFilterType;
 import org.teamapps.universaldb.index.text.TextFilter;

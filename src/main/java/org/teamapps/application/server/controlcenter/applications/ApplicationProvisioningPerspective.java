@@ -146,8 +146,8 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		formLayout.addLabelAndComponent(null, getLocalized("applications.perspectives"), formPanel.getPanel());
 		formLayout.addLabelAndField(null, getLocalized("applications.applicationGroup"), applicationGroupComboBox);
 
-		formPanel.getAddButton().onClick.addListener(() -> showPerspectiveFormWindow(null, perspectiveModelBuilder));
-		formPanel.getEditButton().onClick.addListener(() -> showPerspectiveFormWindow(perspectivesList.getSelectedRecord(), perspectiveModelBuilder));
+		formPanel.getAddButton().onClick.addListener(() -> showPerspectiveFormWindow(null, perspectiveModelBuilder, formController));
+		formPanel.getEditButton().onClick.addListener(() -> showPerspectiveFormWindow(perspectivesList.getSelectedRecord(), perspectiveModelBuilder, formController));
 		formPanel.getDeleteButton().onClick.addListener(() -> perspectiveModelBuilder.removeRecord(perspectivesList.getSelectedRecord()));
 
 		masterDetailController.createViews(getPerspective(), applicationsTable, formLayout);
@@ -181,8 +181,8 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 			}
 		});
 
-		moveUpButton.onClick.addListener(() -> changePerspectiveOrder(perspectiveModelBuilder, perspectivesList, true));
-		moveDownButton.onClick.addListener(() -> changePerspectiveOrder(perspectiveModelBuilder, perspectivesList, false));
+		moveUpButton.onClick.addListener(() -> changePerspectiveOrder(perspectiveModelBuilder, perspectivesList, true, formController));
+		moveDownButton.onClick.addListener(() -> changePerspectiveOrder(perspectiveModelBuilder, perspectivesList, false, formController));
 
 		applicationComboBox.onValueChanged.addListener(app -> {
 			iconComboBox.setValue(app != null ? IconUtils.decodeIcon(app.getIcon()) : null);
@@ -211,7 +211,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		entityModelBuilder.setSelectedRecord(ManagedApplication.create());
 	}
 
-	private void showPerspectiveFormWindow(ManagedApplicationPerspective managedApplicationPerspective, EntityListModelBuilder<ManagedApplicationPerspective> perspectiveModelBuilder) {
+	private void showPerspectiveFormWindow(ManagedApplicationPerspective managedApplicationPerspective, EntityListModelBuilder<ManagedApplicationPerspective> perspectiveModelBuilder, FormController<ManagedApplication> formController) {
 		ManagedApplicationPerspective perspective = managedApplicationPerspective != null ? managedApplicationPerspective : ManagedApplicationPerspective.create();
 		FormWindow formWindow = new FormWindow(ApplicationIcons.WINDOWS, getLocalized("applications.perspective"), getApplicationInstanceData());
 		formWindow.addSaveButton();
@@ -265,6 +265,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 				perspective.save();
 				if (managedApplicationPerspective == null) {
 					perspectiveModelBuilder.addRecord(perspective);
+					formController.setFormDataModified();
 				}
 				formWindow.close();
 			}
@@ -273,7 +274,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 		formWindow.show();
 	}
 
-	private void changePerspectiveOrder(EntityListModelBuilder<ManagedApplicationPerspective> perspectiveModelBuilder, Table<ManagedApplicationPerspective> perspectivesList, boolean moveUp) {
+	private void changePerspectiveOrder(EntityListModelBuilder<ManagedApplicationPerspective> perspectiveModelBuilder, Table<ManagedApplicationPerspective> perspectivesList, boolean moveUp, FormController<ManagedApplication> formController) {
 		ManagedApplicationPerspective selectedPerspective = perspectivesList.getSelectedRecord();
 		if (selectedPerspective != null) {
 			List<ManagedApplicationPerspective> perspectives = perspectiveModelBuilder.getRecords();
@@ -288,6 +289,7 @@ public class ApplicationProvisioningPerspective extends AbstractManagedApplicati
 				}
 			}
 			perspectiveModelBuilder.setRecords(perspectives.stream().sorted((Comparator.comparingInt(ManagedApplicationPerspective::getListingPosition))).collect(Collectors.toList()));
+			formController.setFormDataModified();
 		}
 	}
 

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,6 +45,7 @@ import org.teamapps.databinding.MutableValue;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.pojo.Query;
+import org.teamapps.ux.component.field.Label;
 import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.field.combobox.TagComboBox;
@@ -123,12 +124,12 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 
 
 		RecordListModelBuilder<PrivilegeGroup> appRoleModelBuilder = new RecordListModelBuilder<>(getApplicationInstanceData());
-		Table<PrivilegeGroup> privilegeGroupTable = appRoleModelBuilder.createListTable(true);
-		TemplateField<PrivilegeGroup> privilegeGroupTemplateField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createPrivilegeGroupPropertyProvider(getApplicationInstanceData()));
-		TagComboBox<Privilege> privilegeTagComboBox = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createPrivilegePropertyProvider(getApplicationInstanceData()));
+		Table<PrivilegeGroup> privilegeGroupTable = appRoleModelBuilder.createListTable(false);
+		TemplateField<PrivilegeGroup> privilegeGroupTemplateField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createPrivilegeGroupPropertyProvider(userSessionData, applicationComboBox::getValue));
+		TagComboBox<Privilege> privilegeTagComboBox = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createPrivilegePropertyProvider(getApplicationInstanceData()));
 
-		privilegeGroupTable.addColumn(new TableColumn<>("group", getLocalized("accessControl.privilegeGroup"), privilegeGroupTemplateField));
-		privilegeGroupTable.addColumn(new TableColumn<>("privileges", getLocalized("accessControl.privileges"), privilegeTagComboBox));
+		privilegeGroupTable.addColumn(new TableColumn<PrivilegeGroup>("group", getLocalized("accessControl.privilegeGroup"), privilegeGroupTemplateField).setDefaultWidth(350));
+		privilegeGroupTable.addColumn(new TableColumn<PrivilegeGroup>("privileges", getLocalized("accessControl.privileges"), privilegeTagComboBox).setDefaultWidth(500));
 		privilegeGroupTable.setPropertyExtractor((record, propertyName) -> switch (propertyName) {
 			case "group" -> record;
 			case "privileges" -> record.getPrivileges();
@@ -150,7 +151,8 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 		formLayout.addLabelAndField(null, getLocalized("accessControl.organizationUnitTypeFilter"), organizationUnitTypeFilterTagComboBox);
 
 		formLayout.addSection(ApplicationIcons.SECURITY_BADGE, getLocalized(Dictionary.PRIVILEGES));
-		formLayout.addLabelAndComponent(null, getLocalized("accessControl.applicationRolePrivileges"), formPanel.getPanel());
+		formLayout.addLabelAndComponent(new Label(getLocalized("accessControl.applicationRolePrivileges")));
+		formLayout.addLabelAndComponent(formPanel.getPanel());
 
 		applicationComboBox.onValueChanged.addListener(() -> applicationRoleComboBox.setValue(null));
 		applicationRoleComboBox.onValueChanged.addListener(role -> appRoleModelBuilder.setRecords(role.getPrivilegeGroups()));

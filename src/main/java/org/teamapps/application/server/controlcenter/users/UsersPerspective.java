@@ -25,13 +25,13 @@ import org.teamapps.application.api.application.perspective.AbstractPerspectiveB
 import org.teamapps.application.api.application.perspective.PerspectiveMenuPanel;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.localization.Language;
+import org.teamapps.application.api.password.SecurePasswordHash;
 import org.teamapps.application.api.privilege.Privilege;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.application.server.controlcenter.roles.UserRoleAssignmentPerspectiveBuilder;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
-import org.teamapps.application.server.system.passwordhash.SecurePasswordHash;
 import org.teamapps.application.server.system.privilege.UserPrivileges;
 import org.teamapps.application.server.system.privilege.UserPrivilegesView;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;

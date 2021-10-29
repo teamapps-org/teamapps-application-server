@@ -36,7 +36,7 @@ public class AccessControlAppRolePerspectiveBuilder extends AbstractPerspectiveB
 
 	@Override
 	public boolean isPerspectiveAccessible(ApplicationPrivilegeProvider applicationPrivilegeProvider) {
-		return applicationPrivilegeProvider.isAllowed(Privileges.LAUNCH_PERSPECTIVE_ACCESS_CONTROL_APP_ROLE);
+		return applicationPrivilegeProvider.isReadAccess(Privileges.ACCESS_CONTROL_APP_ROLE_PERSPECTIVE);
 	}
 
 	@Override
