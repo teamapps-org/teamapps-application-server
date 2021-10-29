@@ -208,9 +208,10 @@ public enum Templates implements Template {
 	public UiTemplate createUiTemplate() {
 		return this.uiTemplateReference;
 	}
-
-	public List<String> getDataKeys() {
-		return this.template.getDataKeys();
+	
+	@Override
+	public List<String> getPropertyNames() {
+		return this.template.getPropertyNames();
 	}
 
 	public Template getTemplate() {
