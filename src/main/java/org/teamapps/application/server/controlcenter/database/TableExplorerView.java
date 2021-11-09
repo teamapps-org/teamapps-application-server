@@ -277,6 +277,10 @@ public class TableExplorerView extends AbstractApplicationView {
 	private void createFormFields(TableIndex tableIndex, ResponsiveFormLayout formLayout, Event<Integer> onTableRowSelected) {
 		for (ColumnIndex<?, ?> columnIndex : getSortedColumns(tableIndex)) {
 			String fieldName = columnIndex.getName();
+			if (isMetaUserColumn(columnIndex)) {
+				addFormColumn(fieldName, getApplicationInstanceData().getComponentFactory().createUserTemplateField(), formLayout);
+				continue;
+			}
 			switch (columnIndex.getColumnType()) {
 				case BOOLEAN, BITSET_BOOLEAN -> addFormColumn(fieldName, new CheckBox(), formLayout);
 				case SHORT, INT, LONG -> addFormColumn(fieldName, new NumberField(0), formLayout);
@@ -319,6 +323,10 @@ public class TableExplorerView extends AbstractApplicationView {
 	private void createTableFields(TableIndex tableIndex, Table<Integer> table) {
 		for (ColumnIndex<?, ?> columnIndex : getSortedColumns(tableIndex)) {
 			String fieldName = columnIndex.getName();
+			if (isMetaUserColumn(columnIndex)) {
+				addColumn(fieldName, getApplicationInstanceData().getComponentFactory().createUserTemplateField(), 250, table);
+				continue;
+			}
 			switch (columnIndex.getColumnType()) {
 				case BOOLEAN, BITSET_BOOLEAN -> addColumn(fieldName, new CheckBox(), 70, table);
 				case SHORT, INT, LONG -> addColumn(fieldName, new NumberField(0), 70, table);
@@ -337,6 +345,25 @@ public class TableExplorerView extends AbstractApplicationView {
 				case BINARY -> addColumn(fieldName, new TextField(), 120, table);
 			}
 		}
+	}
+
+	private boolean isMetaUserColumn(ColumnIndex<?, ?> columnIndex) {
+		String fieldName = columnIndex.getName();
+		if (columnIndex.getColumnType() == ColumnType.INT && isMetaField(fieldName)) {
+			if (
+					fieldName.equals(org.teamapps.universaldb.schema.Table.FIELD_CREATED_BY) ||
+					fieldName.equals(org.teamapps.universaldb.schema.Table.FIELD_MODIFIED_BY) ||
+					fieldName.equals(org.teamapps.universaldb.schema.Table.FIELD_DELETED_BY) ||
+					fieldName.equals(org.teamapps.universaldb.schema.Table.FIELD_RESTORED_BY)
+			)			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean isMetaField(String fieldName) {
+		return org.teamapps.universaldb.schema.Table.isReservedMetaName(fieldName);
 	}
 
 	private List<ColumnIndex> getSortedColumns(TableIndex tableIndex) {
@@ -395,6 +422,9 @@ public class TableExplorerView extends AbstractApplicationView {
 	private void addFormColumn(String fieldName, AbstractField<?> field, ResponsiveFormLayout formLayout) {
 		String label = getTitle(fieldName);
 		formLayout.addLabelAndField(null, label, fieldName, field);
+		if (isMetaField(fieldName)) {
+			field.setEditingMode(FieldEditingMode.READONLY);
+		}
 	}
 
 	private void addFormColumn(String fieldName, Component component, ResponsiveFormLayout formLayout) {
@@ -408,7 +438,7 @@ public class TableExplorerView extends AbstractApplicationView {
 	}
 
 	private void addColumn(String name, AbstractField<?> field, int width, Table<Integer> table) {
-		TableColumn<Integer> column = new TableColumn<>(name, getTitle(name), field);
+		TableColumn<Integer, ?> column = new TableColumn<>(name, getTitle(name), field);
 		column.setDefaultWidth(width);
 		table.addColumn(column);
 	}
