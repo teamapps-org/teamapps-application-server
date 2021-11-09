@@ -47,6 +47,7 @@ import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.pojo.Query;
 import org.teamapps.ux.application.layout.StandardLayout;
 import org.teamapps.ux.application.view.View;
+import org.teamapps.ux.component.field.AbstractField;
 import org.teamapps.ux.component.field.CheckBox;
 import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.combobox.ComboBox;
@@ -100,11 +101,11 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 		TagComboBox<ApplicationPrivilege> applicationPrivilegesTableField = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createApplicationPrivilegePropertyProvider(userSessionData));
 		TemplateField<OrganizationUnit> customOrganizationUnitTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.creatOrganizationUnitPropertyProvider(getApplicationInstanceData()));
 
-		table.addColumn(new TableColumn<RolePrivilegeAssignment>(RolePrivilegeAssignment.FIELD_ROLE, getLocalized("roles.role"), roleTableField).setDefaultWidth(200));
-		table.addColumn(new TableColumn<RolePrivilegeAssignment>(RolePrivilegeAssignment.FIELD_APPLICATION, getLocalized("applications.application"), applicationTableField).setDefaultWidth(200));
-		table.addColumn(new TableColumn<RolePrivilegeAssignment>(RolePrivilegeAssignment.FIELD_PRIVILEGE_GROUP, getLocalized("accessControl.privilegeGroup"), applicationPrivilegeGroupTableField).setDefaultWidth(200));
-		table.addColumn(new TableColumn<RolePrivilegeAssignment>(RolePrivilegeAssignment.FIELD_PRIVILEGES, getLocalized("accessControl.privileges"), applicationPrivilegesTableField).setDefaultWidth(350));
-		table.addColumn(new TableColumn<RolePrivilegeAssignment>(RolePrivilegeAssignment.FIELD_FIXED_ORGANIZATION_ROOT, getLocalized("accessControl.customOrganizationUnit"), customOrganizationUnitTableField).setDefaultWidth(200));
+		table.addColumn(new TableColumn<RolePrivilegeAssignment, Role>(RolePrivilegeAssignment.FIELD_ROLE, getLocalized("roles.role"), roleTableField).setDefaultWidth(200));
+		table.addColumn(new TableColumn<RolePrivilegeAssignment, Application>(RolePrivilegeAssignment.FIELD_APPLICATION, getLocalized("applications.application"), applicationTableField).setDefaultWidth(200));
+		table.addColumn(new TableColumn<RolePrivilegeAssignment, ApplicationPrivilegeGroup>(RolePrivilegeAssignment.FIELD_PRIVILEGE_GROUP, getLocalized("accessControl.privilegeGroup"), applicationPrivilegeGroupTableField).setDefaultWidth(200));
+		table.addColumn(new TableColumn<RolePrivilegeAssignment, List<ApplicationPrivilege>>(RolePrivilegeAssignment.FIELD_PRIVILEGES, getLocalized("accessControl.privileges"), applicationPrivilegesTableField).setDefaultWidth(350));
+		table.addColumn(new TableColumn<RolePrivilegeAssignment, OrganizationUnit>(RolePrivilegeAssignment.FIELD_FIXED_ORGANIZATION_ROOT, getLocalized("accessControl.customOrganizationUnit"), customOrganizationUnitTableField).setDefaultWidth(200));
 
 		table.setPropertyExtractor((rolePrivilegeAssignment, propertyName) -> switch (propertyName) {
 			case RolePrivilegeAssignment.FIELD_ROLE -> rolePrivilegeAssignment.getRole();
@@ -127,7 +128,8 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 		TagComboBox<PrivilegeObject> privilegeObjectTagComboBox = createPrivilegeObjectTagComboBox(applicationComboBox, privilegeGroupComboBox);
 		CheckBox privilegeObjectInheritanceCheckBox = new CheckBox(getLocalized("accessControl.privilegeObjectInheritance"));
 		ComboBox<OrganizationField> organizationFieldFilterComboBox = createOrganizationFieldComboBox();
-		ComboBox<OrganizationUnit> organizationFilterComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), true, getApplicationInstanceData());
+//		ComboBox<OrganizationUnit> organizationFilterComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), true, getApplicationInstanceData());
+		AbstractField<OrganizationUnitView> organizationFilterComboBox = formController.getOrganizationUnitViewField(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
 		TagComboBox<OrganizationUnitType> organizationUnitTypeFilterTagComboBox = OrganizationUtils.createOrganizationUnitTypeTagComboBox(50, getApplicationInstanceData());
 
 
@@ -174,7 +176,7 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 					.setPrivilegeObjects(privilegeObjectTagComboBox.getValue() != null ? ValueConverterUtils.compressStringList(privilegeObjectTagComboBox.getValue().stream().map(p -> "" + p.getId()).collect(Collectors.toList())) : null)
 					.setPrivilegeObjectInheritance(privilegeObjectInheritanceCheckBox.getValue())
 					.setOrganizationFieldFilter(organizationField)
-					.setFixedOrganizationRoot(organizationFilterComboBox.getValue())
+					.setFixedOrganizationRoot(OrganizationUtils.convert(organizationFilterComboBox.getValue()))
 					.setOrganizationUnitTypeFilter(organizationUnitTypeFilterTagComboBox.getValue());
 			return true;
 		});
@@ -187,7 +189,7 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 			//privilegeObjectTagComboBox.setValue(rolePrivilegeAssignment); //todo!
 			privilegeObjectInheritanceCheckBox.setValue(rolePrivilegeAssignment.getPrivilegeObjectInheritance());
 			organizationFieldFilterComboBox.setValue(rolePrivilegeAssignment.getOrganizationFieldFilter());
-			organizationFilterComboBox.setValue(rolePrivilegeAssignment.getFixedOrganizationRoot());
+			organizationFilterComboBox.setValue(OrganizationUtils.convert(rolePrivilegeAssignment.getFixedOrganizationRoot()));
 			organizationUnitTypeFilterTagComboBox.setValue(rolePrivilegeAssignment.getOrganizationUnitTypeFilter());
 		});
 

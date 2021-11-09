@@ -181,11 +181,11 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		TemplateField<LocalizationValue> languageColumn = createLocalizationValueTemplateField(false, false);
 		TemplateField<LocalizationValue> stateColumn = createLocalizationValueTemplateField(true, true);
 
-		keyTable.addColumn(new TableColumn<LocalizationKey>("template1", getLocalized("translations.template1"), template1Column).setDefaultWidth(230));
-		keyTable.addColumn(new TableColumn<LocalizationKey>("template2", getLocalized("translations.template2"), template2Column).setDefaultWidth(230));
-		keyTable.addColumn(new TableColumn<LocalizationKey>("language", getLocalized("translations.translationLanguage"), languageColumn).setDefaultWidth(230));
-		keyTable.addColumn(new TableColumn<LocalizationKey>("status", getLocalized("translations.status"), stateColumn).setDefaultWidth(170));
-		keyTable.addColumn(new TableColumn<LocalizationKey>("key", getLocalized("translations.key"), new TextField()).setDefaultWidth(300));
+		keyTable.addColumn("template1", getLocalized("translations.template1"), template1Column).setDefaultWidth(230);
+		keyTable.addColumn("template2", getLocalized("translations.template2"), template2Column).setDefaultWidth(230);
+		keyTable.addColumn("language", getLocalized("translations.translationLanguage"), languageColumn).setDefaultWidth(230);
+		keyTable.addColumn("status", getLocalized("translations.status"), stateColumn).setDefaultWidth(170);
+		keyTable.addColumn("key", getLocalized("translations.key"), new TextField()).setDefaultWidth(300);
 
 		Function<String, String> languageByTableFieldNameFunction = field -> switch (field) {
 			case "template1" -> currentTemplate1;

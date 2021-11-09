@@ -86,10 +86,10 @@ public class ChatPerspective extends AbstractManagedApplicationPerspective {
 
 		TemplateField<User> userTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(getApplicationInstanceData()));
 
-		table.addColumn(new TableColumn<ChatMessage>(ChatMessage.FIELD_CHAT_CHANNEL, "Channel", new TextField()).setDefaultWidth(150));
-		table.addColumn(new TableColumn<ChatMessage>(ChatMessage.FIELD_AUTHOR, "Author", userTableField).setDefaultWidth(180));
-		table.addColumn(new TableColumn<ChatMessage>(ChatMessage.FIELD_META_CREATION_DATE, "Date", new InstantDateTimeField()).setDefaultWidth(200));
-		table.addColumn(new TableColumn<ChatMessage>(ChatMessage.FIELD_MESSAGE, "Message", new TextField()).setDefaultWidth(350));
+		table.addColumn(ChatMessage.FIELD_CHAT_CHANNEL, "Channel", new TextField()).setDefaultWidth(150);
+		table.addColumn(ChatMessage.FIELD_AUTHOR, "Author", userTableField).setDefaultWidth(180);
+		table.addColumn(ChatMessage.FIELD_META_CREATION_DATE, "Date", new InstantDateTimeField()).setDefaultWidth(200);
+		table.addColumn(ChatMessage.FIELD_MESSAGE, "Message", new TextField()).setDefaultWidth(350);
 
 		table.setPropertyExtractor((message, propertyName) -> switch (propertyName) {
 			case ChatMessage.FIELD_CHAT_CHANNEL -> message.getChatChannel().getTitle();

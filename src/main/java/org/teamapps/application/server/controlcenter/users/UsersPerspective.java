@@ -117,11 +117,11 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		TagComboBox<Language> languagesTableField = Language.createTagComboBox(getApplicationInstanceData());
 		TextField rolesTableField = new TextField();
 
-		table.addColumn(new TableColumn<User>(User.FIELD_LAST_NAME, getLocalized("users.user"), userTableField).setDefaultWidth(250));
-		table.addColumn(new TableColumn<User>(User.FIELD_USER_ACCOUNT_STATUS, getLocalized("users.accountStatus"), accountStatusTableField).setDefaultWidth(120));
-		table.addColumn(new TableColumn<User>(User.FIELD_LAST_LOGIN, getLocalized("users.lastLogin"), lastLogin).setDefaultWidth(200));
-		table.addColumn(new TableColumn<User>(User.FIELD_LANGUAGES, getLocalized("users.languages"), languagesTableField).setDefaultWidth(350));
-		table.addColumn(new TableColumn<User>(User.FIELD_ROLE_ASSIGNMENTS, getLocalized("users.roles"), rolesTableField).setDefaultWidth(300));
+		table.addColumn(User.FIELD_LAST_NAME, getLocalized("users.user"), userTableField).setDefaultWidth(250);
+		table.addColumn(User.FIELD_USER_ACCOUNT_STATUS, getLocalized("users.accountStatus"), accountStatusTableField).setDefaultWidth(120);
+		table.addColumn(User.FIELD_LAST_LOGIN, getLocalized("users.lastLogin"), lastLogin).setDefaultWidth(200);
+		table.addColumn(User.FIELD_LANGUAGES, getLocalized("users.languages"), languagesTableField).setDefaultWidth(350);
+		table.addColumn(User.FIELD_ROLE_ASSIGNMENTS, getLocalized("users.roles"), rolesTableField).setDefaultWidth(300);
 
 		table.setPropertyExtractor((user, propertyName) -> switch (propertyName) {
 			case User.FIELD_LAST_NAME -> user;

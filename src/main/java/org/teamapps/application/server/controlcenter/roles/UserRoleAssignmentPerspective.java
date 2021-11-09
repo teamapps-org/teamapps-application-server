@@ -38,6 +38,7 @@ import org.teamapps.databinding.MutableValue;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.pojo.Query;
+import org.teamapps.ux.component.field.AbstractField;
 import org.teamapps.ux.component.field.CheckBox;
 import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.combobox.ComboBox;
@@ -82,9 +83,9 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 		TemplateField<Role> roleTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createRolePropertyProvider(getApplicationInstanceData()));
 		TemplateField<OrganizationUnit> orgUnitTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.creatOrganizationUnitPropertyProvider(getApplicationInstanceData()));
 
-		table.addColumn(new TableColumn<UserRoleAssignment>(UserRoleAssignment.FIELD_USER, getLocalized("userRoleAssignment.user"), userTableField).setDefaultWidth(200));
-		table.addColumn(new TableColumn<UserRoleAssignment>(UserRoleAssignment.FIELD_ROLE, getLocalized("userRoleAssignment.role"), roleTableField).setDefaultWidth(200));
-		table.addColumn(new TableColumn<UserRoleAssignment>(UserRoleAssignment.FIELD_ORGANIZATION_UNIT, getLocalized("userRoleAssignment.orgUnit"), orgUnitTableField).setDefaultWidth(200));
+		table.addColumn(new TableColumn<UserRoleAssignment, User>(UserRoleAssignment.FIELD_USER, getLocalized("userRoleAssignment.user"), userTableField).setDefaultWidth(200));
+		table.addColumn(new TableColumn<UserRoleAssignment, Role>(UserRoleAssignment.FIELD_ROLE, getLocalized("userRoleAssignment.role"), roleTableField).setDefaultWidth(200));
+		table.addColumn(new TableColumn<UserRoleAssignment, OrganizationUnit>(UserRoleAssignment.FIELD_ORGANIZATION_UNIT, getLocalized("userRoleAssignment.orgUnit"), orgUnitTableField).setDefaultWidth(200));
 
 		entityModelBuilder.setCustomFieldSorter(fieldName -> {
 			Comparator<String> comparator = getUser().getComparator(true);
@@ -122,7 +123,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 				BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES
 		);
 
-		ComboBox<OrganizationUnit> organizationComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), true, getApplicationInstanceData());
+		AbstractField<OrganizationUnitView> organizationComboBox = formController.getOrganizationUnitViewField(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
 		CheckBox mainResponsibleField = new CheckBox(getLocalized("userRoleAssignment.mainResponsible"));
 
 
@@ -139,7 +140,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 		formController.addNotNull(roleComboBox);
 		formController.addNotNull(organizationComboBox);
 		formController.addValidator(roleComboBox, role -> {
-			OrganizationUnit organizationUnit = organizationComboBox.getValue();
+			OrganizationUnit organizationUnit = OrganizationUtils.convert(organizationComboBox.getValue());
 			if (organizationUnit != null && role != null) {
 				OrganizationUnitType type = organizationUnit.getType();
 				List<OrganizationUnitType> unitTypes = role.getAllowedOrganizationUnitTypes();
@@ -153,7 +154,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 			userRoleAssignment
 					.setUser(userCombobox.getValue())
 					.setRole(roleComboBox.getValue())
-					.setOrganizationUnit(organizationComboBox.getValue())
+					.setOrganizationUnit(OrganizationUtils.convert(organizationComboBox.getValue()))
 					.setMainResponsible(mainResponsibleField.getValue())
 					.setLastVerified(Instant.now());
 			return true;
@@ -162,7 +163,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 		entityModelBuilder.getOnSelectionEvent().addListener(userRoleAssignment -> {
 			userCombobox.setValue(userRoleAssignment.getUser());
 			roleComboBox.setValue(userRoleAssignment.getRole());
-			organizationComboBox.setValue(userRoleAssignment.getOrganizationUnit());
+			organizationComboBox.setValue(OrganizationUtils.convert(userRoleAssignment.getOrganizationUnit()));
 			mainResponsibleField.setValue(userRoleAssignment.isMainResponsible());
 		});
 		entityModelBuilder.setSelectedRecord(UserRoleAssignment.create());

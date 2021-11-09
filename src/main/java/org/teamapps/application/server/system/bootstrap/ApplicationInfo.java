@@ -72,7 +72,7 @@ public class ApplicationInfo {
 	}
 
 	public Application getApplication() {
-		if (application == null) {
+		if (application == null && getName() != null) {
 			application = Application.filter()
 					.name(TextFilter.textEqualsFilter(getName()))
 					.executeExpectSingleton();

@@ -31,10 +31,7 @@ import org.teamapps.application.server.system.launcher.MobileApplicationNavigati
 import org.teamapps.application.server.system.launcher.MobileAssembler;
 import org.teamapps.application.server.system.privilege.AllowAllPrivilegeProvider;
 import org.teamapps.application.server.system.privilege.PrivilegeApplicationKey;
-import org.teamapps.model.controlcenter.ManagedApplication;
-import org.teamapps.model.controlcenter.ManagedApplicationPerspective;
-import org.teamapps.model.controlcenter.OrganizationFieldView;
-import org.teamapps.model.controlcenter.UserAccountStatus;
+import org.teamapps.model.controlcenter.*;
 import org.teamapps.ux.application.ResponsiveApplication;
 import org.teamapps.ux.application.assembler.DesktopApplicationAssembler;
 import org.teamapps.ux.component.Component;

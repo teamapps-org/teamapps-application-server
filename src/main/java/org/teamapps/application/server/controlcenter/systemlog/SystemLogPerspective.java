@@ -129,8 +129,8 @@ public class SystemLogPerspective extends AbstractManagedApplicationPerspective 
 
 
 		table.addColumn(new TableColumn<>(SystemLog.FIELD_META_CREATION_DATE, getLocalized(Dictionary.DATE), timeField));
-		table.addColumn(new TableColumn<SystemLog>(SystemLog.FIELD_LOG_LEVEL, getLocalized("systemLog.logLevel"), logLevelField).setDefaultWidth(75));
-		table.addColumn(new TableColumn<SystemLog>(SystemLog.FIELD_MESSAGE, getLocalized("systemLog.logMessage"), messageField).setDefaultWidth(230));
+		table.addColumn(new TableColumn<SystemLog, LogLevel>(SystemLog.FIELD_LOG_LEVEL, getLocalized("systemLog.logLevel"), logLevelField).setDefaultWidth(75));
+		table.addColumn(new TableColumn<SystemLog, SystemLog>(SystemLog.FIELD_MESSAGE, getLocalized("systemLog.logMessage"), messageField).setDefaultWidth(230));
 		table.addColumn(new TableColumn<>(SystemLog.FIELD_MANAGED_APPLICATION, getLocalized("applicationProvisioning.provisionedApplication"), managedApplicationField));
 		table.addColumn(new TableColumn<>(SystemLog.FIELD_MANAGED_PERSPECTIVE, getLocalized("systemLog.provisionedPerspective"), perspectiveField));
 		table.addColumn(new TableColumn<>(SystemLog.FIELD_META_CREATED_BY, getLocalized("systemLog.user"), userField));

@@ -53,6 +53,10 @@ public class PrivilegeApplicationKey {
 		return new PrivilegeApplicationKey(privilegeAssignment.getApplication(), OrganizationUtils.convert(privilegeAssignment.getOrganizationFieldFilter()));
 	}
 
+	public static PrivilegeApplicationKey create(Application application, OrganizationField organizationField) {
+		return new PrivilegeApplicationKey(application, OrganizationUtils.convert(organizationField));
+	}
+
 	private final String key;
 	private final Application application;
 	private final OrganizationFieldView organizationFieldView;

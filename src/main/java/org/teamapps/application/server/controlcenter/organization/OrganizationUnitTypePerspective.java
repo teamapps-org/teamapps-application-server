@@ -87,10 +87,10 @@ public class OrganizationUnitTypePerspective extends AbstractManagedApplicationP
 		TemplateField<OrganizationUnitType> defaultChildField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.creatOrganizationUnitTypePropertyProvider(getApplicationInstanceData()));
 		TagComboBox<OrganizationUnitType> allowedChildTypesField = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.creatOrganizationUnitTypePropertyProvider(getApplicationInstanceData()));
 
-		table.addColumn(new TableColumn<OrganizationUnitType>(OrganizationUnitType.FIELD_NAME, getLocalized("organizationUnitType.organizationUnitType"), unitTypeField).setDefaultWidth(170));
-		table.addColumn(new TableColumn<OrganizationUnitType>(OrganizationUnitType.FIELD_ABBREVIATION, getLocalized("organizationUnitType.abbreviation"), abbreviationField).setDefaultWidth(80));
-		table.addColumn(new TableColumn<OrganizationUnitType>(OrganizationUnitType.FIELD_DEFAULT_CHILD_TYPE, getLocalized("organizationUnitType.defaultChildType"), defaultChildField).setDefaultWidth(130));
-		table.addColumn(new TableColumn<OrganizationUnitType>(OrganizationUnitType.FIELD_POSSIBLE_CHILDREN_TYPES, getLocalized("organizationUnitType.allowedChildrenTypes"), allowedChildTypesField).setDefaultWidth(350));
+		table.addColumn(OrganizationUnitType.FIELD_NAME, getLocalized("organizationUnitType.organizationUnitType"), unitTypeField).setDefaultWidth(170);
+		table.addColumn(OrganizationUnitType.FIELD_ABBREVIATION, getLocalized("organizationUnitType.abbreviation"), abbreviationField).setDefaultWidth(80);
+		table.addColumn(OrganizationUnitType.FIELD_DEFAULT_CHILD_TYPE, getLocalized("organizationUnitType.defaultChildType"), defaultChildField).setDefaultWidth(130);
+		table.addColumn(OrganizationUnitType.FIELD_POSSIBLE_CHILDREN_TYPES, getLocalized("organizationUnitType.allowedChildrenTypes"), allowedChildTypesField).setDefaultWidth(350);
 
 		table.setPropertyExtractor((unitType, propertyName) -> switch (propertyName) {
 			case OrganizationUnitType.FIELD_NAME -> unitType;
