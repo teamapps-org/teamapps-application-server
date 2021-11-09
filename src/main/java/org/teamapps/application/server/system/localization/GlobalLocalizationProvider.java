@@ -19,6 +19,7 @@
  */
 package org.teamapps.application.server.system.localization;
 
+import com.ibm.icu.text.MessageFormat;
 import org.teamapps.application.api.localization.LocalizationData;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.model.controlcenter.Application;
@@ -26,7 +27,6 @@ import org.teamapps.model.controlcenter.LocalizationKey;
 import org.teamapps.model.controlcenter.LocalizationValue;
 import org.teamapps.universaldb.index.translation.TranslatableText;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
