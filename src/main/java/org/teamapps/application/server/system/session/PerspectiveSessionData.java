@@ -25,19 +25,23 @@ import org.teamapps.application.api.application.perspective.PerspectiveBuilder;
 import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.desktop.ApplicationDesktop;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
+import org.teamapps.application.api.organization.UserRoleType;
 import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.ui.UiComponentFactory;
 import org.teamapps.application.api.user.SessionUser;
+import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.reporting.convert.DocumentConverter;
+import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.index.translation.TranslatableText;
 import org.teamapps.ux.application.perspective.Perspective;
 import org.teamapps.ux.component.progress.MultiProgressDisplay;
 
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class PerspectiveSessionData implements ApplicationInstanceData {
 
@@ -172,6 +176,44 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 				.setMessage(title)
 				.setDetails(ExceptionUtils.getStackTrace(throwable))
 				.save();
+	}
+
+	@Override
+	public Integer getOrganizationUserWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType) {
+		List<Integer> organizationUsersWithRole = getOrganizationUsersWithRole(orgUnit, userRoleType, false, getOrganizationField());
+		if (organizationUsersWithRole != null && !organizationUsersWithRole.isEmpty()) {
+			return organizationUsersWithRole.get(0);
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public List<Integer> getOrganizationUsersWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType) {
+		return getOrganizationUsersWithRole(orgUnit, userRoleType, false, getOrganizationField());
+	}
+
+	public static List<Integer> getOrganizationUsersWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType, boolean mainResponsible, OrganizationFieldView organizationFieldView) {
+		if (userRoleType == null) {
+			return null;
+		}
+		RoleType roleType = switch (userRoleType) {
+			case LEADER -> RoleType.LEADER;
+			case ASSISTANT -> RoleType.ASSISTANT;
+			case MENTOR -> RoleType.MENTOR;
+			case ADMINISTRATOR -> RoleType.ADMINISTRATOR;
+			case OTHER -> RoleType.OTHER;
+		};
+		OrganizationField organizationField = OrganizationUtils.convert(organizationFieldView);
+		return UserRoleAssignment.filter()
+				.organizationUnit(NumericFilter.equalsFilter(orgUnit.getId()))
+				.execute()
+				.stream()
+				.filter(userRoleAssignment -> organizationField == null || userRoleAssignment.getRole().getOrganizationField().equals(organizationField))
+				.filter(userRoleAssignment -> userRoleAssignment.getRole().getRoleType() == roleType)
+				.filter(userRoleAssignment -> !mainResponsible || userRoleAssignment.isMainResponsible())
+				.map(assignment -> assignment.getUser().getId())
+				.collect(Collectors.toList());
 	}
 
 	@Override

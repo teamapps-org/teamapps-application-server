@@ -25,6 +25,7 @@ import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.desktop.ApplicationDesktop;
 import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 
+import org.teamapps.application.api.organization.UserRoleType;
 import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.ui.UiComponentFactory;
 import org.teamapps.application.api.user.SessionUser;
@@ -140,6 +141,20 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 				.save();
 	}
 
+	@Override
+	public Integer getOrganizationUserWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType) {
+		List<Integer> organizationUsersWithRole = PerspectiveSessionData.getOrganizationUsersWithRole(orgUnit, userRoleType, false, getOrganizationField());
+		if (organizationUsersWithRole != null && !organizationUsersWithRole.isEmpty()) {
+			return organizationUsersWithRole.get(0);
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public List<Integer> getOrganizationUsersWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType) {
+		return PerspectiveSessionData.getOrganizationUsersWithRole(orgUnit, userRoleType, false, getOrganizationField());
+	}
 	@Override
 	public String getLocalized(String s, Object... objects) {
 		return localizationProvider.getLocalized(s, objects);
