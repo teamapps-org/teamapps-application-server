@@ -58,7 +58,10 @@ import org.teamapps.ux.component.table.Table;
 import org.teamapps.ux.component.table.TableColumn;
 import org.teamapps.ux.component.template.BaseTemplate;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -87,12 +90,12 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 		TagComboBox<OrganizationUnitType> allowedOrganizationUnitTypesTableField = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.creatOrganizationUnitTypePropertyProvider(getApplicationInstanceData()));
 		CheckBox noDirectMembershipsTableField = new CheckBox(getLocalized("roles.noDirectMemberships"));
 
-		table.addColumn(new TableColumn<Role>(Role.FIELD_TITLE, getLocalized(Dictionary.NAME), roleTableField).setDefaultWidth(200));
+		table.addColumn(Role.FIELD_TITLE, getLocalized(Dictionary.NAME), roleTableField).setDefaultWidth(200);
 		if (!isAppFilter()) {
-			table.addColumn(new TableColumn<Role>(Role.FIELD_ORGANIZATION_FIELD, getLocalized("organizationField.organizationField"), organizationFieldTableField).setDefaultWidth(130));
+			table.addColumn(Role.FIELD_ORGANIZATION_FIELD, getLocalized("organizationField.organizationField"), organizationFieldTableField).setDefaultWidth(130);
 		}
-		table.addColumn(new TableColumn<Role>(Role.FIELD_ALLOWED_ORGANIZATION_UNIT_TYPES, getLocalized("roles.allowedOrganizationUnitTypes"), allowedOrganizationUnitTypesTableField).setDefaultWidth(350));
-		table.addColumn(new TableColumn<Role>(Role.FIELD_NO_DIRECT_MEMBERSHIPS, getLocalized("roles.noMemberships"), noDirectMembershipsTableField).setDefaultWidth(200));
+		table.addColumn(Role.FIELD_ALLOWED_ORGANIZATION_UNIT_TYPES, getLocalized("roles.allowedOrganizationUnitTypes"), allowedOrganizationUnitTypesTableField).setDefaultWidth(350);
+		table.addColumn(Role.FIELD_NO_DIRECT_MEMBERSHIPS, getLocalized("roles.noMemberships"), noDirectMembershipsTableField).setDefaultWidth(200);
 
 		table.setPropertyExtractor((role, propertyName) -> switch (propertyName) {
 			case Role.FIELD_TITLE -> role;
@@ -104,6 +107,12 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 
 		TranslatableField titleField = TranslatableTextUtils.createTranslatableField(getApplicationInstanceData());
 		ComboBox<Icon> iconComboBox = ApplicationIcons.createIconComboBox();
+		ComboBox<RoleType> roleTypeComboBox = ComboBoxUtils.createRecordComboBox(Arrays.asList(RoleType.values()), (roleType, collection) -> {
+			Map<String, Object> map = new HashMap<>();
+			map.put(BaseTemplate.PROPERTY_ICON, ApplicationIcons.WORKER);
+			map.put(BaseTemplate.PROPERTY_CAPTION, roleType.name());
+			return map;
+		}, BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
 		ComboBox<Role> parentRoleComboBox = ComboBoxUtils.createRecordComboBox(
 				() -> isAppFilter() ? Role.filter().organizationField(NumericFilter.equalsFilter(getOrganizationField().getId())).execute() : Role.getAll(),
 				PropertyProviders.createRolePropertyProvider(getApplicationInstanceData()),
@@ -159,6 +168,8 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 		formLayout.addSection().setCollapsible(false).setDrawHeaderLine(false);
 		formLayout.addLabelAndField(null, getLocalized("roles.role"), titleField);
 		formLayout.addLabelAndField(null, getLocalized("roles.icon"), iconComboBox);
+		formLayout.addLabelAndField(null, getLocalized("roles.type"), roleTypeComboBox);
+
 		formLayout.addLabelAndField(null, getLocalized("roles.parentRole"), parentRoleComboBox);
 		formLayout.addLabelAndField(null, getLocalized("roles.allowedOrganizationUnitTypes"), allowedOrganizationUnitTypesTagCombo);
 		if (!isOrgFieldFilterApplied()) {
@@ -185,6 +196,7 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 			role
 					.setTitle(titleField.getValue())
 					.setIcon(IconUtils.encodeNoStyle(iconComboBox.getValue()))
+					.setRoleType(roleTypeComboBox.getValue())
 					.setParent(parentRoleComboBox.getValue())
 					.setAllowedOrganizationUnitTypes(allowedOrganizationUnitTypesTagCombo.getValue())
 					.setOrganizationField(organizationField)
@@ -199,6 +211,7 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 		entityModelBuilder.getOnSelectionEvent().addListener(role -> {
 			titleField.setValue(role.getTitle());
 			iconComboBox.setValue(IconUtils.decodeIcon(role.getIcon()));
+			roleTypeComboBox.setValue(role.getRoleType());
 			parentRoleComboBox.setValue(role.getParent());
 			allowedOrganizationUnitTypesTagCombo.setValue(role.getAllowedOrganizationUnitTypes());
 			organizationFieldComboBox.setValue(role.getOrganizationField());

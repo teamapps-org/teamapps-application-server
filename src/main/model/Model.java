@@ -389,6 +389,7 @@ public class Model implements SchemaInfoProvider {
 		role
 				.addTranslatableText("title")
 				.addText("icon")
+				.addEnum("roleType", "leader", "assistant", "mentor", "administrator", "other")
 				.addReference("parent", role, false, "children")
 				.addReference("children", role, true, "parent")
 				.addReference("organizationUnit", organizationUnit, false)
