@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -113,23 +113,39 @@ public class LocalizationUtil {
 
 		List<String> existingKeys = keyCompare.getAEntriesInB();
 		for (String key : existingKeys) {
-			//todo check if used = false -> set to true!
 			Map<String, String> translations = localizationMapByKey.get(key);
 			LocalizationKey localizationKey = keyCompare.getB(key);
+
+			if (!localizationKey.isUsed()) {
+				localizationKey.setUsed(true).save();
+			}
+
 			KeyCompare<String, LocalizationValue> languageCompare = new KeyCompare<>(translations.keySet(), localizationKey.getLocalizationValues(), s -> s, LocalizationValue::getLanguage);
 			if (languageCompare.isDifferent()) {
 				List<String> newLanguages = languageCompare.getAEntriesNotInB();
 				newLanguages.forEach(language -> {
-					String original = translations.get(language);
-					LocalizationValue.create()
-							.setLocalizationKey(localizationKey)
-							.setLanguage(language)
-							.setOriginal(original)
-							.setCurrentDisplayValue(original)
-							.setMachineTranslationState(MachineTranslationState.NOT_NECESSARY)
-							.setTranslationState(TranslationState.NOT_NECESSARY)
-							.setTranslationVerificationState(TranslationVerificationState.NOT_NECESSARY)
-							.save();
+					String value = translations.get(language);
+					if (machineTranslatedLanguages.contains(language)) {
+						LocalizationValue.create()
+								.setLocalizationKey(localizationKey)
+								.setLanguage(language)
+								.setMachineTranslation(value)
+								.setCurrentDisplayValue(value)
+								.setMachineTranslationState(MachineTranslationState.OK)
+								.setTranslationState(TranslationState.TRANSLATION_REQUESTED)
+								.setTranslationVerificationState(TranslationVerificationState.NOT_YET_TRANSLATED)
+								.save();
+					} else {
+						LocalizationValue.create()
+								.setLocalizationKey(localizationKey)
+								.setLanguage(language)
+								.setOriginal(value)
+								.setCurrentDisplayValue(value)
+								.setMachineTranslationState(MachineTranslationState.NOT_NECESSARY)
+								.setTranslationState(TranslationState.NOT_NECESSARY)
+								.setTranslationVerificationState(TranslationVerificationState.NOT_NECESSARY)
+								.save();
+					}
 				});
 			}
 			//checking all existing values if the original changed
@@ -353,12 +369,12 @@ public class LocalizationUtil {
 				.filter(value -> value.getLocalizationKey().getKey() != null)
 				.filter(value -> value.getCurrentDisplayValue() != null)
 				.collect(Collectors.groupingBy(value -> {
-			if (value.getLocalizationKey().getApplication() != null) {
-				return value.getLocalizationKey().getApplication().getName();
-			} else {
-				return value.getLocalizationKey().getLocalizationKeyType().name();
-			}
-		}));
+					if (value.getLocalizationKey().getApplication() != null) {
+						return value.getLocalizationKey().getApplication().getName();
+					} else {
+						return value.getLocalizationKey().getLocalizationKeyType().name();
+					}
+				}));
 
 		File zipFile = File.createTempFile("temp", ".zip");
 		FileOutputStream fos = new FileOutputStream(zipFile);
