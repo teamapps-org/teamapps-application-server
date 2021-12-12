@@ -49,7 +49,6 @@ import org.teamapps.application.server.controlcenter.systenconfig.ApplicationCon
 import org.teamapps.application.server.controlcenter.translations.TranslationsPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.users.UsersPerspectiveBuilder;
 import org.teamapps.application.server.system.config.SystemConfig;
-import org.teamapps.application.server.system.dashboard.DashboardPerspectiveBuilder;
 import org.teamapps.model.ControlCenterSchema;
 import org.teamapps.universaldb.schema.SchemaInfoProvider;
 
