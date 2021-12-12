@@ -49,6 +49,7 @@ import org.teamapps.application.server.controlcenter.systenconfig.ApplicationCon
 import org.teamapps.application.server.controlcenter.translations.TranslationsPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.users.UsersPerspectiveBuilder;
 import org.teamapps.application.server.system.config.SystemConfig;
+import org.teamapps.application.server.system.dashboard.DashboardPerspectiveBuilder;
 import org.teamapps.model.ControlCenterSchema;
 import org.teamapps.universaldb.schema.SchemaInfoProvider;
 
@@ -95,7 +96,7 @@ public class ControlCenterAppBuilder extends AbstractApplicationBuilder {
 
 	@Override
 	public ApplicationVersion getApplicationVersion() {
-		return ApplicationVersion.create(0, 44);
+		return ApplicationVersion.create(0, 46);
 	}
 
 	@Override
