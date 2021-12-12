@@ -212,6 +212,7 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 				.filter(userRoleAssignment -> organizationField == null || userRoleAssignment.getRole().getOrganizationField().equals(organizationField))
 				.filter(userRoleAssignment -> userRoleAssignment.getRole().getRoleType() == roleType)
 				.filter(userRoleAssignment -> !mainResponsible || userRoleAssignment.isMainResponsible())
+				.filter(userRoleAssignment -> userRoleAssignment.getUser() != null)
 				.map(assignment -> assignment.getUser().getId())
 				.collect(Collectors.toList());
 	}
