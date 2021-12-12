@@ -86,7 +86,7 @@ public class ApplicationJarInstallationPhase implements ApplicationInstallationP
 			applicationInfo.setBinaryHash(fileHash);
 			applicationInfo.setApplicationClassLoader(classLoader);
 		} catch (Exception e) {
-			applicationInfo.addError("Error checking jar file:" + e.getMessage());
+			applicationInfo.addError("Error checking jar file for app " + applicationInfo.getApplication() + e.getMessage());
 			LOGGER.error("Error checking jar file:", e);
 		}
 	}
