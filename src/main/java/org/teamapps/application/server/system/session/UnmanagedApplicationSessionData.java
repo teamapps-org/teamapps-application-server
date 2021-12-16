@@ -152,6 +152,16 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 	}
 
 	@Override
+	public String getOrganizationUserNameWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType, boolean lastNameFirst) {
+		Integer userId = getOrganizationUserWithRole(orgUnit, userRoleType);
+		if (userId != null) {
+			User user = User.getById(userId);
+			return lastNameFirst ? user.getLastName() + ", " + user.getFirstName() : user.getFirstName() + " " + user.getLastName();
+		} else {
+			return null;
+		}
+	}
+	@Override
 	public List<Integer> getOrganizationUsersWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType) {
 		return PerspectiveSessionData.getOrganizationUsersWithRole(orgUnit, userRoleType, false, getOrganizationField());
 	}
