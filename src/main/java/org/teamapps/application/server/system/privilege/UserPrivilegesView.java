@@ -111,7 +111,7 @@ public class UserPrivilegesView extends AbstractApplicationView {
 		organizationPanel.getPanel().setVisible(false);
 
 
-		privilegeTable.onRowSelected.addListener(privilege -> {
+		privilegeTable.onSingleRowSelected.addListener(privilege -> {
 			if (privilegeOrgUnitsMap != null) {
 				Set<OrganizationUnitView> organizationUnitViews = privilegeOrgUnitsMap.get(privilege);
 				organizationTree.setOrganizationUnits(organizationUnitViews);

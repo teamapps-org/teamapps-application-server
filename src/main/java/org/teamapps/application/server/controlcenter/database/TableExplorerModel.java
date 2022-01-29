@@ -20,8 +20,6 @@
 package org.teamapps.application.server.controlcenter.database;
 
 import org.teamapps.application.api.application.ApplicationInstanceData;
-import org.teamapps.data.value.SortDirection;
-import org.teamapps.data.value.Sorting;
 import org.teamapps.universaldb.TableConfig;
 import org.teamapps.universaldb.index.ColumnIndex;
 import org.teamapps.universaldb.index.IndexType;
@@ -30,6 +28,8 @@ import org.teamapps.universaldb.index.TableIndex;
 import org.teamapps.universaldb.index.numeric.IntegerIndex;
 import org.teamapps.universaldb.index.numeric.LongIndex;
 import org.teamapps.universaldb.query.Filter;
+import org.teamapps.universaldb.query.SortDirection;
+import org.teamapps.universaldb.query.Sorting;
 import org.teamapps.universaldb.schema.Table;
 import org.teamapps.ux.component.table.AbstractTableModel;
 import org.teamapps.ux.component.timegraph.Interval;
@@ -125,10 +125,10 @@ public class TableExplorerModel extends AbstractTableModel<Integer> {
 		}
 
 		if (currentSorting != null) {
-			ColumnIndex columnIndex = tableIndex.getColumnIndex(currentSorting.getFieldName());
+			ColumnIndex columnIndex = tableIndex.getColumnIndex(currentSorting.getSortFieldName());
 			if (columnIndex != null) {
 				List<SortEntry> sortEntries = SortEntry.createSortEntries(recordBitSet);
-				columnIndex.sortRecords(sortEntries, currentSorting.getSorting() == SortDirection.ASC, applicationInstanceData.getUser());
+				columnIndex.sortRecords(sortEntries, currentSorting.getSortDirection() == SortDirection.ASCENDING, applicationInstanceData.getUser());
 				result = sortEntries.stream().map(entry -> entry.getId()).collect(Collectors.toList());
 			}
 		}
@@ -148,26 +148,31 @@ public class TableExplorerModel extends AbstractTableModel<Integer> {
 		return recordCount;
 	}
 
-	@Override
-	public List<Integer> getRecords(int startIndex, int length, Sorting sorting) {
-		if (sortingChanged(sorting)) {
-			currentSorting = sorting;
-			executeQuery();
+	public void setSorting(String fieldName, boolean ascending) {
+		if (fieldName == null) {
+			currentSorting = null;
+		} else {
+			currentSorting = new Sorting(fieldName, ascending);
 		}
+		executeQuery();
+	}
+
+	@Override
+	public List<Integer> getRecords(int startIndex, int length) {
 		return resultRecords.stream().skip(startIndex).limit(length).collect(Collectors.toList());
 	}
 
-	private boolean sortingChanged(Sorting sorting) {
-		if (currentSorting == null && sorting == null) {
-			return false;
-		}
-		if (currentSorting != null && sorting != null &&
-				currentSorting.getFieldName() != null &&
-				currentSorting.getFieldName().equals(sorting.getFieldName()) &&
-				currentSorting.getSorting() == sorting.getSorting()
-		) {
-			return false;
-		}
-		return true;
-	}
+//	private boolean sortingChanged(Sorting sorting) {
+//		if (currentSorting == null && sorting == null) {
+//			return false;
+//		}
+//		if (currentSorting != null && sorting != null &&
+//				currentSorting.getFieldName() != null &&
+//				currentSorting.getFieldName().equals(sorting.getFieldName()) &&
+//				currentSorting.getSorting() == sorting.getSorting()
+//		) {
+//			return false;
+//		}
+//		return true;
+//	}
 }

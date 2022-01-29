@@ -356,7 +356,7 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		createTranslationFilesButton.onClick.addListener(() -> {
 			try {
 				File file = LocalizationUtil.createTranslationResourceFiles();
-				SessionContext.current().downloadFile(file, "Translations.zip");
+				SessionContext.current().download(file, "Translations.zip");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -365,7 +365,7 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		exportTranslationsButton.onClick.addListener(() -> {
 			try {
 				File file = LocalizationUtil.createTranslationExport(isAppFilter() ? getMainApplication() : null);
-				SessionContext.current().downloadFile(file, "Translation-Export.zip");
+				SessionContext.current().download(file, "Translation-Export.zip");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

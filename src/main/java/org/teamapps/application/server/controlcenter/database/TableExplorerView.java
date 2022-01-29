@@ -29,6 +29,7 @@ import org.teamapps.application.ux.form.FormPanel;
 import org.teamapps.common.format.Color;
 import org.teamapps.common.format.RgbaColor;
 import org.teamapps.data.extract.PropertyProvider;
+import org.teamapps.data.value.SortDirection;
 import org.teamapps.databinding.TwoWayBindableValue;
 import org.teamapps.event.Event;
 import org.teamapps.universaldb.index.ColumnIndex;
@@ -98,6 +99,7 @@ public class TableExplorerView extends AbstractApplicationView {
 		Map<String, Function<Integer, Object>> fieldValueFunctionMap = createFieldValueFunctionMap(tableIndex);
 		Table<Integer> table = new Table<>();
 		table.setModel(model);
+		table.onSortingChanged.addListener(event -> model.setSorting(event.getSortField(), event.getSortDirection() == SortDirection.ASC));
 		table.setDisplayAsList(true);
 		table.setPropertyProvider(createTablePropertyProvider(fieldValueFunctionMap, tableIndex));
 
@@ -108,8 +110,8 @@ public class TableExplorerView extends AbstractApplicationView {
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(450);
 		formLayout.addSection().setCollapsible(false).setDrawHeaderLine(false);
 		addFormColumn("ID", new NumberField(0), formLayout);
-		createFormFields(tableIndex, formLayout, table.onRowSelected);
-		table.onRowSelected.addListener(id -> {
+		createFormFields(tableIndex, formLayout, table.onSingleRowSelected);
+		table.onSingleRowSelected.addListener(id -> {
 			form.setFieldValue("ID", id);
 			tableIndex.getColumnIndices().stream().filter(c -> c.getColumnType() != ColumnType.MULTI_REFERENCE).forEach(c -> {
 				Function<Integer, Object> valueFunction = fieldValueFunctionMap.get(c.getName());
@@ -179,7 +181,7 @@ public class TableExplorerView extends AbstractApplicationView {
 		tableView.getPanel().setRightHeaderField(queryField);
 
 		formView.setComponent(form);
-		table.onRowSelected.addListener(id -> formView.setTitle("ID: " + id));
+		table.onSingleRowSelected.addListener(id -> formView.setTitle("ID: " + id));
 
 
 	}
