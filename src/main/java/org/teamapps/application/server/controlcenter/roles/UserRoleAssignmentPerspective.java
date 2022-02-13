@@ -123,7 +123,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 				BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES
 		);
 
-		AbstractField<OrganizationUnitView> organizationComboBox = formController.getOrganizationUnitViewField(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
+		AbstractField<OrganizationUnitView> organizationComboBox = formController.getOrganizationUnitViewField(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, false);
 		CheckBox mainResponsibleField = new CheckBox(getLocalized("userRoleAssignment.mainResponsible"));
 
 

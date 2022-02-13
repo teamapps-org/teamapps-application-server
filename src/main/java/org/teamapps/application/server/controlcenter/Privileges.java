@@ -21,6 +21,7 @@ package org.teamapps.application.server.controlcenter;
 
 import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.theme.ApplicationIcons;
+import org.teamapps.application.server.controlcenter.organization.OrganizationChartPerspective;
 import org.teamapps.icons.composite.CompositeIcon;
 
 import java.util.List;
@@ -38,7 +39,6 @@ public class Privileges {
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_APPLICATION_PROVISIONING = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveApplicationProvisioning", ApplicationIcons.INSTALL, "applicationProvisioning.launch", "applicationProvisioning.desc");
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_APPLICATIONS = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveApplications", ApplicationIcons.BOX_SOFTWARE, "applications.launch", "applications.desc");
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_APP_LOCAL_ADMINISTRATION = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveAppLocalAdministration", ApplicationIcons.WINDOW_KEY, "appLocalAdministration.launch", "appLocalAdministration.desc");
-	public final static SimplePrivilege LAUNCH_PERSPECTIVE_ORGANIZATION_CHART = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveOrganizationChart", ApplicationIcons.PIECES, "organizationChart.launch", "organizationChart.desc");
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_APPLICATION_CONFIGURATION = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveApplicationConfiguration", ApplicationIcons.CODE_LINE, "applicationConfiguration.launch", "applicationConfiguration.desc");
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_MACHINE_TRANSLATION = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveMachineTranslation", ApplicationIcons.EARTH_LINK, "machineTranslation.launch", "machineTranslation.desc");
 	public final static SimplePrivilege LAUNCH_PERSPECTIVE_TRANSLATIONS = PRIVILEGE_BUILDER.addSimplePrivilege("launchPerspectiveTranslations", ApplicationIcons.SPELL_CHECK, "translations.launch", "translations.desc");
@@ -62,6 +62,12 @@ public class Privileges {
 	public final static StandardPrivilegeGroup SYSTEM_LOG_PERSPECTIVE = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("systemLogPerspective", ApplicationIcons.CONSOLE, "systemLog.title", "systemLog.desc", READ);
 	public final static StandardPrivilegeGroup DATABASE_PERSPECTIVE = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("databasePerspective", ApplicationIcons.DATA_TABLE, "database.launch", "database.desc", READ, SHOW_RECYCLE_BIN);
 
+	public final static OrganizationalPrivilegeGroup ORGANIZATION_CHART_PERSPECTIVE = PRIVILEGE_BUILDER.addOrganizationalPrivilegeGroup("organizationChartPerspective", ApplicationIcons.PIECES, "organizationChart.title", "organizationChart.desc",
+			OrganizationChartPerspective.SHOW_UPWARDS_LEADERS,
+			OrganizationChartPerspective.SHOW_UPWARDS_ALL_ROLES,
+			OrganizationChartPerspective.SHOW_DOWNWARDS_LEADERS,
+			OrganizationChartPerspective.SHOW_DOWNWARDS_ALL_ROLES
+			);
 
 	public final static ApplicationRole APPLICATION_ADMINISTRATOR_ROLE = ROLE_BUILDER.addRole("applicationAdministratorRole", ApplicationIcons.PILOT, "application.roles.applicationAdministrator", "application.roles.applicationAdministrator.desc",
 			LAUNCH_PERSPECTIVE_APP_LOCAL_ADMINISTRATION,

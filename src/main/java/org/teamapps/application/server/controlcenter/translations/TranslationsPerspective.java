@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,7 +54,6 @@ import org.teamapps.ux.component.form.ResponsiveForm;
 import org.teamapps.ux.component.form.ResponsiveFormLayout;
 import org.teamapps.ux.component.format.Spacing;
 import org.teamapps.ux.component.table.Table;
-import org.teamapps.ux.component.table.TableColumn;
 import org.teamapps.ux.component.template.BaseTemplate;
 import org.teamapps.ux.component.toolbar.ToolbarButton;
 import org.teamapps.ux.component.toolbar.ToolbarButtonGroup;
@@ -96,6 +95,11 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 		ToolbarButton startMachineTranslationButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.GEARWHEELS, ApplicationIcons.MESSAGES), getLocalized("translations.startMachineTranslation"), getLocalized("translations.translateAllNewEntries")));
 		ToolbarButton createTranslationFilesButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.FOLDER_ZIP, ApplicationIcons.EARTH), getLocalized("translations.createTranslationFiles"), getLocalized("translations.createApplicationResourceFiles")));
 
+		buttonGroup = localizationKeyView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
+		ToolbarButton fixDisplayValuesButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.TEXT, ApplicationIcons.OK), getLocalized("translations.fixValues"), getLocalized("translations.fixValues")));
+
+
+		buttonGroup = localizationKeyView.addWorkspaceButtonGroup(new ToolbarButtonGroup());
 		ToolbarButton exportTranslationsButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.BOX_OUT, ApplicationIcons.EARTH), getLocalized(Dictionary.EXPORT), getLocalized("translations.exportTranslations")));
 		ToolbarButton importTranslationsButton = buttonGroup.addButton(ToolbarButton.create(CompositeIcon.of(ApplicationIcons.BOX_INTO, ApplicationIcons.EARTH), getLocalized(Dictionary.IMPORT), getLocalized("translations.importTranslations")));
 
@@ -378,6 +382,18 @@ public class TranslationsPerspective extends AbstractManagedApplicationPerspecti
 				e.printStackTrace();
 			}
 		}, getApplicationInstanceData()));
+
+		fixDisplayValuesButton.onClick.addListener(() -> {
+			for (LocalizationValue localizationValue : LocalizationValue.getAll()) {
+				if (localizationValue.getOriginal() != null && localizationValue.getAdminKeyOverride() == null && localizationValue.getAdminLocalOverride() == null && !localizationValue.getOriginal().equals(localizationValue.getCurrentDisplayValue())) {
+					Application application = localizationValue.getLocalizationKey().getApplication();
+					String app = application != null ? application.getName() : "";
+					System.out.println(app + " - " +  localizationValue.getLocalizationKey().getKey() + ": " + localizationValue.getOriginal() + " -> " + localizationValue.getCurrentDisplayValue() + ", " + localizationValue.getMachineTranslation());
+					localizationValue.setCurrentDisplayValue(localizationValue.getOriginal()).save();
+				}
+			}
+
+		});
 
 
 		importLocalizationKeys.onClick.addListener(() -> UploadDialogue.createFileUploadDialogue(file -> {

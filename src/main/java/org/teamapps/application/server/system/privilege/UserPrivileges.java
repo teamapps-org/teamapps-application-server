@@ -114,11 +114,12 @@ public class UserPrivileges {
 			PrivilegeApplicationKey privilegeApplicationKey = PrivilegeApplicationKey.create(roleApplicationRoleAssignment);
 			OrganizationUnit fixedOrganizationRoot = roleApplicationRoleAssignment.getFixedOrganizationRoot();
 			List<OrganizationUnitType> organizationUnitTypeFilter = roleApplicationRoleAssignment.getOrganizationUnitTypeFilter();
+			boolean noInheritanceOfOrganizationalUnits = roleApplicationRoleAssignment.isNoInheritanceOfOrganizationalUnits();
 			LoadedApplication loadedApplication = systemRegistry.getLoadedApplication(application);
 			if (loadedApplication != null) {
 				ApplicationRole applicationRole = loadedApplication.getAppPrivilegeProvider().getApplicationRole(applicationRoleName);
 				if (applicationRole != null && applicationRole.getPrivilegeGroups() != null) {
-					Set<OrganizationUnit> allUnits = OrganizationUtils.getAllUnits(fixedOrganizationRoot != null ? fixedOrganizationRoot : organizationUnit, organizationUnitTypeFilter);
+					Set<OrganizationUnit> allUnits = OrganizationUtils.getAllUnits(fixedOrganizationRoot != null ? fixedOrganizationRoot : organizationUnit, organizationUnitTypeFilter, noInheritanceOfOrganizationalUnits);
 					List<OrganizationUnitView> organizationUnitViews = OrganizationUtils.convertList(allUnits);
 					List<PrivilegeGroup> privilegeGroups = applicationRole.getPrivilegeGroups();
 					for (PrivilegeGroup privilegeGroup : privilegeGroups) {
@@ -194,12 +195,13 @@ public class UserPrivileges {
 			PrivilegeApplicationKey privilegeApplicationKey = PrivilegeApplicationKey.create(privilegeAssignment);
 			OrganizationUnit fixedOrganizationRoot = privilegeAssignment.getFixedOrganizationRoot();
 			List<OrganizationUnitType> organizationUnitTypeFilter = privilegeAssignment.getOrganizationUnitTypeFilter();
+			boolean noInheritanceOfOrganizationalUnits = privilegeAssignment.isNoInheritanceOfOrganizationalUnits();
 			PrivilegeGroup privilegeGroup = privilegeProvider.getPrivilegeGroup(privilegeAssignment.getPrivilegeGroup().getName());
 			List<Privilege> privileges = privilegeProvider.getPrivilegesByNameList(privilegeAssignment.getPrivileges().stream().map(ApplicationPrivilege::getName).collect(Collectors.toList()));
 			boolean privilegeObjectInheritance = privilegeAssignment.getPrivilegeObjectInheritance();
 			List<Integer> privilegeObjectIdList = ValueConverterUtils.decompressIds(privilegeAssignment.getPrivilegeObjects());
 			List<PrivilegeObject> privilegeObjects = privilegeProvider.getPrivilegeObjects(privilegeGroup, privilegeObjectIdList, privilegeObjectInheritance);
-			Set<OrganizationUnit> allUnits = OrganizationUtils.getAllUnits(fixedOrganizationRoot != null ? fixedOrganizationRoot : organizationUnit, organizationUnitTypeFilter);
+			Set<OrganizationUnit> allUnits = OrganizationUtils.getAllUnits(fixedOrganizationRoot != null ? fixedOrganizationRoot : organizationUnit, organizationUnitTypeFilter, noInheritanceOfOrganizationalUnits);
 			List<OrganizationUnitView> organizationUnitViews = OrganizationUtils.convertList(allUnits);
 			try {
 				switch (privilegeGroup.getType()) {
