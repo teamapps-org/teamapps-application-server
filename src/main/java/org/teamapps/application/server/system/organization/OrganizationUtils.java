@@ -58,6 +58,16 @@ public class OrganizationUtils {
 				.collect(Collectors.toSet());
 	}
 
+	public static Set<OrganizationUnit> convertViewSet(Collection<OrganizationUnitView>... organizationUnitCollections) {
+		Set<OrganizationUnit> organizationUnitSet = new HashSet<>();
+		for (Collection<OrganizationUnitView> unitViews : organizationUnitCollections) {
+			organizationUnitSet.addAll(unitViews.stream()
+					.map(unit -> OrganizationUnit.getById(unit.getId()))
+					.collect(Collectors.toSet()));
+		}
+		return organizationUnitSet;
+	}
+
 	public static List<OrganizationUnit> convertViewList(Collection<OrganizationUnitView> organizationUnits) {
 		return organizationUnits.stream()
 				.map(unit -> OrganizationUnit.getById(unit.getId()))
@@ -81,10 +91,38 @@ public class OrganizationUtils {
 		return OrganizationFieldView != null && OrganizationFieldView.getId() > 0 ? OrganizationField.getById(OrganizationFieldView.getId()) : null;
 	}
 
+	public static List<OrganizationUnit> getRootNodes(Collection<OrganizationUnit> nodes) {
+		Set<OrganizationUnit> set = nodes instanceof Set ? (Set<OrganizationUnit>) nodes : new HashSet<>(nodes);
+		return nodes.stream()
+				.filter(node -> node.getParent() == null || !set.contains(node.getParent()))
+				.collect(Collectors.toList());
+	}
+
+	public static List<OrganizationUnit> getPath(OrganizationUnit organizationUnit) {
+		List<OrganizationUnit> path = new ArrayList<>();
+		OrganizationUnit unit = organizationUnit;
+		while (unit != null) {
+			path.add(unit);
+			unit = unit.getParent();
+		}
+		Collections.reverse(path);
+		return path;
+	}
+
 	public static Set<OrganizationUnit> getAllUnits(OrganizationUnit unit, Collection<OrganizationUnitType> unitTypesFilter) {
+		return getAllUnits(unit, unitTypesFilter, false);
+	}
+
+	public static Set<OrganizationUnit> getAllUnits(OrganizationUnit unit, Collection<OrganizationUnitType> unitTypesFilter, boolean noInheritanceOfOrganizationalUnits) {
 		Set<OrganizationUnit> result = new HashSet<>();
 		Set<OrganizationUnit> traversedNodes = new HashSet<>();
 		Set<OrganizationUnitType> filter = unitTypesFilter != null && !unitTypesFilter.isEmpty() ? new HashSet<>(unitTypesFilter) : null;
+		if (noInheritanceOfOrganizationalUnits) {
+			if (unitTypesFilter == null || unitTypesFilter.contains(unit.getType())) {
+				result.add(unit);
+			}
+			return result;
+		}
 		calculateAllUnits(unit, filter, traversedNodes, result);
 		return result;
 	}
@@ -176,13 +214,13 @@ public class OrganizationUtils {
 
 	public static List<OrganizationUnit> queryOrganizationUnits(String query, Collection<OrganizationUnit> allowedUnits) {
 		return query == null || query.isBlank() ?
-				allowedUnits.stream().limit(150).collect(Collectors.toList()) :
+				allowedUnits.stream().limit(250).collect(Collectors.toList()) :
 				OrganizationUnit.filter()
 						.parseFullTextFilter(query)
 						.execute()
 						.stream()
 						.filter(allowedUnits::contains)
-						.limit(150)
+						.limit(250)
 						.collect(Collectors.toList());
 	}
 
