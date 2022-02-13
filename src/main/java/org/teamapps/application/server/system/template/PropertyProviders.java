@@ -271,8 +271,7 @@ public class PropertyProviders {
 			if (userProfilePictureLink != null) {
 				map.put(BaseTemplate.PROPERTY_IMAGE, userProfilePictureLink);
 			} else {
-				//todo generic user image
-				map.put(BaseTemplate.PROPERTY_ICON, ApplicationIcons.USER);
+				map.put(BaseTemplate.PROPERTY_IMAGE, "/ta-media/user-silhouette.png");
 			}
 			map.put(BaseTemplate.PROPERTY_CAPTION, user.getFirstName() + " " + user.getLastName());
 			map.put(BaseTemplate.PROPERTY_DESCRIPTION, translatableTextExtractor.apply(user.getOrganizationUnit() != null ? user.getOrganizationUnit().getName() : null));
@@ -292,8 +291,7 @@ public class PropertyProviders {
 			if (userProfilePictureLink != null) {
 				map.put(BaseTemplate.PROPERTY_IMAGE, userProfilePictureLink);
 			} else {
-				//todo generic user image
-				map.put(BaseTemplate.PROPERTY_ICON, ApplicationIcons.USER);
+				map.put(BaseTemplate.PROPERTY_IMAGE, "/ta-media/user-silhouette.png");
 			}
 			map.put(BaseTemplate.PROPERTY_CAPTION, user.getFirstName() + " " + user.getLastName());
 			map.put(BaseTemplate.PROPERTY_DESCRIPTION, translatableTextExtractor.apply(user.getOrganizationUnit() != null ? user.getOrganizationUnit().getName() : null));
