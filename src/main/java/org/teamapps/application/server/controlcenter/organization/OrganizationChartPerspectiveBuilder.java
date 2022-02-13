@@ -35,7 +35,11 @@ public class OrganizationChartPerspectiveBuilder extends AbstractPerspectiveBuil
 
 	@Override
 	public boolean isPerspectiveAccessible(ApplicationPrivilegeProvider applicationPrivilegeProvider) {
-		return applicationPrivilegeProvider.isAllowed(Privileges.LAUNCH_PERSPECTIVE_ORGANIZATION_CHART);
+		return applicationPrivilegeProvider.isAnyAccess(Privileges.ORGANIZATION_CHART_PERSPECTIVE,
+				OrganizationChartPerspective.SHOW_UPWARDS_LEADERS,
+				OrganizationChartPerspective.SHOW_UPWARDS_ALL_ROLES,
+				OrganizationChartPerspective.SHOW_DOWNWARDS_LEADERS,
+				OrganizationChartPerspective.SHOW_DOWNWARDS_ALL_ROLES);
 	}
 
 	@Override
