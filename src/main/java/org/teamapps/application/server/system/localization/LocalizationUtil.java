@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -152,25 +152,42 @@ public class LocalizationUtil {
 			for (LocalizationValue localizationValue : languageCompare.getBEntriesInA()) {
 				String language = localizationValue.getLanguage();
 				if (machineTranslatedLanguages.contains(language)) {
-					continue;
-				}
-				String original = translations.get(language);
-				if (original != null &&
-						!original.isBlank() &&
-						localizationValue.getOriginal() != null &&
-						!original.equals(localizationValue.getOriginal())
-				) {
-					localizationValue.setOriginal(original).save();
-					localizationValue.getLocalizationKey().getLocalizationValues().stream()
-							.filter(value -> !value.equals(localizationValue))
-							.filter(value -> value.getOriginal() == null)
-							.filter(value -> value.getAdminLocalOverride() == null)
-							.filter(value -> value.getAdminKeyOverride() == null)
-							.forEach(value -> value
-									.setMachineTranslationState(MachineTranslationState.TRANSLATION_REQUESTED)
-									.setTranslationState(TranslationState.TRANSLATION_REQUESTED)
-									.setTranslationVerificationState(TranslationVerificationState.NOT_YET_TRANSLATED)
-									.save());
+					String applicationTranslation = translations.get(language);
+					String machineTranslation = localizationValue.getMachineTranslation();
+					if (applicationTranslation != null &&
+							!applicationTranslation.isBlank() &&
+							machineTranslation != null &&
+							!applicationTranslation.equals(machineTranslation)) {
+						localizationValue
+								.setMachineTranslation(applicationTranslation)
+								.setMachineTranslationState(MachineTranslationState.OK);
+						if (localizationValue.getTranslation() == null) {
+							localizationValue.setCurrentDisplayValue(applicationTranslation);
+						}
+						localizationValue.save();
+						LOGGER.info("Update machine translation, key: {}, old: {}, new: {}", localizationValue.getLocalizationKey().getKey(), machineTranslation, applicationTranslation);
+					}
+
+				} else {
+					String original = translations.get(language);
+					if (original != null &&
+							!original.isBlank() &&
+							localizationValue.getOriginal() != null &&
+							!original.equals(localizationValue.getOriginal())
+					) {
+						LOGGER.info("Update original localization, key: {}, old: {}, new: {}", localizationValue.getLocalizationKey().getKey(), localizationValue.getOriginal(), original);
+						localizationValue.setOriginal(original).setCurrentDisplayValue(original).save();
+						localizationValue.getLocalizationKey().getLocalizationValues().stream()
+								.filter(value -> !value.equals(localizationValue))
+								.filter(value -> value.getOriginal() == null)
+								.filter(value -> value.getAdminLocalOverride() == null)
+								.filter(value -> value.getAdminKeyOverride() == null)
+								.forEach(value -> value
+										.setMachineTranslationState(MachineTranslationState.TRANSLATION_REQUESTED)
+										.setTranslationState(TranslationState.TRANSLATION_REQUESTED)
+										.setTranslationVerificationState(TranslationVerificationState.NOT_YET_TRANSLATED)
+										.save());
+					}
 				}
 			}
 		}
