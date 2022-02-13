@@ -36,7 +36,9 @@ public enum Templates implements Template {
 	LIST_4_LINES_TEMPLATE(create4LinesTemplate()),
 	NODE_TEMPLATE(createNodeTemplate()),
 	ORGANIZATION_GRAPH_TEMPLATE(createOrganizationGraphTreeNodeTpl()),
-	ORGANIZATION_GRAPH_SMALL_TEMPLATE(createOrganizationGraphTreeNodeSmallTpl()),
+	ORGANIZATION_GRAPH_SMALL_BlUE_TEMPLATE(createOrganizationGraphTreeNodeSmallTpl(Color.MATERIAL_BLUE_900)),
+	ORGANIZATION_GRAPH_SMALL_GREEN_TEMPLATE(createOrganizationGraphTreeNodeSmallTpl(Color.MATERIAL_GREEN_900)),
+	ORGANIZATION_GRAPH_SMALL_GREY_TEMPLATE(createOrganizationGraphTreeNodeSmallTpl(Color.MATERIAL_GREY_900)),
 	;
 
 	public final static String PROPERTY_IMAGE = BaseTemplate.PROPERTY_IMAGE;
@@ -135,7 +137,7 @@ public enum Templates implements Template {
 		return tpl;
 	}
 
-	public static Template createOrganizationGraphTreeNodeSmallTpl() {
+	public static Template createOrganizationGraphTreeNodeSmallTpl(Color textColor) {
 		GridTemplate tpl = new GridTemplate()
 				.setPadding(new Spacing(2, 1, 1, 30))
 				.addColumn(SizingPolicy.fixed(200))
@@ -143,7 +145,7 @@ public enum Templates implements Template {
 				.addRow(SizeType.FIXED, 16, 16, 0, 0)
 				.addElement(new TextElement(PROPERTY_DESCRIPTION, 0, 0)
 						.setWrapLines(false)
-						.setFontStyle(new FontStyle(1f, Color.MATERIAL_GREEN_900, null, true, false, false))
+						.setFontStyle(new FontStyle(1f, textColor, null, true, false, false))
 						.setVerticalAlignment(VerticalElementAlignment.CENTER)
 						.setHorizontalAlignment(HorizontalElementAlignment.LEFT))
 				.addElement(new TextElement(PROPERTY_LINE3, 1, 0)
