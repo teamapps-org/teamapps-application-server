@@ -64,6 +64,7 @@ import org.teamapps.ux.model.ComboBoxModel;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -128,9 +129,9 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 		TagComboBox<PrivilegeObject> privilegeObjectTagComboBox = createPrivilegeObjectTagComboBox(applicationComboBox, privilegeGroupComboBox);
 		CheckBox privilegeObjectInheritanceCheckBox = new CheckBox(getLocalized("accessControl.privilegeObjectInheritance"));
 		ComboBox<OrganizationField> organizationFieldFilterComboBox = createOrganizationFieldComboBox();
-//		ComboBox<OrganizationUnit> organizationFilterComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), true, getApplicationInstanceData());
-		AbstractField<OrganizationUnitView> organizationFilterComboBox = formController.getOrganizationUnitViewField(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
+		AbstractField<OrganizationUnitView> customOrganizationUnit = formController.getOrganizationUnitViewField(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, true);
 		TagComboBox<OrganizationUnitType> organizationUnitTypeFilterTagComboBox = OrganizationUtils.createOrganizationUnitTypeTagComboBox(50, getApplicationInstanceData());
+		CheckBox noOrgUnitInheritanceCheckBox = new CheckBox(getLocalized("accessControl.noInheritanceOfOrganizationalUnits"));
 
 
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(450);
@@ -144,8 +145,71 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 		if (!isOrgFieldFilterApplied()) {
 			formLayout.addLabelAndField(null, getLocalized("accessControl.organizationFieldFilter"), organizationFieldFilterComboBox);
 		}
-		formLayout.addLabelAndField(null, getLocalized("accessControl.customOrganizationUnit"), organizationFilterComboBox);
+		formLayout.addLabelAndField(null, getLocalized("accessControl.customOrganizationUnit"), customOrganizationUnit);
 		formLayout.addLabelAndField(null, getLocalized("accessControl.organizationUnitTypeFilter"), organizationUnitTypeFilterTagComboBox);
+		formLayout.addLabelAndField(null, getLocalized("accessControl.noInheritance"), noOrgUnitInheritanceCheckBox);
+
+		Consumer<ApplicationPrivilegeGroup> privilegeGroupHandler = privilegeGroup -> {
+			if (privilegeGroup == null) {
+				privilegesTagComboBox.setVisible(false);
+				privilegeObjectTagComboBox.setVisible(false);
+				privilegeObjectInheritanceCheckBox.setVisible(false);
+				customOrganizationUnit.setVisible(false);
+				organizationUnitTypeFilterTagComboBox.setVisible(false);
+				noOrgUnitInheritanceCheckBox.setVisible(false);
+				return;
+			}
+			switch (privilegeGroup.getApplicationPrivilegeGroupType()) {
+				case SIMPLE_PRIVILEGE -> {
+					privilegesTagComboBox.setVisible(false);
+					privilegeObjectTagComboBox.setVisible(false);
+					privilegeObjectInheritanceCheckBox.setVisible(false);
+					customOrganizationUnit.setVisible(false);
+					organizationUnitTypeFilterTagComboBox.setVisible(false);
+					noOrgUnitInheritanceCheckBox.setVisible(false);
+				}
+				case SIMPLE_ORGANIZATIONAL_PRIVILEGE -> {
+					privilegesTagComboBox.setVisible(false);
+					privilegeObjectTagComboBox.setVisible(false);
+					privilegeObjectInheritanceCheckBox.setVisible(false);
+					customOrganizationUnit.setVisible(true);
+					organizationUnitTypeFilterTagComboBox.setVisible(true);
+					noOrgUnitInheritanceCheckBox.setVisible(true);
+				}
+				case SIMPLE_CUSTOM_OBJECT_PRIVILEGE -> {
+					privilegesTagComboBox.setVisible(false);
+					privilegeObjectTagComboBox.setVisible(true);
+					privilegeObjectInheritanceCheckBox.setVisible(true);
+					customOrganizationUnit.setVisible(false);
+					organizationUnitTypeFilterTagComboBox.setVisible(false);
+					noOrgUnitInheritanceCheckBox.setVisible(false);
+				}
+				case STANDARD_PRIVILEGE_GROUP -> {
+					privilegesTagComboBox.setVisible(true);
+					privilegeObjectTagComboBox.setVisible(false);
+					privilegeObjectInheritanceCheckBox.setVisible(false);
+					customOrganizationUnit.setVisible(false);
+					organizationUnitTypeFilterTagComboBox.setVisible(false);
+					noOrgUnitInheritanceCheckBox.setVisible(false);
+				}
+				case ORGANIZATIONAL_PRIVILEGE_GROUP -> {
+					privilegesTagComboBox.setVisible(true);
+					privilegeObjectTagComboBox.setVisible(false);
+					privilegeObjectInheritanceCheckBox.setVisible(false);
+					customOrganizationUnit.setVisible(true);
+					organizationUnitTypeFilterTagComboBox.setVisible(true);
+					noOrgUnitInheritanceCheckBox.setVisible(true);
+				}
+				case CUSTOM_OBJECT_PRIVILEGE_GROUP -> {
+					privilegesTagComboBox.setVisible(true);
+					privilegeObjectTagComboBox.setVisible(true);
+					privilegeObjectInheritanceCheckBox.setVisible(true);
+					customOrganizationUnit.setVisible(false);
+					organizationUnitTypeFilterTagComboBox.setVisible(false);
+					noOrgUnitInheritanceCheckBox.setVisible(false);
+				}
+			}
+		};
 
 		applicationComboBox.onValueChanged.addListener(() -> {
 			privilegeGroupComboBox.setValue(null);
@@ -153,10 +217,14 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 			privilegeObjectTagComboBox.setValue(null);
 		});
 
-		privilegeGroupComboBox.onValueChanged.addListener(() -> {
+		privilegeGroupComboBox.onValueChanged.addListener(privilegeGroup -> {
 			privilegesTagComboBox.setValue(null);
 			privilegeObjectTagComboBox.setValue(null);
+			privilegeGroupHandler.accept(privilegeGroup);
 		});
+
+
+
 
 		masterDetailController.createViews(getPerspective(), table, formLayout);
 
@@ -176,21 +244,25 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 					.setPrivilegeObjects(privilegeObjectTagComboBox.getValue() != null ? ValueConverterUtils.compressStringList(privilegeObjectTagComboBox.getValue().stream().map(p -> "" + p.getId()).collect(Collectors.toList())) : null)
 					.setPrivilegeObjectInheritance(privilegeObjectInheritanceCheckBox.getValue())
 					.setOrganizationFieldFilter(organizationField)
-					.setFixedOrganizationRoot(OrganizationUtils.convert(organizationFilterComboBox.getValue()))
-					.setOrganizationUnitTypeFilter(organizationUnitTypeFilterTagComboBox.getValue());
+					.setFixedOrganizationRoot(OrganizationUtils.convert(customOrganizationUnit.getValue()))
+					.setOrganizationUnitTypeFilter(organizationUnitTypeFilterTagComboBox.getValue())
+					.setNoInheritanceOfOrganizationalUnits(noOrgUnitInheritanceCheckBox.getValue());
 			return true;
 		});
 
 		entityModelBuilder.getOnSelectionEvent().addListener(rolePrivilegeAssignment -> {
+			ApplicationPrivilegeGroup privilegeGroup = rolePrivilegeAssignment.getPrivilegeGroup();
+			privilegeGroupHandler.accept(privilegeGroup);
 			roleComboBox.setValue(rolePrivilegeAssignment.getRole());
 			applicationComboBox.setValue(rolePrivilegeAssignment.getApplication());
-			privilegeGroupComboBox.setValue(rolePrivilegeAssignment.getPrivilegeGroup());
+			privilegeGroupComboBox.setValue(privilegeGroup);
 			privilegesTagComboBox.setValue(rolePrivilegeAssignment.getPrivileges());
 			//privilegeObjectTagComboBox.setValue(rolePrivilegeAssignment); //todo!
 			privilegeObjectInheritanceCheckBox.setValue(rolePrivilegeAssignment.getPrivilegeObjectInheritance());
 			organizationFieldFilterComboBox.setValue(rolePrivilegeAssignment.getOrganizationFieldFilter());
-			organizationFilterComboBox.setValue(OrganizationUtils.convert(rolePrivilegeAssignment.getFixedOrganizationRoot()));
+			customOrganizationUnit.setValue(OrganizationUtils.convert(rolePrivilegeAssignment.getFixedOrganizationRoot()));
 			organizationUnitTypeFilterTagComboBox.setValue(rolePrivilegeAssignment.getOrganizationUnitTypeFilter());
+			noOrgUnitInheritanceCheckBox.setValue(rolePrivilegeAssignment.isNoInheritanceOfOrganizationalUnits());
 		});
 
 		entityModelBuilder.setSelectedRecord(RolePrivilegeAssignment.create());

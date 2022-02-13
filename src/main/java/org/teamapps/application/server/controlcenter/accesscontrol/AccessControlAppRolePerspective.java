@@ -46,6 +46,7 @@ import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.pojo.Query;
 import org.teamapps.ux.component.field.AbstractField;
+import org.teamapps.ux.component.field.CheckBox;
 import org.teamapps.ux.component.field.Label;
 import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.combobox.ComboBox;
@@ -120,9 +121,9 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 		ComboBox<Application> applicationComboBox = createApplicationComboBox();
 		ComboBox<ApplicationRole> applicationRoleComboBox = createApplicationRoleComboBox(applicationComboBox);
 		ComboBox<OrganizationField> organizationFieldFilterComboBox = createOrganizationFieldComboBox();
-//		ComboBox<OrganizationUnit> organizationFilterComboBox = OrganizationUtils.createOrganizationComboBox(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, OrganizationUnit.getAll(), true, getApplicationInstanceData());
-		AbstractField<OrganizationUnitView> organizationFilterComboBox = formController.getOrganizationUnitViewField(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES);
+		AbstractField<OrganizationUnitView> customOrganizationUnit = formController.getOrganizationUnitViewField(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, true);
 		TagComboBox<OrganizationUnitType> organizationUnitTypeFilterTagComboBox = OrganizationUtils.createOrganizationUnitTypeTagComboBox(50, getApplicationInstanceData());
+		CheckBox noOrgUnitInheritanceCheckBox = new CheckBox(getLocalized("accessControl.noInheritanceOfOrganizationalUnits"));
 
 
 		RecordListModelBuilder<PrivilegeGroup> appRoleModelBuilder = new RecordListModelBuilder<>(getApplicationInstanceData());
@@ -149,8 +150,9 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 		if (!isOrgFieldFilterApplied()) {
 			formLayout.addLabelAndField(null, getLocalized("accessControl.organizationFieldFilter"), organizationFieldFilterComboBox);
 		}
-		formLayout.addLabelAndField(null, getLocalized("accessControl.customOrganizationUnit"), organizationFilterComboBox);
+		formLayout.addLabelAndField(null, getLocalized("accessControl.customOrganizationUnit"), customOrganizationUnit);
 		formLayout.addLabelAndField(null, getLocalized("accessControl.organizationUnitTypeFilter"), organizationUnitTypeFilterTagComboBox);
+		formLayout.addLabelAndField(null, getLocalized("accessControl.noInheritance"), noOrgUnitInheritanceCheckBox);
 
 		formLayout.addSection(ApplicationIcons.SECURITY_BADGE, getLocalized(Dictionary.PRIVILEGES));
 		formLayout.addLabelAndComponent(new Label(getLocalized("accessControl.applicationRolePrivileges")));
@@ -171,7 +173,7 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 					.setApplication(applicationComboBox.getValue())
 					.setApplicationRoleName(applicationRoleComboBox.getValue().getName())
 					.setOrganizationFieldFilter(organizationField)
-					.setFixedOrganizationRoot(OrganizationUtils.convert(organizationFilterComboBox.getValue()))
+					.setFixedOrganizationRoot(OrganizationUtils.convert(customOrganizationUnit.getValue()))
 					.setOrganizationUnitTypeFilter(organizationUnitTypeFilterTagComboBox.getValue());
 			return true;
 		});
@@ -182,7 +184,7 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 			ApplicationRole applicationRole = getApplicationRole(roleApplicationRoleAssignment);
 			applicationRoleComboBox.setValue(applicationRole);
 			organizationFieldFilterComboBox.setValue(roleApplicationRoleAssignment.getOrganizationFieldFilter());
-			organizationFilterComboBox.setValue(OrganizationUtils.convert(roleApplicationRoleAssignment.getFixedOrganizationRoot()));
+			customOrganizationUnit.setValue(OrganizationUtils.convert(roleApplicationRoleAssignment.getFixedOrganizationRoot()));
 			organizationUnitTypeFilterTagComboBox.setValue(roleApplicationRoleAssignment.getOrganizationUnitTypeFilter());
 			appRoleModelBuilder.setRecords(applicationRole != null ? applicationRole.getPrivilegeGroups() : Collections.emptyList());
 		});

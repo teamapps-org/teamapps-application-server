@@ -424,6 +424,7 @@ public class Model implements SchemaInfoProvider {
 				.addReference("organizationFieldFilter", organizationField, false)
 				.addReference("fixedOrganizationRoot", organizationUnit, false)
 				.addReference("organizationUnitTypeFilter", organizationUnitType, true)
+				.addBoolean("noInheritanceOfOrganizationalUnits")
 		;
 
 		roleApplicationRoleAssignment
@@ -433,6 +434,7 @@ public class Model implements SchemaInfoProvider {
 				.addReference("organizationFieldFilter", organizationField, false)
 				.addReference("fixedOrganizationRoot", organizationUnit, false)
 				.addReference("organizationUnitTypeFilter", organizationUnitType, true)
+				.addBoolean("noInheritanceOfOrganizationalUnits")
 		;
 
 
