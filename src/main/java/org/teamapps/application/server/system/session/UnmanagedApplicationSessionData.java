@@ -143,7 +143,7 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 
 	@Override
 	public Integer getOrganizationUserWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType) {
-		List<Integer> organizationUsersWithRole = PerspectiveSessionData.getOrganizationUsersWithRole(orgUnit, userRoleType, false, getOrganizationField());
+		List<Integer> organizationUsersWithRole = PerspectiveSessionData.getOrganizationUsersWithRole(orgUnit, userRoleType, getOrganizationField());
 		if (organizationUsersWithRole != null && !organizationUsersWithRole.isEmpty()) {
 			return organizationUsersWithRole.get(0);
 		} else {
@@ -163,7 +163,7 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 	}
 	@Override
 	public List<Integer> getOrganizationUsersWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType) {
-		return PerspectiveSessionData.getOrganizationUsersWithRole(orgUnit, userRoleType, false, getOrganizationField());
+		return PerspectiveSessionData.getOrganizationUsersWithRole(orgUnit, userRoleType, getOrganizationField());
 	}
 	@Override
 	public String getLocalized(String s, Object... objects) {

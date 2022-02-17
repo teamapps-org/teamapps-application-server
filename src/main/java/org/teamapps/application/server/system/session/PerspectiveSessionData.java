@@ -30,6 +30,7 @@ import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.ui.UiComponentFactory;
 import org.teamapps.application.api.user.SessionUser;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
+import org.teamapps.application.server.system.utils.RoleUtils;
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.icons.Icon;
 import org.teamapps.model.controlcenter.*;
@@ -40,6 +41,7 @@ import org.teamapps.ux.application.perspective.Perspective;
 import org.teamapps.ux.component.progress.MultiProgressDisplay;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -180,7 +182,7 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 
 	@Override
 	public Integer getOrganizationUserWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType) {
-		List<Integer> organizationUsersWithRole = getOrganizationUsersWithRole(orgUnit, userRoleType, false, getOrganizationField());
+		List<Integer> organizationUsersWithRole = getOrganizationUsersWithRole(orgUnit, userRoleType, getOrganizationField());
 		if (organizationUsersWithRole != null && !organizationUsersWithRole.isEmpty()) {
 			return organizationUsersWithRole.get(0);
 		} else {
@@ -201,10 +203,10 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 
 	@Override
 	public List<Integer> getOrganizationUsersWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType) {
-		return getOrganizationUsersWithRole(orgUnit, userRoleType, false, getOrganizationField());
+		return getOrganizationUsersWithRole(orgUnit, userRoleType, getOrganizationField());
 	}
 
-	public static List<Integer> getOrganizationUsersWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType, boolean mainResponsible, OrganizationFieldView organizationFieldView) {
+	public static List<Integer> getOrganizationUsersWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType, OrganizationFieldView organizationFieldView) {
 		if (userRoleType == null) {
 			return null;
 		}
@@ -222,8 +224,8 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 				.stream()
 				.filter(userRoleAssignment -> organizationField == null || userRoleAssignment.getRole().getOrganizationField().equals(organizationField))
 				.filter(userRoleAssignment -> userRoleAssignment.getRole().getRoleType() == roleType)
-				.filter(userRoleAssignment -> !mainResponsible || userRoleAssignment.isMainResponsible())
 				.filter(userRoleAssignment -> userRoleAssignment.getUser() != null)
+				.sorted(RoleUtils.createRoleTypeAndMainResponsibleComparator())
 				.map(assignment -> assignment.getUser().getId())
 				.collect(Collectors.toList());
 	}

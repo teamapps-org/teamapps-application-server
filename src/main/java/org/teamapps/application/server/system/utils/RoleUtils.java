@@ -94,6 +94,29 @@ public class RoleUtils {
 				.collect(Collectors.toList());
 	}
 
+	public static Comparator<UserRoleAssignment> createRoleTypeAndMainResponsibleComparator() {
+		return (assignment1, assignment2) -> {
+			RoleType type1 = assignment1.getRole().getRoleType();
+			RoleType type2 = assignment2.getRole().getRoleType();
+			int ordinal1 = type1 != null ? type1.ordinal() : RoleType.OTHER.ordinal();
+			int ordinal2 = type2 != null ? type2.ordinal() : RoleType.OTHER.ordinal();
+			if (type1 == type2) {
+				if (assignment1.isMainResponsible()) {
+					ordinal1 = -1;
+				}
+				if (assignment2.isMainResponsible()) {
+					ordinal2 = -1;
+				}
+				if (ordinal1 == ordinal2) {
+					if (assignment1.getUser().getProfilePictureLength() == 0) {
+						ordinal1++;
+					}
+				}
+			}
+			return Integer.compare(ordinal1, ordinal2);
+		};
+	}
+
 	public static List<ApplicationPrivilegeGroup> calculateRolePrivileges(Role role, SystemRegistry systemRegistry) {
 		Map<String, ApplicationRole> applicationRoleMap = new HashMap<>();
 		for (LoadedApplication loadedApplication : systemRegistry.getLoadedApplications()) {
