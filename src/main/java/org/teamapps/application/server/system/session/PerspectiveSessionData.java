@@ -276,6 +276,11 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	}
 
 	@Override
+	public boolean isAllowed(RoleAssignmentDelegatedCustomPrivilegeGroup group, Privilege privilege, PrivilegeObject privilegeObject) {
+		return privilegeProvider.isAllowed(group, privilege, privilegeObject);
+	}
+
+	@Override
 	public List<OrganizationUnitView> getAllowedUnits(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege) {
 		return privilegeProvider.getAllowedUnits(simpleOrganizationalPrivilege);
 	}
@@ -293,5 +298,10 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	@Override
 	public List<PrivilegeObject> getAllowedPrivilegeObjects(CustomObjectPrivilegeGroup customObjectPrivilegeGroup, Privilege privilege) {
 		return privilegeProvider.getAllowedPrivilegeObjects(customObjectPrivilegeGroup, privilege);
+	}
+
+	@Override
+	public List<PrivilegeObject> getAllowedPrivilegeObjects(RoleAssignmentDelegatedCustomPrivilegeGroup group, Privilege privilege) {
+		return privilegeProvider.getAllowedPrivilegeObjects(group, privilege);
 	}
 }

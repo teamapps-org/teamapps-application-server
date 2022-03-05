@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.teamapps.model.controlcenter.ApplicationPrivilegeGroupType.*;
+import static org.teamapps.model.controlcenter.ApplicationPrivilegeGroupType.ROLE_ASSIGNMENT_DELEGATED_CUSTOM_PRIVILEGE_GROUP;
 
 public class PrivilegeDataInstallationPhase implements ApplicationInstallationPhase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -191,6 +192,8 @@ public class PrivilegeDataInstallationPhase implements ApplicationInstallationPh
 				return ORGANIZATIONAL_PRIVILEGE_GROUP;
 			case CUSTOM_OBJECT_PRIVILEGE_GROUP:
 				return CUSTOM_OBJECT_PRIVILEGE_GROUP;
+			case ROLE_ASSIGNMENT_DELEGATED_CUSTOM_PRIVILEGE_GROUP:
+				return ROLE_ASSIGNMENT_DELEGATED_CUSTOM_PRIVILEGE_GROUP;
 			default:
 				return null;
 		}
@@ -210,7 +213,7 @@ public class PrivilegeDataInstallationPhase implements ApplicationInstallationPh
 	private List<String> getApplicationPrivilegeGroupInfoData(List<ApplicationPrivilegeGroup> privilegeGroups) {
 		List<String> infoData = new ArrayList<>();
 		for (ApplicationPrivilegeGroup privilegeGroup : privilegeGroups) {
-			infoData.add(privilegeGroup.getName() + ": " + privilegeGroup.getApplicationPrivilegeGroupType().name());
+			infoData.add(privilegeGroup.getName() + ": " + (privilegeGroup.getApplicationPrivilegeGroupType() != null ? privilegeGroup.getApplicationPrivilegeGroupType().name() : null));
 			for (ApplicationPrivilege privilege : privilegeGroup.getPrivileges()) {
 				infoData.add(" -> " + privilege.getName());
 			}

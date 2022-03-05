@@ -208,6 +208,14 @@ public class AccessControlPerspective extends AbstractManagedApplicationPerspect
 					organizationUnitTypeFilterTagComboBox.setVisible(false);
 					noOrgUnitInheritanceCheckBox.setVisible(false);
 				}
+				case ROLE_ASSIGNMENT_DELEGATED_CUSTOM_PRIVILEGE_GROUP -> {
+					privilegesTagComboBox.setVisible(true);
+					privilegeObjectTagComboBox.setVisible(false);
+					privilegeObjectInheritanceCheckBox.setVisible(false);
+					customOrganizationUnit.setVisible(false);
+					organizationUnitTypeFilterTagComboBox.setVisible(false);
+					noOrgUnitInheritanceCheckBox.setVisible(false);
+				}
 			}
 		};
 

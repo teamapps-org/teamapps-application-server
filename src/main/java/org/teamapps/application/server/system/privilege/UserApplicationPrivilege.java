@@ -35,6 +35,7 @@ public class UserApplicationPrivilege implements ApplicationPrivilegeProvider {
 	private Map<StandardPrivilegeGroup, Set<Privilege>> standardPrivilegeGroupSetMap;
 	private Map<OrganizationalPrivilegeGroup, Map<Privilege, Set<OrganizationUnitView>>> organizationalPrivilegeGroupMap;
 	private Map<CustomObjectPrivilegeGroup, Map<Privilege, Set<PrivilegeObject>>> customObjectPrivilegeGroupMap;
+	private Map<RoleAssignmentDelegatedCustomPrivilegeGroup, Map<Privilege, Set<PrivilegeObject>>> delegatedCustomPrivilegeGroupMap;
 
 	public UserApplicationPrivilege(UserPrivileges userPrivileges, PrivilegeApplicationKey privilegeApplicationKey) {
 		this.userPrivileges = userPrivileges;
@@ -49,6 +50,7 @@ public class UserApplicationPrivilege implements ApplicationPrivilegeProvider {
 		standardPrivilegeGroupSetMap = userPrivileges.getStandardPrivilegeMap().get(privilegeApplicationKey);
 		organizationalPrivilegeGroupMap = userPrivileges.getOrganizationPrivilegeGroupMap().get(privilegeApplicationKey);
 		customObjectPrivilegeGroupMap = userPrivileges.getCustomObjectPrivilegeGroupMap().get(privilegeApplicationKey);
+		delegatedCustomPrivilegeGroupMap = userPrivileges.getRoleAssignmentDelegatedCustomPrivilegeMap().get(privilegeApplicationKey);
 	}
 
 	@Override
@@ -116,6 +118,20 @@ public class UserApplicationPrivilege implements ApplicationPrivilegeProvider {
 	}
 
 	@Override
+	public boolean isAllowed(RoleAssignmentDelegatedCustomPrivilegeGroup group, Privilege privilege, PrivilegeObject privilegeObject) {
+		if (delegatedCustomPrivilegeGroupMap == null || !delegatedCustomPrivilegeGroupMap.containsKey(group)) {
+			return false;
+		} else {
+			Set<PrivilegeObject> privilegeObjects = delegatedCustomPrivilegeGroupMap.get(group).get(privilege);
+			if (privilegeObjects != null && privilegeObjects.contains(privilegeObject)) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+
+	@Override
 	public List<OrganizationUnitView> getAllowedUnits(SimpleOrganizationalPrivilege simpleOrganizationalPrivilege) {
 		if (simpleOrganizationalPrivilegeSetMap == null || !simpleOrganizationalPrivilegeSetMap.containsKey(simpleOrganizationalPrivilege)) {
 			return Collections.emptyList();
@@ -149,6 +165,16 @@ public class UserApplicationPrivilege implements ApplicationPrivilegeProvider {
 			return Collections.emptyList();
 		} else {
 			Set<PrivilegeObject> privilegeObjects = customObjectPrivilegeGroupMap.get(customObjectPrivilegeGroup).get(privilege);
+			return privilegeObjects != null ? new ArrayList<>(privilegeObjects) : Collections.emptyList();
+		}
+	}
+
+	@Override
+	public List<PrivilegeObject> getAllowedPrivilegeObjects(RoleAssignmentDelegatedCustomPrivilegeGroup group, Privilege privilege) {
+		if (delegatedCustomPrivilegeGroupMap == null || !delegatedCustomPrivilegeGroupMap.containsKey(group)) {
+			return Collections.emptyList();
+		} else {
+			Set<PrivilegeObject> privilegeObjects = delegatedCustomPrivilegeGroupMap.get(group).get(privilege);
 			return privilegeObjects != null ? new ArrayList<>(privilegeObjects) : Collections.emptyList();
 		}
 	}

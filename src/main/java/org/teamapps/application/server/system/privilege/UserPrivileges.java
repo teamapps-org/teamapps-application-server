@@ -42,6 +42,7 @@ public class UserPrivileges {
 	private final Map<PrivilegeApplicationKey, Map<StandardPrivilegeGroup, Set<Privilege>>> standardPrivilegeMap = new HashMap<>();
 	private final Map<PrivilegeApplicationKey, Map<OrganizationalPrivilegeGroup, Map<Privilege, Set<OrganizationUnitView>>>> organizationPrivilegeGroupMap = new HashMap<>();
 	private final Map<PrivilegeApplicationKey, Map<CustomObjectPrivilegeGroup, Map<Privilege, Set<PrivilegeObject>>>> customObjectPrivilegeGroupMap = new HashMap<>();
+	private final Map<PrivilegeApplicationKey, Map<RoleAssignmentDelegatedCustomPrivilegeGroup, Map<Privilege, Set<PrivilegeObject>>>> roleAssignmentDelegatedCustomPrivilegeMap = new HashMap<>();
 	private final Map<PrivilegeApplicationKey, UserApplicationPrivilege> userApplicationPrivilegeByApplication = new HashMap<>();
 
 	public UserPrivileges(User user, SystemRegistry systemRegistry) {
@@ -93,21 +94,22 @@ public class UserPrivileges {
 	private void calculatePrivileges() {
 		for (UserRoleAssignment roleAssignment : user.getRoleAssignments()) {
 			Role role = roleAssignment.getRole();
+			int delegatedCustomPrivilegeObjectId = roleAssignment.getDelegatedCustomPrivilegeObjectId();
 			OrganizationUnit organizationUnit = roleAssignment.getOrganizationUnit();
 			Set<Role> privilegeRoles = RoleUtils.getAllPrivilegeRoles(role);
 			for (Role privilegeRole : privilegeRoles) {
 				for (RoleApplicationRoleAssignment roleApplicationRoleAssignment : privilegeRole.getApplicationRoleAssignments()) {
-					calculatePrivilegesFromApplicationRoleAssignment(organizationUnit, roleApplicationRoleAssignment);
+					calculatePrivilegesFromApplicationRoleAssignment(organizationUnit, roleApplicationRoleAssignment, delegatedCustomPrivilegeObjectId);
 				}
 
 				for (RolePrivilegeAssignment privilegeAssignment : privilegeRole.getPrivilegeAssignments()) {
-					calculatePrivilegesFromRolePrivilegeAssignment(organizationUnit, privilegeAssignment);
+					calculatePrivilegesFromRolePrivilegeAssignment(organizationUnit, privilegeAssignment, delegatedCustomPrivilegeObjectId);
 				}
 			}
 		}
 	}
 
-	private void calculatePrivilegesFromApplicationRoleAssignment(OrganizationUnit organizationUnit, RoleApplicationRoleAssignment roleApplicationRoleAssignment) {
+	private void calculatePrivilegesFromApplicationRoleAssignment(OrganizationUnit organizationUnit, RoleApplicationRoleAssignment roleApplicationRoleAssignment, int delegatedCustomPrivilegeObjectId) {
 		try {
 			Application application = roleApplicationRoleAssignment.getApplication();
 			String applicationRoleName = roleApplicationRoleAssignment.getApplicationRoleName();
@@ -178,6 +180,9 @@ public class UserPrivileges {
 											.addAll(customPrivileges);
 								}
 								break;
+							case ROLE_ASSIGNMENT_DELEGATED_CUSTOM_PRIVILEGE_GROUP:
+
+								break;
 						}
 					}
 				}
@@ -187,7 +192,7 @@ public class UserPrivileges {
 		}
 	}
 
-	private void calculatePrivilegesFromRolePrivilegeAssignment(OrganizationUnit organizationUnit, RolePrivilegeAssignment privilegeAssignment) {
+	private void calculatePrivilegesFromRolePrivilegeAssignment(OrganizationUnit organizationUnit, RolePrivilegeAssignment privilegeAssignment, int delegatedCustomPrivilegeObjectId) {
 		Application application = privilegeAssignment.getApplication();
 		LoadedApplication loadedApplication = systemRegistry.getLoadedApplication(application);
 		if (loadedApplication != null) {
@@ -254,6 +259,22 @@ public class UserPrivileges {
 									.addAll(privilegeObjects);
 						}
 						break;
+					case ROLE_ASSIGNMENT_DELEGATED_CUSTOM_PRIVILEGE_GROUP:
+						if (delegatedCustomPrivilegeObjectId > 0) {
+							RoleAssignmentDelegatedCustomPrivilegeGroup delegatedCustomPrivilegeGroup = (RoleAssignmentDelegatedCustomPrivilegeGroup) privilegeGroup;
+							Map<Privilege, Set<PrivilegeObject>> privilegeObjectByPrivilege = roleAssignmentDelegatedCustomPrivilegeMap
+									.computeIfAbsent(privilegeApplicationKey, app -> new HashMap<>())
+									.computeIfAbsent(delegatedCustomPrivilegeGroup, s -> new HashMap<>());
+							PrivilegeObject privilegeObject = delegatedCustomPrivilegeGroup.getPrivilegeObjectById(delegatedCustomPrivilegeObjectId);
+							if (privilegeObject != null) {
+								for (Privilege privilege : privileges) {
+									privilegeObjectByPrivilege
+											.computeIfAbsent(privilege, p -> new HashSet<>())
+											.add(privilegeObject);
+								}
+							}
+						}
+						break;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -297,4 +318,7 @@ public class UserPrivileges {
 		return customObjectPrivilegeGroupMap;
 	}
 
+	public Map<PrivilegeApplicationKey, Map<RoleAssignmentDelegatedCustomPrivilegeGroup, Map<Privilege, Set<PrivilegeObject>>>> getRoleAssignmentDelegatedCustomPrivilegeMap() {
+		return roleAssignmentDelegatedCustomPrivilegeMap;
+	}
 }

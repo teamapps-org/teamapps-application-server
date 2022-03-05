@@ -129,6 +129,7 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 		TagComboBox<Role> privilegesReceivingRolesTagCombo = createRoleTagComboBox();
 		TagComboBox<Role> privilegesSendingRolesTagCombo = createRoleTagComboBox();
 		CheckBox noDirectMembershipsCheckBox = new CheckBox(getLocalized("roles.noDirectMemberships"));
+		CheckBox customPrivilegeRoleCheckBox = new CheckBox(getLocalized("roles.customPrivilegeRole"));
 
 		EntityListModelBuilder<UserRoleAssignment> userRoleAssignmentModelBuilder = new EntityListModelBuilder<>(getApplicationInstanceData(), userRoleAssignment ->  userRoleAssignment.getUser().getFirstName() + " " + userRoleAssignment.getUser().getLastName());
 		Table<UserRoleAssignment> roleMemberTable = userRoleAssignmentModelBuilder.createListTable(true);
@@ -180,6 +181,7 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 		formLayout.addLabelAndField(null, getLocalized("roles.privilegesReceivingRoles"), privilegesReceivingRolesTagCombo);
 		formLayout.addLabelAndField(null, getLocalized("roles.privilegesSendingRoles"), privilegesSendingRolesTagCombo);
 		formLayout.addLabelAndField(null, getLocalized("roles.noMemberships"), noDirectMembershipsCheckBox);
+		formLayout.addLabelAndField(null, getLocalized("roles.customPrivilegeRole"), customPrivilegeRoleCheckBox);
 
 		formLayout.addSection(ApplicationIcons.USERS_CROWD, getLocalized("roles.members"));
 		formLayout.addLabelAndComponent(null, getLocalized("applications.privileges"), roleMembersPanel.getPanel());
@@ -204,7 +206,8 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 					.setSpecializationRoles(specializationRolesTagCombo.getValue())
 					.setPrivilegesReceivingRoles(privilegesReceivingRolesTagCombo.getValue())
 					.setPrivilegesSendingRoles(privilegesSendingRolesTagCombo.getValue())
-					.setNoDirectMemberships(noDirectMembershipsCheckBox.getValue());
+					.setNoDirectMemberships(noDirectMembershipsCheckBox.getValue())
+					.setDelegatedCustomPrivilegeObjectRole(customPrivilegeRoleCheckBox.getValue());
 			return true;
 		});
 
@@ -220,6 +223,7 @@ public class RolesPerspective extends AbstractManagedApplicationPerspective {
 			privilegesReceivingRolesTagCombo.setValue(role.getPrivilegesReceivingRoles());
 			privilegesSendingRolesTagCombo.setValue(role.getPrivilegesSendingRoles());
 			noDirectMembershipsCheckBox.setValue(role.getNoDirectMemberships());
+			customPrivilegeRoleCheckBox.setValue(role.isDelegatedCustomPrivilegeObjectRole());
 			userRoleAssignmentModelBuilder.setRecords(RoleUtils.getMembers(role, true));
 		});
 		entityModelBuilder.setSelectedRecord(Role.create());

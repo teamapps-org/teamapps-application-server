@@ -19,17 +19,18 @@
  */
 package org.teamapps.application.server.controlcenter.roles;
 
+import org.teamapps.application.api.application.ApplicationRoleAssignmentPrivilegeObjectProvider;
 import org.teamapps.application.api.application.ApplicationInstanceData;
-import org.teamapps.application.api.privilege.Privilege;
+import org.teamapps.application.api.privilege.PrivilegeObject;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.controlcenter.Privileges;
 import org.teamapps.application.server.system.application.AbstractManagedApplicationPerspective;
+import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.tools.EntityModelBuilder;
-import org.teamapps.application.tools.PrivilegeUtils;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.combo.ComboBoxUtils;
 import org.teamapps.application.ux.form.FormController;
@@ -49,8 +50,7 @@ import org.teamapps.ux.component.table.TableColumn;
 import org.teamapps.ux.component.template.BaseTemplate;
 
 import java.time.Instant;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -126,12 +126,37 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 		AbstractField<OrganizationUnitView> organizationComboBox = formController.getOrganizationUnitViewField(BaseTemplate.LIST_ITEM_LARGE_ICON_TWO_LINES, false);
 		CheckBox mainResponsibleField = new CheckBox(getLocalized("userRoleAssignment.mainResponsible"));
 
+		ComboBox<PrivilegeObject> delegatedPrivilegeObjectComboBox = ComboBoxUtils.createRecordComboBox(() -> {
+			Role role = roleComboBox.getValue();
+			if (role != null && role.isDelegatedCustomPrivilegeObjectRole() && organizationComboBox.getValue() != null) {
+				ApplicationRoleAssignmentPrivilegeObjectProvider privilegeObjectProvider = getDelegatePrivilegeObjectProvider();
+				return privilegeObjectProvider != null ? privilegeObjectProvider.getPrivilegeObjects(organizationComboBox.getValue()) : Collections.emptyList();
+			}
+			return Collections.emptyList();
+		},  (privilegeObject, collection) -> {
+			Map<String, Object> map = new HashMap<>();
+			map.put(BaseTemplate.PROPERTY_ICON, privilegeObject.getIcon());
+			map.put(BaseTemplate.PROPERTY_CAPTION, getLocalized(privilegeObject.getTitleKey()));
+			return map;
+		}, BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
+		delegatedPrivilegeObjectComboBox.setVisible(false);
+
+		roleComboBox.onValueChanged.addListener(role -> {
+			if (role == null || !role.isDelegatedCustomPrivilegeObjectRole()) {
+				delegatedPrivilegeObjectComboBox.setVisible(false);
+			} else {
+				delegatedPrivilegeObjectComboBox.setValue(null);
+				delegatedPrivilegeObjectComboBox.setVisible(true);
+			}
+		});
+
 
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(450);
 		formLayout.addSection().setCollapsible(false).setDrawHeaderLine(false);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.user"), userCombobox);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.role"), roleComboBox);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.orgUnit"), organizationComboBox);
+		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.customPrivilegeObject"), delegatedPrivilegeObjectComboBox);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.mainResponsible"), mainResponsibleField);
 
 		masterDetailController.createViews(getPerspective(), table, formLayout);
@@ -147,6 +172,9 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 				if (!unitTypes.isEmpty() && !unitTypes.contains(type)) {
 					return getLocalized("userRoleAssignment.wrongOrgUnitForThisRole");
 				}
+				if (role.isDelegatedCustomPrivilegeObjectRole() && delegatedPrivilegeObjectComboBox.getValue() == null) {
+					return getLocalized("userRoleAssignment.missingCustomPrivilegeObject");
+				}
 			}
 			return null;
 		});
@@ -155,6 +183,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 					.setUser(userCombobox.getValue())
 					.setRole(roleComboBox.getValue())
 					.setOrganizationUnit(OrganizationUtils.convert(organizationComboBox.getValue()))
+					.setDelegatedCustomPrivilegeObjectId(delegatedPrivilegeObjectComboBox.getValue() != null ? delegatedPrivilegeObjectComboBox.getValue().getId() : 0)
 					.setMainResponsible(mainResponsibleField.getValue())
 					.setLastVerified(Instant.now());
 			return true;
@@ -165,12 +194,27 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 			roleComboBox.setValue(userRoleAssignment.getRole());
 			organizationComboBox.setValue(OrganizationUtils.convert(userRoleAssignment.getOrganizationUnit()));
 			mainResponsibleField.setValue(userRoleAssignment.isMainResponsible());
+			delegatedPrivilegeObjectComboBox.setValue(null);
+			if (userRoleAssignment.getDelegatedCustomPrivilegeObjectId() > 0) {
+				ApplicationRoleAssignmentPrivilegeObjectProvider privilegeObjectProvider = getDelegatePrivilegeObjectProvider();
+				if (privilegeObjectProvider != null) {
+					delegatedPrivilegeObjectComboBox.setValue(privilegeObjectProvider.getPrivilegeObjectById(userRoleAssignment.getDelegatedCustomPrivilegeObjectId()));
+				}
+				delegatedPrivilegeObjectComboBox.setVisible(true);
+			} else {
+				delegatedPrivilegeObjectComboBox.setVisible(false);
+			}
 		});
 		entityModelBuilder.setSelectedRecord(UserRoleAssignment.create());
 	}
 
 	private boolean matches(String value, String query) {
 		return value != null && value.toLowerCase().contains(query);
+	}
+
+	private ApplicationRoleAssignmentPrivilegeObjectProvider getDelegatePrivilegeObjectProvider() {
+		LoadedApplication loadedApplication = userSessionData.getRegistry().getLoadedApplication(getMainApplication());
+		return loadedApplication.getBaseApplicationBuilder().getRoleAssignmentDelegatedPrivilegeObjectProvider();
 	}
 
 }

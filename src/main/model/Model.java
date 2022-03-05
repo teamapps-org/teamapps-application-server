@@ -122,7 +122,7 @@ public class Model implements SchemaInfoProvider {
 
 		applicationPrivilegeGroup
 				.addReference("application", application, false, "privilegeGroups")
-				.addEnum("applicationPrivilegeGroupType", "simplePrivilege", "simpleOrganizationalPrivilege", "simpleCustomObjectPrivilege", "standardPrivilegeGroup", "organizationalPrivilegeGroup", "customObjectPrivilegeGroup")
+				.addEnum("applicationPrivilegeGroupType", "simplePrivilege", "simpleOrganizationalPrivilege", "simpleCustomObjectPrivilege", "standardPrivilegeGroup", "organizationalPrivilegeGroup", "customObjectPrivilegeGroup", "roleAssignmentDelegatedCustomPrivilegeGroup")
 				.addText("name")
 				.addText("icon")
 				.addText("titleKey")
@@ -395,6 +395,7 @@ public class Model implements SchemaInfoProvider {
 				.addReference("organizationUnit", organizationUnit, false)
 				.addReference("allowedOrganizationUnitTypes", organizationUnitType, true)
 				.addReference("organizationField", organizationField, false)
+				.addBoolean("delegatedCustomPrivilegeObjectRole")
 				.addReference("generalizationRoles", role, true, "specializationRoles")
 				.addReference("specializationRoles", role, true, "generalizationRoles")
 				.addReference("privilegesReceivingRoles", role, true, "privilegesSendingRoles")
@@ -409,6 +410,7 @@ public class Model implements SchemaInfoProvider {
 				.addReference("user", user, false, "roleAssignments")
 				.addReference("role", role, false, "userRoleAssignments")
 				.addReference("organizationUnit", organizationUnit, false)
+				.addInteger("delegatedCustomPrivilegeObjectId")
 				.addBoolean("mainResponsible")
 				.addTimestamp("lastVerified")
 				.addReference("lastVerifiedBy", user, false)
