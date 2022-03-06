@@ -123,8 +123,13 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 			if (binary != null) {
 				File jarFile = binary.getFileSupplier().get();
 				ApplicationInstaller jarInstaller = ApplicationInstaller.createJarInstaller(jarFile, universalDB, systemRegistry.getTranslationService(), systemRegistry.getSystemConfig().getLocalizationConfig());
-				if (jarInstaller.isInstalled()) {
-					systemRegistry.loadApplication(jarInstaller);
+				try {
+					if (jarInstaller.isInstalled()) {
+						systemRegistry.loadApplication(jarInstaller);
+					}
+				} catch (Throwable e) {
+					LOGGER.warn("Error while loading application:", e);
+					e.printStackTrace();
 				}
 			}
 		}
