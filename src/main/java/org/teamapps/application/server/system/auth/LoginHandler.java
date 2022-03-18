@@ -32,6 +32,7 @@ import org.teamapps.common.format.Color;
 import org.teamapps.model.controlcenter.User;
 import org.teamapps.model.controlcenter.UserAccessToken;
 import org.teamapps.model.controlcenter.UserAccountStatus;
+import org.teamapps.universaldb.UniversalDB;
 import org.teamapps.universaldb.index.enumeration.EnumFilterType;
 import org.teamapps.universaldb.index.text.TextFilter;
 import org.teamapps.ux.component.field.*;
@@ -323,6 +324,7 @@ public class LoginHandler {
 
 	private void handleSuccessfulLogin(User user, RootPanel rootPanel, SessionContext context) {
 		UserSessionData userSessionData = new UserSessionData(user, context, systemRegistry, rootPanel);
+		UniversalDB.setUserId(userSessionData.getUser().getId());
 		if (systemRegistry.getSessionRegistryHandler() != null) {
 			systemRegistry.getSessionRegistryHandler().handleAuthenticatedUser(userSessionData, context);
 		}
