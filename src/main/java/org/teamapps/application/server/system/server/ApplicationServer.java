@@ -80,9 +80,6 @@ public class ApplicationServer implements WebController, SessionManager {
 		this.basePath = basePath;
 		this.teamAppsConfiguration = teamAppsConfiguration;
 		this.port = port;
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			SystemStarts.create().setTimestamp(Instant.now()).setType(Type.STOP).save();
-		}));
 	}
 
 	public void updateSessionHandler(File jarFile) throws Exception {
