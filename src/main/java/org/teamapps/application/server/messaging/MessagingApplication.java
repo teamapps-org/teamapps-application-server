@@ -19,7 +19,6 @@
  */
 package org.teamapps.application.server.messaging;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import org.teamapps.application.api.application.AbstractApplicationBuilder;
 import org.teamapps.application.api.application.perspective.PerspectiveBuilder;
 import org.teamapps.application.api.config.ApplicationConfig;

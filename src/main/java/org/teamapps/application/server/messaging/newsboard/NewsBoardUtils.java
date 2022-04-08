@@ -19,7 +19,6 @@
  */
 package org.teamapps.application.server.messaging.newsboard;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Language;
 import org.teamapps.application.api.theme.ApplicationIcons;
@@ -30,10 +29,7 @@ import org.teamapps.model.controlcenter.NewsBoardMessageTranslation;
 import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.template.BaseTemplate;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
