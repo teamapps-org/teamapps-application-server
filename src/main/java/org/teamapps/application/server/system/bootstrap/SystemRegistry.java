@@ -19,7 +19,6 @@
  */
 package org.teamapps.application.server.system.bootstrap;
 
-import org.docx4j.wml.U;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.application.BaseApplicationBuilder;
@@ -28,6 +27,8 @@ import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.theme.ApplicationIcons;
 import org.teamapps.application.server.system.auth.AuthenticationHandler;
 import org.teamapps.application.server.system.auth.UrlAuthenticationHandler;
+import org.teamapps.application.api.application.entity.EntityUpdate;
+import org.teamapps.application.server.system.bootstrap.entity.EntityUpdateEventHandler;
 import org.teamapps.application.server.system.bootstrap.installer.ApplicationInstaller;
 import org.teamapps.application.server.system.config.DocumentConversionConfig;
 import org.teamapps.application.server.system.config.MachineTranslationConfig;
@@ -43,6 +44,7 @@ import org.teamapps.application.ux.IconUtils;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.reporting.convert.DocumentConverter;
 import org.teamapps.universaldb.UniversalDB;
+import org.teamapps.universaldb.record.EntityBuilder;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
@@ -50,6 +52,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -70,11 +73,13 @@ public class SystemRegistry {
 	private SessionRegistryHandler sessionRegistryHandler;
 	private DocumentConverter documentConverter;
 	private List<AuthenticationHandler> authenticationHandlers = new ArrayList<>();
+	private EntityUpdateEventHandler entityUpdateEventHandler;
 
 	public SystemRegistry(BootstrapSessionHandler bootstrapSessionHandler, UniversalDB universalDB, ApplicationConfig<SystemConfig> applicationConfig) {
 		SystemConfig systemConfig = applicationConfig.getConfig();
 		this.bootstrapSessionHandler = bootstrapSessionHandler;
 		this.universalDB = universalDB;
+		this.entityUpdateEventHandler = new EntityUpdateEventHandler(universalDB.getUpdateEventQueue());
 		this.applicationConfig = applicationConfig;
 		this.systemDictionary = new SystemLocalizationProvider();
 		this.dictionary = new DictionaryLocalizationProvider(systemConfig.getLocalizationConfig());
@@ -235,5 +240,9 @@ public class SystemRegistry {
 
 	public UniversalDB getUniversalDB() {
 		return universalDB;
+	}
+
+	public synchronized <ENTITY> void registerEntity(EntityBuilder<ENTITY> entityBuilder, int userId, Consumer<EntityUpdate<ENTITY>> listener) {
+		entityUpdateEventHandler.registerEntity(entityBuilder, userId, listener);
 	}
 }

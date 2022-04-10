@@ -70,6 +70,7 @@ public class Privileges {
 			);
 
 	public final static ApplicationRole APPLICATION_ADMINISTRATOR_ROLE = ROLE_BUILDER.addRole("applicationAdministratorRole", ApplicationIcons.PILOT, "application.roles.applicationAdministrator", "application.roles.applicationAdministrator.desc",
+			LAUNCH_APPLICATION,
 			LAUNCH_PERSPECTIVE_APP_LOCAL_ADMINISTRATION,
 			LAUNCH_PERSPECTIVE_TRANSLATIONS,
 			USER_ROLE_ASSIGNMENT_PERSPECTIVE.createCopyWithPrivileges(READ, CREATE, UPDATE, DELETE),

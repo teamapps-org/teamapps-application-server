@@ -21,6 +21,7 @@ package org.teamapps.application.server.system.session;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.teamapps.application.api.application.ApplicationInstanceData;
+import org.teamapps.application.api.application.entity.EntityUpdate;
 import org.teamapps.application.api.application.perspective.PerspectiveBuilder;
 import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.desktop.ApplicationDesktop;
@@ -37,11 +38,13 @@ import org.teamapps.model.controlcenter.*;
 import org.teamapps.reporting.convert.DocumentConverter;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
 import org.teamapps.universaldb.index.translation.TranslatableText;
+import org.teamapps.universaldb.record.EntityBuilder;
 import org.teamapps.ux.application.perspective.Perspective;
 import org.teamapps.ux.component.progress.MultiProgressDisplay;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -204,6 +207,11 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	@Override
 	public List<Integer> getOrganizationUsersWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType) {
 		return getOrganizationUsersWithRole(orgUnit, userRoleType, getOrganizationField());
+	}
+
+	@Override
+	public <ENTITY> void registerEntity(EntityBuilder<ENTITY> entityBuilder, Consumer<EntityUpdate<ENTITY>> listener) {
+		userSessionData.getRegistry().registerEntity(entityBuilder, userSessionData.getUser().getId(), listener);
 	}
 
 	public static List<Integer> getOrganizationUsersWithRole(OrganizationUnitView orgUnit, UserRoleType userRoleType, OrganizationFieldView organizationFieldView) {
