@@ -28,6 +28,7 @@ import org.teamapps.application.server.rest.ChatRestServlet;
 import org.teamapps.application.server.system.bootstrap.BootstrapSessionHandler;
 import org.teamapps.application.server.system.bootstrap.PublicLinkResourceProvider;
 import org.teamapps.application.server.system.utils.ValueConverterUtils;
+import org.teamapps.cluster.network.NodeAddress;
 import org.teamapps.config.TeamAppsConfiguration;
 import org.teamapps.model.ApplicationServerSchema;
 import org.teamapps.model.controlcenter.User;
@@ -68,8 +69,26 @@ public class ApplicationServer implements WebController, SessionManager {
 
 	private WeakHashMap<SessionHandler, Long> weakStartDateBySessionHandler = new WeakHashMap<>();
 
+	private boolean useCluster;
+	private String clusterSecret;
+	private int leaderPort;
+	private String leaderHost;
+	private int localPort;
+
 	public ApplicationServer() {
 		this(new File("./server-data"), new TeamAppsConfiguration(), 8080);
+	}
+
+	public ApplicationServer(boolean useCluster, String clusterSecret, int localPort, String leaderHost, int leaderPort) {
+		this.basePath = new File("./server-data");
+		this.teamAppsConfiguration = new TeamAppsConfiguration();
+		this.port = 8080;
+
+		this.useCluster = useCluster;
+		this.clusterSecret = clusterSecret;
+		this.leaderPort = leaderPort;
+		this.leaderHost = leaderHost;
+		this.localPort = localPort;
 	}
 
 	public ApplicationServer(File basePath) {
@@ -132,7 +151,15 @@ public class ApplicationServer implements WebController, SessionManager {
 	public void start() throws Exception {
 		File dbPath = new File(basePath, "database");
 		dbPath.mkdir();
-		universalDb = UniversalDB.createStandalone(dbPath, new ApplicationServerSchema());
+		if (useCluster) {
+			if (leaderHost != null) {
+				universalDb = new UniversalDB(dbPath, new ApplicationServerSchema(), clusterSecret, localPort, new NodeAddress(leaderHost, leaderPort));
+			} else {
+				universalDb = new UniversalDB(dbPath, new ApplicationServerSchema(), clusterSecret, localPort);
+			}
+		} else {
+			universalDb = UniversalDB.createStandalone(dbPath, new ApplicationServerSchema());
+		}
 		sessionHandler.init(this, universalDb);
 		TeamAppsUndertowEmbeddedServer server = new TeamAppsUndertowEmbeddedServer(this, teamAppsConfiguration, port);
 
