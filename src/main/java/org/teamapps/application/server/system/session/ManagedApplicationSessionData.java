@@ -79,6 +79,9 @@ public class ManagedApplicationSessionData {
 
 	public PerspectiveSessionData createPerspectiveSessionData(ManagedApplicationPerspective managedApplicationPerspective) {
 		LoadedApplication loadedApplication = registry.getLoadedApplication(managedApplicationPerspective.getApplicationPerspective().getApplication());
+		if (loadedApplication == null) {
+			return null;
+		}
 		ApplicationLocalizationProvider localizationProvider = userSessionData.getApplicationLocalizationProvider(managedApplicationPerspective.getApplicationPerspective().getApplication());
 		ApplicationPrivilegeProvider privilegeProvider = userSessionData.getUserPrivileges().getApplicationPrivilegeProvider(PrivilegeApplicationKey.create(managedApplicationPerspective));
 		PerspectiveBuilder perspectiveBuilder = loadedApplication.getPerspectiveBuilder(managedApplicationPerspective.getApplicationPerspective().getName());

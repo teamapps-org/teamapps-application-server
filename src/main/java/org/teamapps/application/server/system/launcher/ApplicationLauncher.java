@@ -480,7 +480,10 @@ public class ApplicationLauncher {
 		for (ManagedApplicationPerspective managedApplicationPerspective : managedApplicationPerspectives) {
 			if (managedApplicationPerspective.getApplicationPerspective() != null) {
 				PerspectiveSessionData perspectiveSessionData = applicationSessionData.createPerspectiveSessionData(managedApplicationPerspective);
-				if (perspectiveSessionData.getPerspectiveBuilder() !=null &&  perspectiveSessionData.getPerspectiveBuilder().isPerspectiveAccessible(perspectiveSessionData)) {
+				if (perspectiveSessionData == null) {
+					LOGGER.error("Missing application loader for:" + managedApplicationPerspective.getApplicationPerspective());
+				}
+				if (perspectiveSessionData != null && perspectiveSessionData.getPerspectiveBuilder() !=null &&  perspectiveSessionData.getPerspectiveBuilder().isPerspectiveAccessible(perspectiveSessionData)) {
 					sortedPerspectives.add(perspectiveSessionData);
 				}
 			}
