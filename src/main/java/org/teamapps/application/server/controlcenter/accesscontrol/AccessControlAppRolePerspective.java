@@ -129,10 +129,10 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 		RecordListModelBuilder<PrivilegeGroup> appRoleModelBuilder = new RecordListModelBuilder<>(getApplicationInstanceData());
 		Table<PrivilegeGroup> privilegeGroupTable = appRoleModelBuilder.createListTable(false);
 		TemplateField<PrivilegeGroup> privilegeGroupTemplateField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createPrivilegeGroupPropertyProvider(userSessionData, applicationComboBox::getValue));
-		TagComboBox<Privilege> privilegeTagComboBox = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createPrivilegePropertyProvider(getApplicationInstanceData()));
+		TagComboBox<Privilege> privilegeTagComboBox = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createPrivilegePropertyProvider(userSessionData, applicationComboBox::getValue));
 
 		privilegeGroupTable.addColumn("group", getLocalized("accessControl.privilegeGroup"), privilegeGroupTemplateField).setDefaultWidth(350);
-		privilegeGroupTable.addColumn("privileges", getLocalized("accessControl.privileges"), privilegeTagComboBox).setDefaultWidth(500);
+		privilegeGroupTable.addColumn("privileges", getLocalized("accessControl.privileges"), privilegeTagComboBox).setDefaultWidth(750);
 		privilegeGroupTable.setPropertyExtractor((record, propertyName) -> switch (propertyName) {
 			case "group" -> record;
 			case "privileges" -> record.getPrivileges();

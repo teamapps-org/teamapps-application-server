@@ -104,11 +104,16 @@ public class PropertyProviders {
 		};
 	}
 
-	public static PropertyProvider<Privilege> createPrivilegePropertyProvider(ApplicationInstanceData applicationInstanceData) {
+	public static PropertyProvider<Privilege> createPrivilegePropertyProvider(UserSessionData userSessionData, Supplier<Application> applicationSupplier) {
 		return (privilege, propertyNames) -> {
+			Application application = applicationSupplier.get();
+			if (application == null) {
+				return new HashMap<>();
+			}
+			ApplicationLocalizationProvider localizationProvider = userSessionData.getApplicationLocalizationProvider(application);
 			Map<String, Object> map = new HashMap<>();
 			map.put(BaseTemplate.PROPERTY_ICON, privilege.getIcon());
-			map.put(BaseTemplate.PROPERTY_CAPTION, applicationInstanceData.getLocalized(privilege.getTitleKey()));
+			map.put(BaseTemplate.PROPERTY_CAPTION, localizationProvider.getLocalized(privilege.getTitleKey()));
 			return map;
 		};
 	}
