@@ -22,6 +22,7 @@ package org.teamapps.application.server.system.bootstrap.installer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.application.BaseApplicationBuilder;
+import org.teamapps.application.api.privilege.ApplicationRole;
 import org.teamapps.application.api.privilege.Privilege;
 import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.api.privilege.PrivilegeGroupType;
@@ -40,6 +41,7 @@ import org.teamapps.universaldb.pojo.Entity;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.teamapps.model.controlcenter.ApplicationPrivilegeGroupType.*;
@@ -58,6 +60,16 @@ public class PrivilegeDataInstallationPhase implements ApplicationInstallationPh
 			List<PrivilegeGroup> privilegeGroups = baseApplicationBuilder.getPrivilegeGroups();
 			if (privilegeGroups == null) {
 				applicationInfo.addError("Missing privileges");
+				return;
+			}
+
+			if (!privilegeGroups.stream().map(PrivilegeGroup::getName).allMatch(new HashSet<>()::add)) {
+				applicationInfo.addError("Privilege groups with same name");
+				return;
+			}
+
+			if (baseApplicationBuilder.getApplicationRoles() != null && !baseApplicationBuilder.getApplicationRoles().stream().map(ApplicationRole::getName).allMatch(new HashSet<>()::add)) {
+				applicationInfo.addError("Application roles with same name");
 				return;
 			}
 
