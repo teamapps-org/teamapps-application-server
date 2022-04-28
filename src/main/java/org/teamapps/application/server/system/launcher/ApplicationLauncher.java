@@ -252,6 +252,8 @@ public class ApplicationLauncher {
 	}
 
 	private void logout() {
+		User user = userSessionData.getUser();
+		LOGGER.info("User logout: {}, {} {}", user.getId(), user.getFirstName(), user.getLastName());
 		registry.getBootstrapSessionHandler().onUserLogout.fire(userSessionData.getContext());
 		userSessionData.invalidate();
 		SessionContext.current().clearExecutionDecorators();

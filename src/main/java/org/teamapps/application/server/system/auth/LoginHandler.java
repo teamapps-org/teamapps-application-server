@@ -19,6 +19,8 @@
  */
 package org.teamapps.application.server.system.auth;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.password.SecurePasswordHash;
 import org.teamapps.application.api.theme.ApplicationIcons;
@@ -50,10 +52,12 @@ import org.teamapps.ux.component.panel.Panel;
 import org.teamapps.ux.component.rootpanel.RootPanel;
 import org.teamapps.ux.session.SessionContext;
 
+import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.*;
 
 public class LoginHandler {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private final SystemRegistry systemRegistry;
 	private final LogoutHandler logoutHandler;
@@ -326,6 +330,9 @@ public class LoginHandler {
 		try {
 			UserSessionData userSessionData = new UserSessionData(user, context, systemRegistry, rootPanel);
 			UniversalDB.setUserId(userSessionData.getUser().getId());
+			String userInfo = user.getId() + "-" + user.getLastName() + "-" + user.getFirstName();
+			LOGGER.info("User logged in: {}", userInfo);
+			context.setName(userInfo);
 			if (systemRegistry.getSessionRegistryHandler() != null) {
 				systemRegistry.getSessionRegistryHandler().handleAuthenticatedUser(userSessionData, context);
 			}
