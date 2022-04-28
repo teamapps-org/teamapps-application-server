@@ -132,7 +132,7 @@ public class AccessControlAppRolePerspective extends AbstractManagedApplicationP
 		TagComboBox<Privilege> privilegeTagComboBox = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE, PropertyProviders.createPrivilegePropertyProvider(userSessionData, applicationComboBox::getValue));
 
 		privilegeGroupTable.addColumn("group", getLocalized("accessControl.privilegeGroup"), privilegeGroupTemplateField).setDefaultWidth(350);
-		privilegeGroupTable.addColumn("privileges", getLocalized("accessControl.privileges"), privilegeTagComboBox).setDefaultWidth(750);
+		privilegeGroupTable.addColumn("privileges", getLocalized("accessControl.privileges"), privilegeTagComboBox).setDefaultWidth(1_000);
 		privilegeGroupTable.setPropertyExtractor((record, propertyName) -> switch (propertyName) {
 			case "group" -> record;
 			case "privileges" -> record.getPrivileges();
