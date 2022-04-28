@@ -19,6 +19,7 @@
  */
 package org.teamapps.application.server.ui.localize;
 
+import org.slf4j.event.Level;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.localization.Dictionary;
 import org.teamapps.application.api.localization.Language;
@@ -150,7 +151,7 @@ public class LocalizationKeyWindow {
 					success = true;
 					newLocalizationKey = localizationKey.getKey();
 					formWindow.close();
-					applicationInstanceData.writeActivityLog("Created new translation key", userData.toString());
+					applicationInstanceData.writeActivityLog(Level.INFO, "Created new translation key", userData.toString());
 					systemRegistry.updateGlobalLocalizationProvider();
 					systemRegistry.machineTranslateMissingEntries();
 					onNewKey.fire(newLocalizationKey);

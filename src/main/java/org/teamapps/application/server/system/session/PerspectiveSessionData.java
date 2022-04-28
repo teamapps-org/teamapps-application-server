@@ -20,6 +20,7 @@
 package org.teamapps.application.server.system.session;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.event.Level;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.application.entity.EntityUpdate;
 import org.teamapps.application.api.application.perspective.PerspectiveBuilder;
@@ -31,6 +32,7 @@ import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.ui.UiComponentFactory;
 import org.teamapps.application.api.user.SessionUser;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
+import org.teamapps.application.server.system.utils.LogUtils;
 import org.teamapps.application.server.system.utils.RoleUtils;
 import org.teamapps.application.ux.IconUtils;
 import org.teamapps.icons.Icon;
@@ -160,24 +162,32 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	}
 
 	@Override
-	public void writeActivityLog(String title, String data) {
+	public void writeActivityLog(Level level, String title, String data) {
+		LogLevel logLevel = LogUtils.convert(level);
+		if (logLevel == null) {
+			return;
+		}
 		SystemLog.create()
 				.setManagedApplication(managedApplication)
 				.setManagedPerspective(managedApplicationPerspective)
 				.setApplication(managedApplicationPerspective.getApplicationPerspective().getApplication())
-				.setLogLevel(LogLevel.INFO)
+				.setLogLevel(logLevel)
 				.setMessage(title)
 				.setDetails(data)
 				.save();
 	}
 
 	@Override
-	public void writeExceptionLog(String title, Throwable throwable) {
+	public void writeExceptionLog(Level level, String title, Throwable throwable) {
+		LogLevel logLevel = LogUtils.convert(level);
+		if (logLevel == null) {
+			return;
+		}
 		SystemLog.create()
 				.setManagedApplication(managedApplication)
 				.setManagedPerspective(managedApplicationPerspective)
 				.setApplication(managedApplicationPerspective.getApplicationPerspective().getApplication())
-				.setLogLevel(LogLevel.ERROR)
+				.setLogLevel(logLevel)
 				.setMessage(title)
 				.setDetails(ExceptionUtils.getStackTrace(throwable))
 				.save();

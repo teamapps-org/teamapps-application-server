@@ -71,11 +71,12 @@ public class ApplicationArtifactInstallationPhase implements ApplicationInstalla
 			if (application != null) {
 				for (ApplicationVersion version : application.getVersions()) {
 					String installedVersion = version.getVersion();
+					org.teamapps.application.api.versioning.ApplicationVersion installedVersion2 = new org.teamapps.application.api.versioning.ApplicationVersion(installedVersion);
 					if (installedVersion.equals(versionString)) {
 						applicationInfo.addWarning("This version is already installed: " + versionString);
 						applicationInfo.setApplicationVersion(version);
 					}
-					if (installedVersion.compareTo(versionString) > 0) {
+					if (installedVersion2.compareTo(applicationVersion) > 0) {
 						applicationInfo.addWarning("A higher version is already installed! This version: " + versionString + ", installed Version: " + installedVersion);
 					}
 				}

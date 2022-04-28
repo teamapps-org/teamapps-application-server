@@ -20,6 +20,7 @@
 package org.teamapps.application.server.system.session;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.event.Level;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.application.entity.EntityUpdate;
 import org.teamapps.application.api.config.ApplicationConfig;
@@ -31,6 +32,7 @@ import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.ui.UiComponentFactory;
 import org.teamapps.application.api.user.SessionUser;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
+import org.teamapps.application.server.system.utils.LogUtils;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.reporting.convert.DocumentConverter;
@@ -123,7 +125,11 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 	}
 
 	@Override
-	public void writeActivityLog(String title, String data) {
+	public void writeActivityLog(Level level, String title, String data) {
+		LogLevel logLevel = LogUtils.convert(level);
+		if (logLevel == null) {
+			return;
+		}
 		SystemLog.create()
 				.setManagedApplication(managedApplication)
 				.setApplication(application)
@@ -134,7 +140,11 @@ public class UnmanagedApplicationSessionData implements ApplicationInstanceData 
 	}
 
 	@Override
-	public void writeExceptionLog(String title, Throwable throwable) {
+	public void writeExceptionLog(Level level, String title, Throwable throwable) {
+		LogLevel logLevel = LogUtils.convert(level);
+		if (logLevel == null) {
+			return;
+		}
 		SystemLog.create()
 				.setManagedApplication(managedApplication)
 				.setApplication(application)
