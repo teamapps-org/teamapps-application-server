@@ -181,7 +181,21 @@ public class UserPrivileges {
 								}
 								break;
 							case ROLE_ASSIGNMENT_DELEGATED_CUSTOM_PRIVILEGE_GROUP:
-
+								if (delegatedCustomPrivilegeObjectId > 0) {
+									RoleAssignmentDelegatedCustomPrivilegeGroup delegatedCustomPrivilegeGroup = (RoleAssignmentDelegatedCustomPrivilegeGroup) privilegeGroup;
+									List<Privilege> delegatedCustomPrivileges = delegatedCustomPrivilegeGroup.getPrivileges();
+									Map<Privilege, Set<PrivilegeObject>> privilegeObjectByPrivilege = roleAssignmentDelegatedCustomPrivilegeMap
+											.computeIfAbsent(privilegeApplicationKey, app -> new HashMap<>())
+											.computeIfAbsent(delegatedCustomPrivilegeGroup, s -> new HashMap<>());
+									PrivilegeObject privilegeObject = delegatedCustomPrivilegeGroup.getPrivilegeObjectById(delegatedCustomPrivilegeObjectId);
+									if (privilegeObject != null) {
+										for (Privilege privilege : delegatedCustomPrivileges) {
+											privilegeObjectByPrivilege
+													.computeIfAbsent(privilege, p -> new HashSet<>())
+													.add(privilegeObject);
+										}
+									}
+								}
 								break;
 						}
 					}
