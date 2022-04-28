@@ -23,8 +23,10 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
+import org.slf4j.Marker;
 import org.teamapps.application.server.system.launcher.ApplicationLauncher;
 import org.teamapps.model.controlcenter.*;
+import org.teamapps.universaldb.UniversalDB;
 
 public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
 
@@ -38,6 +40,10 @@ public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEven
 	protected void append(ILoggingEvent event) {
 		LogLevel logLevel = getLevel(event);
 		if (!started || logLevel == null) return;
+		Marker marker = event.getMarker();
+		if (marker != null && UniversalDB.SKIP_DB_LOGGING.getName().equals(marker.getName())) {
+			return;
+		}
 
 		ManagedApplication managedApplication = ApplicationLauncher.THREAD_LOCAL_APPLICATION.get();
 		ManagedApplicationPerspective managedApplicationPerspective = ApplicationLauncher.THREAD_LOCAL_MANAGED_PERSPECTIVE.get();
