@@ -21,6 +21,9 @@ package org.teamapps.application.server.system.server;
 
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfoList;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.application.api.password.SecurePasswordHash;
@@ -44,9 +47,6 @@ import org.teamapps.ux.resource.ResourceProviderServlet;
 import org.teamapps.ux.session.SessionContext;
 import org.teamapps.webcontroller.WebController;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -188,7 +188,7 @@ public class ApplicationServer implements WebController, SessionManager {
 				server.addServletContextListener(new ServletContextListener() {
 					@Override
 					public void contextInitialized(ServletContextEvent sce) {
-						javax.servlet.ServletRegistration.Dynamic dynamic = sce.getServletContext().addServlet("teamapps-registered-" + servletRegistration.getServlet().getClass().getSimpleName() + UUID.randomUUID().toString(), servletRegistration.getServlet());
+						jakarta.servlet.ServletRegistration.Dynamic dynamic = sce.getServletContext().addServlet("teamapps-registered-" + servletRegistration.getServlet().getClass().getSimpleName() + UUID.randomUUID().toString(), servletRegistration.getServlet());
 						dynamic.setAsyncSupported(servletRegistration.isAsyncSupported());
 						dynamic.addMapping(mapping);
 					}

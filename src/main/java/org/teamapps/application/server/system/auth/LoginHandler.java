@@ -323,11 +323,16 @@ public class LoginHandler {
 
 
 	private void handleSuccessfulLogin(User user, RootPanel rootPanel, SessionContext context) {
-		UserSessionData userSessionData = new UserSessionData(user, context, systemRegistry, rootPanel);
-		UniversalDB.setUserId(userSessionData.getUser().getId());
-		if (systemRegistry.getSessionRegistryHandler() != null) {
-			systemRegistry.getSessionRegistryHandler().handleAuthenticatedUser(userSessionData, context);
+		try {
+			UserSessionData userSessionData = new UserSessionData(user, context, systemRegistry, rootPanel);
+			UniversalDB.setUserId(userSessionData.getUser().getId());
+			if (systemRegistry.getSessionRegistryHandler() != null) {
+				systemRegistry.getSessionRegistryHandler().handleAuthenticatedUser(userSessionData, context);
+			}
+			new ApplicationLauncher(userSessionData, logoutHandler);
+		} finally {
+			UniversalDB.setUserId(0);
 		}
-		new ApplicationLauncher(userSessionData, logoutHandler);
+
 	}
 }

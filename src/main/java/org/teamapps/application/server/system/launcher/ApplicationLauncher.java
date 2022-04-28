@@ -117,15 +117,19 @@ public class ApplicationLauncher {
 				.save());
 
 		userSessionData.getContext().addExecutionDecorator(runnable -> {
-			UniversalDB.setUserId(userSessionData.getUser().getId());
-			THREAD_LOCAL_APPLICATION.set(selectedApplication.get());
-			THREAD_LOCAL_MANAGED_PERSPECTIVE.set(currentPerspective);
-			activityCount++;
 			try {
+				UniversalDB.setUserId(userSessionData.getUser().getId());
+				THREAD_LOCAL_APPLICATION.set(selectedApplication.get());
+				THREAD_LOCAL_MANAGED_PERSPECTIVE.set(currentPerspective);
+				activityCount++;
 				runnable.run();
 			} catch (Throwable e) {
 				LOGGER.error("Application crash", e);
 				handleSessionException(e);
+			} finally {
+				UniversalDB.setUserId(0);
+				THREAD_LOCAL_APPLICATION.set(null);
+				THREAD_LOCAL_MANAGED_PERSPECTIVE.set(null);
 			}
 		}, true);
 		selectedApplication.onChanged().addListener(this::handleApplicationSelection);
@@ -249,9 +253,10 @@ public class ApplicationLauncher {
 
 	private void logout() {
 		registry.getBootstrapSessionHandler().onUserLogout.fire(userSessionData.getContext());
+		userSessionData.invalidate();
+		SessionContext.current().clearExecutionDecorators();
 		LoginHandler loginHandler = new LoginHandler(registry, logoutHandler, userSessionData);
 		loginHandler.createLoginView(userSessionData.getContext(), userSessionData.getRootPanel());
-		userSessionData.invalidate();
 	}
 
 	private void createMainView() {
@@ -322,7 +327,7 @@ public class ApplicationLauncher {
 		selectedApplication.set(applicationData.getManagedApplication());
 		THREAD_LOCAL_APPLICATION.set(selectedApplication.get());
 		applicationOpenCount++;
-		LOGGER.info("Open app");
+		LOGGER.info("Open app: " + (currentPerspective != null ? currentPerspective.getApplicationPerspective().getQualifiedName() : null));
 		if (openedApplications.contains(applicationData)) {
 			if (mobileView) {
 				Component component = mobilAppByApplicationData.get(applicationData);
@@ -442,6 +447,7 @@ public class ApplicationLauncher {
 	private void showPerspective(PerspectiveSessionData perspectiveSessionData, MobileLayout mobileLayout, View applicationMenu, Map<PerspectiveSessionData, ApplicationPerspective> applicationPerspectiveByPerspectiveBuilder) {
 		currentPerspective = perspectiveSessionData.getManagedApplicationPerspective();
 		THREAD_LOCAL_MANAGED_PERSPECTIVE.set(currentPerspective);
+		LOGGER.info("Open perspective");
 		ResponsiveApplication responsiveApplication = perspectiveSessionData.getManagedApplicationSessionData().getResponsiveApplication();
 		ApplicationPerspective applicationPerspective = applicationPerspectiveByPerspectiveBuilder.get(perspectiveSessionData);
 		if (applicationPerspective == null) {
@@ -576,6 +582,7 @@ public class ApplicationLauncher {
 	private void showPerspective(PerspectiveSessionData perspectiveSessionData, ToolbarButton backButton, MobileLayout mobileLayout, Map<PerspectiveSessionData, ApplicationPerspective> applicationPerspectiveByPerspectiveBuilder) {
 		currentPerspective = perspectiveSessionData.getManagedApplicationPerspective();
 		THREAD_LOCAL_MANAGED_PERSPECTIVE.set(currentPerspective);
+		LOGGER.info("Open perspective");
 		ResponsiveApplication responsiveApplication = perspectiveSessionData.getManagedApplicationSessionData().getResponsiveApplication();
 		ApplicationPerspective applicationPerspective = applicationPerspectiveByPerspectiveBuilder.get(perspectiveSessionData);
 		if (applicationPerspective == null) {
