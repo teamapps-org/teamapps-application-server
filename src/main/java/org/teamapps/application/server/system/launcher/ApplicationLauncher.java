@@ -94,8 +94,8 @@ public class ApplicationLauncher {
 	private Map<ApplicationData, Tab> tabByApplicationData = new HashMap<>();
 	private Map<ApplicationData, Component> mobilAppByApplicationData = new HashMap<>();
 	private TabPanel applicationsTabPanel;
-	private ManagedApplicationPerspective currentPerspective;
 	private TwoWayBindableValue<ManagedApplication> selectedApplication = TwoWayBindableValue.create();
+	private TwoWayBindableValue<ManagedApplicationPerspective> selectedPerspective = TwoWayBindableValue.create();
 	private boolean selectedThemeIsDarkTheme;
 	private int activityCount;
 	private int applicationOpenCount;
@@ -120,7 +120,7 @@ public class ApplicationLauncher {
 			try {
 				UniversalDB.setUserId(userSessionData.getUser().getId());
 				THREAD_LOCAL_APPLICATION.set(selectedApplication.get());
-				THREAD_LOCAL_MANAGED_PERSPECTIVE.set(currentPerspective);
+				THREAD_LOCAL_MANAGED_PERSPECTIVE.set(selectedPerspective.get());
 				activityCount++;
 				runnable.run();
 			} catch (Throwable e) {
@@ -131,7 +131,7 @@ public class ApplicationLauncher {
 				THREAD_LOCAL_APPLICATION.set(null);
 				THREAD_LOCAL_MANAGED_PERSPECTIVE.set(null);
 			}
-		}, true);
+		}, false);
 		selectedApplication.onChanged().addListener(this::handleApplicationSelection);
 		userSessionData.getUser().setLastLogin(Instant.now()).save();
 		userSessionData.setApplicationDesktopSupplier(this::createApplicationDesktop);
@@ -329,7 +329,7 @@ public class ApplicationLauncher {
 		selectedApplication.set(applicationData.getManagedApplication());
 		THREAD_LOCAL_APPLICATION.set(selectedApplication.get());
 		applicationOpenCount++;
-		LOGGER.info("Open app: " + (currentPerspective != null ? currentPerspective.getApplicationPerspective().getQualifiedName() : null));
+		LOGGER.info("Open app: " + (selectedPerspective.get() != null ? selectedPerspective.get().getApplicationPerspective().getQualifiedName() : null));
 		if (openedApplications.contains(applicationData)) {
 			if (mobileView) {
 				Component component = mobilAppByApplicationData.get(applicationData);
@@ -340,13 +340,14 @@ public class ApplicationLauncher {
 				tab.select();
 			}
 		} else {
+			ApplicationInstance applicationInstance = new ApplicationInstance(userSessionData, applicationData, applicationLauncher, selectedPerspective);
 			if (mobileView) {
-				Component application = createMobileApplication(applicationData);
+				Component application = applicationInstance.createMobileApplication();
 				userSessionData.setRootComponent(application);
 				openedApplications.add(applicationData);
 				mobilAppByApplicationData.put(applicationData, application);
 			} else {
-				Component application = createApplication(applicationData);
+				Component application = applicationInstance.createApplication();
 				Tab tab = new Tab(applicationData.getIcon(), applicationData.getTitle(), application);
 				tab.setCloseable(true);
 				openedApplications.add(applicationData);
@@ -401,233 +402,6 @@ public class ApplicationLauncher {
 						new MobileAssembler(mobileNavigation, userSessionData.getLocalizationProvider()) :
 						new DesktopApplicationAssembler());
 	}
-
-	private Component createMobileApplication(ApplicationData applicationData) {
-		ManagedApplicationSessionData applicationSessionData = applicationData.getApplicationSessionData();
-		MobileApplicationNavigation mobileNavigation = applicationSessionData.getMobileNavigation();
-		mobileNavigation.setApplicationLauncher(applicationLauncher);
-		ResponsiveApplication responsiveApplication = applicationSessionData.getResponsiveApplication();
-		if (applicationSessionData.isUnmanagedApplication()) {
-			applicationSessionData.getMainApplication().getBaseApplicationBuilder().build(responsiveApplication, applicationSessionData.getUnmanagedApplicationData());
-			return responsiveApplication.getUi();
-		}
-		List<PerspectiveSessionData> sortedPerspectives = new ArrayList<>();
-		List<ManagedApplicationPerspective> managedApplicationPerspectives = applicationData.getManagedApplication().getPerspectives().stream()
-				.sorted(Comparator.comparingInt(ManagedApplicationPerspective::getListingPosition))
-				.collect(Collectors.toList());
-		for (ManagedApplicationPerspective managedApplicationPerspective : managedApplicationPerspectives) {
-			PerspectiveSessionData perspectiveSessionData = applicationSessionData.createPerspectiveSessionData(managedApplicationPerspective);
-			if (perspectiveSessionData.getPerspectiveBuilder().isPerspectiveAccessible(perspectiveSessionData)) {
-				sortedPerspectives.add(perspectiveSessionData);
-			}
-		}
-
-		View applicationMenu = View.createView(StandardLayout.LEFT, ApplicationIcons.RADIO_BUTTON_GROUP, getLocalized(Dictionary.APPLICATION_MENU), null);
-		applicationMenu.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.84f));
-		responsiveApplication.addApplicationView(applicationMenu);
-		MobileLayout mobileLayout = new MobileLayout();
-		applicationMenu.setComponent(mobileLayout);
-		mobileNavigation.setApplicationMenu(applicationMenu);
-
-		Tree<PerspectiveSessionData> tree = createApplicationMenuTree(sortedPerspectives);
-		mobileLayout.setContent(tree);
-
-		Map<PerspectiveSessionData, ApplicationPerspective> applicationPerspectiveByPerspectiveBuilder = new HashMap<>();
-		tree.onNodeSelected.addListener(perspectiveSessionData -> {
-			showPerspective(perspectiveSessionData, mobileLayout, applicationMenu, applicationPerspectiveByPerspectiveBuilder);
-		});
-
-		mobileNavigation.onBackOperation.addListener(() -> {
-			mobileLayout.setContent(tree, PageTransition.MOVE_TO_RIGHT_VS_MOVE_FROM_LEFT, 500);
-		});
-
-		mobileNavigation.onShowViewRequest().fire(applicationMenu);
-
-		return responsiveApplication.getUi();
-	}
-
-	private void showPerspective(PerspectiveSessionData perspectiveSessionData, MobileLayout mobileLayout, View applicationMenu, Map<PerspectiveSessionData, ApplicationPerspective> applicationPerspectiveByPerspectiveBuilder) {
-		currentPerspective = perspectiveSessionData.getManagedApplicationPerspective();
-		THREAD_LOCAL_MANAGED_PERSPECTIVE.set(currentPerspective);
-		LOGGER.info("Open perspective");
-		ResponsiveApplication responsiveApplication = perspectiveSessionData.getManagedApplicationSessionData().getResponsiveApplication();
-		ApplicationPerspective applicationPerspective = applicationPerspectiveByPerspectiveBuilder.get(perspectiveSessionData);
-		if (applicationPerspective == null) {
-			applicationPerspective = perspectiveSessionData.getPerspectiveBuilder().build(perspectiveSessionData, null);
-			applicationPerspectiveByPerspectiveBuilder.put(perspectiveSessionData, applicationPerspective);
-			responsiveApplication.addPerspective(applicationPerspective.getPerspective());
-		} else {
-			applicationPerspective.getOnPerspectiveRefreshRequested().fire();
-		}
-		Perspective perspective = applicationPerspective.getPerspective();
-		if (perspective.getFocusedView() == null && applicationPerspective.getPerspectiveMenuPanel() != null) {
-			perspective.setFocusedView(applicationMenu);
-		}
-		responsiveApplication.showPerspective(perspective);
-		if (applicationPerspective.getPerspectiveMenuPanel() != null) {
-			if (applicationMenu.equals(perspective.getFocusedView())) {
-				mobileLayout.setContent(applicationPerspective.getPerspectiveMenuPanel(), PageTransition.MOVE_TO_LEFT_VS_MOVE_FROM_RIGHT, 500);
-			} else {
-				mobileLayout.setContent(applicationPerspective.getPerspectiveMenuPanel());
-			}
-			perspectiveSessionData.getManagedApplicationSessionData().getMobileNavigation().setBackOperationAvailable(true);
-		}
-	}
-
-	private Component createApplication(ApplicationData applicationData) {
-		ManagedApplicationSessionData applicationSessionData = applicationData.getApplicationSessionData();
-		ResponsiveApplication responsiveApplication = applicationSessionData.getResponsiveApplication();
-		if (applicationSessionData.isUnmanagedApplication()) {
-			applicationSessionData.getMainApplication().getBaseApplicationBuilder().build(responsiveApplication, applicationSessionData.getUnmanagedApplicationData());
-			return responsiveApplication.getUi();
-		}
-		List<PerspectiveSessionData> sortedPerspectives = new ArrayList<>();
-		List<ManagedApplicationPerspective> managedApplicationPerspectives = applicationData.getManagedApplication().getPerspectives().stream()
-				.sorted(Comparator.comparingInt(ManagedApplicationPerspective::getListingPosition))
-				.collect(Collectors.toList());
-		for (ManagedApplicationPerspective managedApplicationPerspective : managedApplicationPerspectives) {
-			if (managedApplicationPerspective.getApplicationPerspective() != null) {
-				PerspectiveSessionData perspectiveSessionData = applicationSessionData.createPerspectiveSessionData(managedApplicationPerspective);
-				if (perspectiveSessionData == null) {
-					LOGGER.error("Missing application loader for:" + managedApplicationPerspective.getApplicationPerspective());
-				}
-				if (perspectiveSessionData != null && perspectiveSessionData.getPerspectiveBuilder() !=null &&  perspectiveSessionData.getPerspectiveBuilder().isPerspectiveAccessible(perspectiveSessionData)) {
-					sortedPerspectives.add(perspectiveSessionData);
-				}
-			}
-		}
-
-
-		boolean toolbarApplicationMenu = applicationData.getManagedApplication().getToolbarApplicationMenu();
-		ToolbarButton backButton = toolbarApplicationMenu ? null : new ToolbarButton(BaseTemplate.LIST_ITEM_LARGE_ICON_SINGLE_LINE, new BaseTemplateRecord(ApplicationIcons.NAVIGATE_LEFT, getLocalized(Dictionary.BACK), null));
-		MobileLayout mobileLayout = toolbarApplicationMenu ? null : new MobileLayout();
-
-		Map<PerspectiveSessionData, ApplicationPerspective> applicationPerspectiveByPerspectiveBuilder = new HashMap<>();
-
-
-		if (toolbarApplicationMenu) {
-			SimpleItemView<PerspectiveSessionData> applicationMenu = createApplicationMenu(sortedPerspectives);
-			applicationSessionData.setApplicationToolbarMenuComponent(applicationMenu);
-
-			applicationMenu.onItemClicked.addListener(event -> {
-				PerspectiveSessionData perspectiveSessionData = event.getItem().getPayload();
-				showPerspective(perspectiveSessionData, backButton, mobileLayout, applicationPerspectiveByPerspectiveBuilder);
-			});
-		} else {
-			Tree<PerspectiveSessionData> tree = createApplicationMenuTree(sortedPerspectives);
-			View applicationMenu = View.createView(StandardLayout.LEFT, ApplicationIcons.RADIO_BUTTON_GROUP, getLocalized(Dictionary.MENU), null);
-			responsiveApplication.addApplicationView(applicationMenu);
-			applicationMenu.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.84f));
-			VerticalLayout verticalLayout = new VerticalLayout();
-			applicationMenu.setComponent(verticalLayout);
-
-			Toolbar toolbar = new Toolbar();
-			ToolbarButtonGroup buttonGroup = toolbar.addButtonGroup(new ToolbarButtonGroup());
-			buttonGroup.setShowGroupSeparator(false);
-			backButton.setVisible(false);
-			buttonGroup.addButton(backButton);
-			verticalLayout.addComponent(toolbar);
-			mobileLayout.setContent(tree);
-			verticalLayout.addComponentFillRemaining(mobileLayout);
-
-			backButton.onClick.addListener(() -> {
-				backButton.setVisible(false);
-				mobileLayout.setContent(tree, PageTransition.MOVE_TO_RIGHT_VS_MOVE_FROM_LEFT, 500);
-			});
-
-			tree.onNodeSelected.addListener(perspectiveSessionData -> {
-				showPerspective(perspectiveSessionData, backButton, mobileLayout, applicationPerspectiveByPerspectiveBuilder);
-			});
-		}
-
-
-
-		if (!sortedPerspectives.isEmpty()) {
-			showPerspective(sortedPerspectives.get(0), backButton, mobileLayout, applicationPerspectiveByPerspectiveBuilder);
-		}
-
-		return responsiveApplication.getUi();
-	}
-
-	private Tree<PerspectiveSessionData> createApplicationMenuTree(List<PerspectiveSessionData> sortedPerspectives) {
-		ListTreeModel<PerspectiveSessionData> treeModel = new ListTreeModel<>(sortedPerspectives);
-		Tree<PerspectiveSessionData> tree = new Tree<>(treeModel);
-		tree.setShowExpanders(false);
-		tree.setEntryTemplate(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES);
-		tree.setPropertyExtractor((perspectiveSessionData, propertyName) -> {
-			switch (propertyName) {
-				case BaseTemplate.PROPERTY_BADGE:
-					return null; //todo
-				case BaseTemplate.PROPERTY_ICON:
-					return perspectiveSessionData.getIcon();
-				case BaseTemplate.PROPERTY_CAPTION:
-					return perspectiveSessionData.getTitle();
-				case BaseTemplate.PROPERTY_DESCRIPTION:
-					return perspectiveSessionData.getDescription();
-				default:
-					return null;
-			}
-		});
-		return tree;
-	}
-
-	private SimpleItemView<PerspectiveSessionData> createApplicationMenu(List<PerspectiveSessionData> sortedPerspectives) {
-		SimpleItemView<PerspectiveSessionData> itemView = new SimpleItemView<>();
-		SimpleItemGroup<PerspectiveSessionData> itemGroup = itemView.addSingleColumnGroup(ApplicationIcons.WINDOWS, getLocalized(Dictionary.APPLICATION_PERSPECTIVE));
-		itemGroup.setItemTemplate(BaseTemplate.LIST_ITEM_VERY_LARGE_ICON_TWO_LINES);
-		sortedPerspectives.forEach(p -> {
-			itemGroup.addItem(p.getIcon(), p.getTitle(), p.getDescription()).setPayload(p);
-		});
-		return itemView;
-	}
-
-	private void showPerspective(PerspectiveSessionData perspectiveSessionData, ToolbarButton backButton, MobileLayout mobileLayout, Map<PerspectiveSessionData, ApplicationPerspective> applicationPerspectiveByPerspectiveBuilder) {
-		currentPerspective = perspectiveSessionData.getManagedApplicationPerspective();
-		THREAD_LOCAL_MANAGED_PERSPECTIVE.set(currentPerspective);
-		LOGGER.info("Open perspective");
-		ResponsiveApplication responsiveApplication = perspectiveSessionData.getManagedApplicationSessionData().getResponsiveApplication();
-		ApplicationPerspective applicationPerspective = applicationPerspectiveByPerspectiveBuilder.get(perspectiveSessionData);
-		if (applicationPerspective == null) {
-			applicationPerspective = perspectiveSessionData.getPerspectiveBuilder().build(perspectiveSessionData, null);
-			applicationPerspectiveByPerspectiveBuilder.put(perspectiveSessionData, applicationPerspective);
-			responsiveApplication.addPerspective(applicationPerspective.getPerspective());
-
-			if (applicationPerspective.getPerspectiveMenuPanel() != null) {
-				if (perspectiveSessionData.getManagedApplicationPerspective().getToolbarPerspectiveMenu()) {
-					Component perspectiveMenuPanel = applicationPerspective.getPerspectiveMenuPanel();
-					perspectiveMenuPanel.setCssStyle("height","300px");
-					if (perspectiveMenuPanel instanceof Tree) {
-						Tree menu = (Tree) perspectiveMenuPanel;
-						menu.onNodeSelected.addListener(() -> {
-
-						});
-					}
-				} else if (mobileLayout == null) {
-					View perspectiveMenuView = View.createView(StandardLayout.LEFT, ApplicationIcons.RADIO_BUTTON_GROUP, getLocalized(Dictionary.APPLICATION_MENU), null);
-					applicationPerspective.getPerspective().addView(perspectiveMenuView);
-					perspectiveMenuView.setComponent(applicationPerspective.getPerspectiveMenuPanel());
-				}
-			}
-		} else {
-			applicationPerspective.getOnPerspectiveRefreshRequested().fire();
-		}
-		if (applicationPerspective.getPerspectiveMenuPanel() != null && perspectiveSessionData.getManagedApplicationPerspective().getToolbarPerspectiveMenu()) {
-			perspectiveSessionData.getManagedApplicationSessionData().setPerspectiveToolbarMenuComponent(applicationPerspective.getPerspectiveToolbarMenuPanel() != null ? applicationPerspective.getPerspectiveToolbarMenuPanel() : applicationPerspective.getPerspectiveMenuPanel());
-		} else {
-			perspectiveSessionData.getManagedApplicationSessionData().setPerspectiveToolbarMenuComponent(null);
-		}
-		responsiveApplication.showPerspective(applicationPerspective.getPerspective());
-
-		if (mobileLayout != null && applicationPerspective.getPerspectiveMenuPanel() != null && !perspectiveSessionData.getManagedApplicationPerspective().getToolbarPerspectiveMenu()) {
-			backButton.setVisible(true);
-			mobileLayout.setContent(applicationPerspective.getPerspectiveMenuPanel(), PageTransition.MOVE_TO_LEFT_VS_MOVE_FROM_RIGHT, 500);
-		}
-		if (applicationPerspective instanceof AbstractManagedApplicationPerspective) {
-			AbstractManagedApplicationPerspective managedApplicationPerspective = (AbstractManagedApplicationPerspective) applicationPerspective;
-			managedApplicationPerspective.onPerspectiveInitialized.fire();
-		}
-	}
-
 
 	private Component createLauncherView(SimpleItemView<ApplicationData> applicationLauncher, boolean mobileView) {
 		Panel panel = new Panel(ApplicationIcons.HOME, getLocalized(Dictionary.APPLICATIONS));

@@ -23,6 +23,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.event.Level;
 import org.teamapps.application.api.application.ApplicationInstanceData;
 import org.teamapps.application.api.application.entity.EntityUpdate;
+import org.teamapps.application.api.application.perspective.ApplicationPerspective;
 import org.teamapps.application.api.application.perspective.PerspectiveBuilder;
 import org.teamapps.application.api.config.ApplicationConfig;
 import org.teamapps.application.api.desktop.ApplicationDesktop;
@@ -31,6 +32,7 @@ import org.teamapps.application.api.organization.UserRoleType;
 import org.teamapps.application.api.privilege.*;
 import org.teamapps.application.api.ui.UiComponentFactory;
 import org.teamapps.application.api.user.SessionUser;
+import org.teamapps.application.server.system.launcher.PerspectiveByNameLauncher;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.utils.LogUtils;
 import org.teamapps.application.server.system.utils.RoleUtils;
@@ -56,17 +58,19 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	private final ManagedApplication managedApplication;
 	private final ManagedApplicationPerspective managedApplicationPerspective;
 	private final PerspectiveBuilder perspectiveBuilder;
+	private PerspectiveByNameLauncher perspectiveByNameLauncher;
 	private final ApplicationPrivilegeProvider privilegeProvider;
 	private final ApplicationLocalizationProvider localizationProvider;
 	private final Supplier<DocumentConverter> documentConverterSupplier;
 	private final UserSessionData userSessionData;
 	private final SessionUiComponentFactory componentFactory;
 
-	public PerspectiveSessionData(ManagedApplicationSessionData managedApplicationSessionData, ManagedApplication managedApplication, ManagedApplicationPerspective managedApplicationPerspective, PerspectiveBuilder perspectiveBuilder, ApplicationPrivilegeProvider privilegeProvider, ApplicationLocalizationProvider localizationProvider, Supplier<DocumentConverter> documentConverterSupplier) {
+	public PerspectiveSessionData(ManagedApplicationSessionData managedApplicationSessionData, ManagedApplication managedApplication, ManagedApplicationPerspective managedApplicationPerspective, PerspectiveBuilder perspectiveBuilder, PerspectiveByNameLauncher perspectiveByNameLauncher, ApplicationPrivilegeProvider privilegeProvider, ApplicationLocalizationProvider localizationProvider, Supplier<DocumentConverter> documentConverterSupplier) {
 		this.managedApplicationSessionData = managedApplicationSessionData;
 		this.managedApplication = managedApplication;
 		this.managedApplicationPerspective = managedApplicationPerspective;
 		this.perspectiveBuilder = perspectiveBuilder;
+		this.perspectiveByNameLauncher = perspectiveByNameLauncher;
 		this.privilegeProvider = privilegeProvider;
 		this.localizationProvider = localizationProvider;
 		this.documentConverterSupplier = documentConverterSupplier;
@@ -138,6 +142,11 @@ public class PerspectiveSessionData implements ApplicationInstanceData {
 	@Override
 	public void showPerspective(Perspective perspective) {
 		managedApplicationSessionData.getResponsiveApplication().showPerspective(perspective);
+	}
+
+	@Override
+	public ApplicationPerspective showApplicationPerspective(String perspectiveName) {
+		return perspectiveByNameLauncher.showApplicationPerspective(perspectiveName);
 	}
 
 	@Override

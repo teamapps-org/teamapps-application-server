@@ -29,6 +29,7 @@ import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.launcher.MobileApplicationNavigation;
 import org.teamapps.application.server.system.launcher.MobileAssembler;
+import org.teamapps.application.server.system.launcher.PerspectiveByNameLauncher;
 import org.teamapps.application.server.system.privilege.AllowAllPrivilegeProvider;
 import org.teamapps.application.server.system.privilege.PrivilegeApplicationKey;
 import org.teamapps.model.controlcenter.*;
@@ -77,7 +78,7 @@ public class ManagedApplicationSessionData {
 		this.mainApplicationLocalizationProvider = userSessionData.getApplicationLocalizationProvider(managedApplication.getMainApplication());
 	}
 
-	public PerspectiveSessionData createPerspectiveSessionData(ManagedApplicationPerspective managedApplicationPerspective) {
+	public PerspectiveSessionData createPerspectiveSessionData(ManagedApplicationPerspective managedApplicationPerspective, PerspectiveByNameLauncher perspectiveByNameLauncher) {
 		LoadedApplication loadedApplication = registry.getLoadedApplication(managedApplicationPerspective.getApplicationPerspective().getApplication());
 		if (loadedApplication == null) {
 			return null;
@@ -88,7 +89,7 @@ public class ManagedApplicationSessionData {
 		if (userSessionData.getUser().getUserAccountStatus() == UserAccountStatus.SUPER_ADMIN) {
 			privilegeProvider = new AllowAllPrivilegeProvider();
 		}
-		return new PerspectiveSessionData(this, managedApplication, managedApplicationPerspective, perspectiveBuilder, privilegeProvider, localizationProvider, registry.getDocumentConverterSupplier());
+		return new PerspectiveSessionData(this, managedApplication, managedApplicationPerspective, perspectiveBuilder, perspectiveByNameLauncher, privilegeProvider, localizationProvider, registry.getDocumentConverterSupplier());
 	}
 
 	public ApplicationInstanceData getUnmanagedApplicationData() {
