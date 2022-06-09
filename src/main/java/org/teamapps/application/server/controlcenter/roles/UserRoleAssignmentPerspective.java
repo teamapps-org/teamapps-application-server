@@ -30,11 +30,16 @@ import org.teamapps.application.server.system.organization.OrganizationUtils;
 import org.teamapps.application.server.system.session.PerspectiveSessionData;
 import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
+import org.teamapps.application.server.system.utils.RoleUtils;
+import org.teamapps.application.tools.EntityListModelBuilder;
 import org.teamapps.application.tools.EntityModelBuilder;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.combo.ComboBoxUtils;
 import org.teamapps.application.ux.form.FormController;
+import org.teamapps.application.ux.form.FormPanel;
 import org.teamapps.application.ux.view.MasterDetailController;
+import org.teamapps.common.format.Color;
+import org.teamapps.data.extract.PropertyProvider;
 import org.teamapps.databinding.MutableValue;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.universaldb.index.numeric.NumericFilter;
@@ -45,9 +50,14 @@ import org.teamapps.ux.component.field.TemplateField;
 import org.teamapps.ux.component.field.combobox.ComboBox;
 import org.teamapps.ux.component.form.ResponsiveForm;
 import org.teamapps.ux.component.form.ResponsiveFormLayout;
+import org.teamapps.ux.component.format.*;
 import org.teamapps.ux.component.table.Table;
 import org.teamapps.ux.component.table.TableColumn;
 import org.teamapps.ux.component.template.BaseTemplate;
+import org.teamapps.ux.component.template.Template;
+import org.teamapps.ux.component.template.gridtemplate.GridTemplate;
+import org.teamapps.ux.component.template.gridtemplate.ImageElement;
+import org.teamapps.ux.component.template.gridtemplate.TextElement;
 
 import java.time.Instant;
 import java.util.*;
@@ -75,17 +85,27 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 
 		Table<UserRoleAssignment> table = entityModelBuilder.createTable();
 		table.setDisplayAsList(true);
-		table.setRowHeight(28);
-		table.setStripedRows(false);
+		table.setRowHeight(64);
+		table.setForceFitWidth(true);
+		table.setHideHeaders(true);
 		entityModelBuilder.updateModels();
 
-		TemplateField<User> userTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createUserPropertyProvider(getApplicationInstanceData()));
-		TemplateField<Role> roleTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createRolePropertyProvider(getApplicationInstanceData()));
-		TemplateField<OrganizationUnit> orgUnitTableField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.creatOrganizationUnitPropertyProvider(getApplicationInstanceData()));
-
-		table.addColumn(new TableColumn<UserRoleAssignment, User>(UserRoleAssignment.FIELD_USER, getLocalized("userRoleAssignment.user"), userTableField).setDefaultWidth(200));
-		table.addColumn(new TableColumn<UserRoleAssignment, Role>(UserRoleAssignment.FIELD_ROLE, getLocalized("userRoleAssignment.role"), roleTableField).setDefaultWidth(200));
-		table.addColumn(new TableColumn<UserRoleAssignment, OrganizationUnit>(UserRoleAssignment.FIELD_ORGANIZATION_UNIT, getLocalized("userRoleAssignment.orgUnit"), orgUnitTableField).setDefaultWidth(200));
+		PropertyProvider<User> userPropertyProvider = PropertyProviders.createUserPropertyProvider(getApplicationInstanceData());
+		PropertyProvider<Role> rolePropertyProvider = PropertyProviders.createRolePropertyProvider(getApplicationInstanceData());
+		PropertyProvider<OrganizationUnit> organizationUnitPropertyProvider = PropertyProviders.creatOrganizationUnitPropertyProvider(getApplicationInstanceData());
+		TemplateField<UserRoleAssignment> assignmentTemplateField = new TemplateField<>(createRoleAssignmentTemplate());
+		assignmentTemplateField.setPropertyProvider((assignment, collection) -> {
+			Map<String, Object> map = new HashMap<>();
+			Map<String, Object> userValues = userPropertyProvider.getValues(assignment.getUser(), null);
+			Map<String, Object> roleValues = rolePropertyProvider.getValues(assignment.getRole(), null);
+			Map<String, Object> unitValues = organizationUnitPropertyProvider.getValues(assignment.getOrganizationUnit(), null);
+			map.put("image", userValues.get(BaseTemplate.PROPERTY_IMAGE));
+			map.put("line1", userValues.get(BaseTemplate.PROPERTY_CAPTION));
+			map.put("line2", roleValues.get(BaseTemplate.PROPERTY_CAPTION));
+			map.put("line3", unitValues.get(BaseTemplate.PROPERTY_CAPTION));
+			return map;
+		});
+		table.addColumn("data", null, assignmentTemplateField).setValueExtractor(assignment -> assignment);
 
 		entityModelBuilder.setCustomFieldSorter(fieldName -> {
 			Comparator<String> comparator = getUser().getComparator(true);
@@ -150,14 +170,33 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 			}
 		});
 
+		EntityListModelBuilder<UserRoleAssignment> userRoleAssignmentModelBuilder = new EntityListModelBuilder<>(getApplicationInstanceData(), userRoleAssignment ->  userRoleAssignment.getRole().getTitle().getText() + " " + userRoleAssignment.getOrganizationUnit().getName().getText());
+		Table<UserRoleAssignment> roleMemberTable = userRoleAssignmentModelBuilder.createListTable(true);
+		roleMemberTable.setHideHeaders(true);
+		TemplateField<Role> roleTemplateField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createRolePropertyProvider(getApplicationInstanceData()));
+		TemplateField<OrganizationUnit> organizationUnitTemplateField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.creatOrganizationUnitPropertyProvider(getApplicationInstanceData()));
+		roleMemberTable.addColumn(new TableColumn<>("role", roleTemplateField));
+		roleMemberTable.addColumn(new TableColumn<>("orgUnit", organizationUnitTemplateField));
+		roleMemberTable.setPropertyExtractor((userRoleAssignment, propertyName) -> switch (propertyName){
+			case "role" -> userRoleAssignment.getRole();
+			case "orgUnit" -> userRoleAssignment.getOrganizationUnit();
+			default -> null;
+		});
+
+		FormPanel roleMembersPanel = new FormPanel(getApplicationInstanceData());
+		roleMembersPanel.setTable(roleMemberTable, userRoleAssignmentModelBuilder, ApplicationIcons.USERS_THREE_RELATION, getLocalized("userRoleAssignment.allRolesOfTheUser"),  true, false, false);
 
 		ResponsiveFormLayout formLayout = form.addResponsiveFormLayout(450);
-		formLayout.addSection().setCollapsible(false).setDrawHeaderLine(false);
+		formLayout.addSection(ApplicationIcons.USERS_THREE_RELATION, getLocalized("userRoleAssignment.title"));
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.user"), userCombobox);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.role"), roleComboBox);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.orgUnit"), organizationComboBox);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.customPrivilegeObject"), delegatedPrivilegeObjectComboBox);
 		formLayout.addLabelAndField(null, getLocalized("userRoleAssignment.mainResponsible"), mainResponsibleField);
+
+
+		formLayout.addSection(ApplicationIcons.USER, getLocalized("userRoleAssignment.allRolesOfTheUser")).setCollapsed(true);
+		formLayout.addLabelAndComponent(roleMembersPanel.getPanel());
 
 		masterDetailController.createViews(getPerspective(), table, formLayout);
 
@@ -204,6 +243,7 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 			} else {
 				delegatedPrivilegeObjectComboBox.setVisible(false);
 			}
+			userRoleAssignmentModelBuilder.setRecords(userRoleAssignment.getUser() != null ? userRoleAssignment.getUser().getRoleAssignments() : Collections.emptyList());
 		});
 		entityModelBuilder.setSelectedRecord(UserRoleAssignment.create());
 	}
@@ -215,6 +255,37 @@ public class UserRoleAssignmentPerspective extends AbstractManagedApplicationPer
 	private ApplicationRoleAssignmentPrivilegeObjectProvider getDelegatePrivilegeObjectProvider() {
 		LoadedApplication loadedApplication = userSessionData.getRegistry().getLoadedApplication(getMainApplication());
 		return loadedApplication.getBaseApplicationBuilder().getRoleAssignmentDelegatedPrivilegeObjectProvider();
+	}
+
+	public static Template createRoleAssignmentTemplate() {
+		GridTemplate tpl = new GridTemplate()
+				.setPadding(new Spacing(2))
+				.addColumn(SizingPolicy.AUTO)
+				.addColumn(SizingPolicy.FRACTION)
+				.addRow(SizeType.FIXED, 22, 22, 0, 0)
+				.addRow(SizeType.FIXED, 20, 20, 0, 0)
+				.addRow(SizeType.FIXED, 20, 20, 0, 0)
+				.addElement(new ImageElement("image", 0, 0, 60, 60).setRowSpan(4)
+						.setBorder(new Border(new Line(Color.GRAY, LineType.SOLID, 0.5f)).setBorderRadius(300))
+						.setShadow(Shadow.withSize(0.5f))
+						.setVerticalAlignment(VerticalElementAlignment.CENTER)
+						.setMargin(new Spacing(0, 8, 0, 4)))
+				.addElement(new TextElement("line1", 0, 1)
+						.setWrapLines(false)
+						.setFontStyle(new FontStyle(1f, Color.MATERIAL_GREY_900, null, true, false, false))
+						.setVerticalAlignment(VerticalElementAlignment.CENTER)
+						.setHorizontalAlignment(HorizontalElementAlignment.LEFT))
+				.addElement(new TextElement("line2", 1, 1)
+						.setWrapLines(false)
+						.setFontStyle(new FontStyle(1f, Color.MATERIAL_BLUE_900, null, true, false, false))
+						.setVerticalAlignment(VerticalElementAlignment.CENTER)
+						.setHorizontalAlignment(HorizontalElementAlignment.LEFT))
+				.addElement(new TextElement("line3", 2, 1)
+						.setWrapLines(false)
+						.setFontStyle(new FontStyle(1f, Color.MATERIAL_GREY_700, null, false, false, false))
+						.setVerticalAlignment(VerticalElementAlignment.CENTER)
+						.setHorizontalAlignment(HorizontalElementAlignment.LEFT));
+		return tpl;
 	}
 
 }
