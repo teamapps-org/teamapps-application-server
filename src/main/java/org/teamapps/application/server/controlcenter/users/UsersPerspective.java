@@ -39,10 +39,12 @@ import org.teamapps.application.server.system.session.UserSessionData;
 import org.teamapps.application.server.system.template.PropertyProviders;
 import org.teamapps.application.server.system.utils.ValueConverterUtils;
 import org.teamapps.application.server.ui.address.AddressForm;
+import org.teamapps.application.tools.EntityListModelBuilder;
 import org.teamapps.application.tools.EntityModelBuilder;
 import org.teamapps.application.ux.UiUtils;
 import org.teamapps.application.ux.combo.ComboBoxUtils;
 import org.teamapps.application.ux.form.FormController;
+import org.teamapps.application.ux.form.FormPanel;
 import org.teamapps.application.ux.view.MasterDetailController;
 import org.teamapps.application.ux.window.ApplicationWindow;
 import org.teamapps.data.extract.PropertyProvider;
@@ -161,12 +163,25 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		TextField loginField = new TextField();
 		PasswordField passwordField = new PasswordField();
 		ComboBox<UserAccountStatus> accountStatusComboBox = createAccountStatusComboBox();
-		TagComboBox<UserRoleAssignment> userRoleAssignmentTagCombo = createUserRoleAssignmentTagCombo();
 		AbstractField<OrganizationUnitView> organizationUnitViewField = formController.getOrganizationUnitViewField();
 
-		userRoleAssignmentTagCombo.setMargin(new Spacing(0, 5, 0, -4));
+		EntityListModelBuilder<UserRoleAssignment> userRoleAssignmentModelBuilder = new EntityListModelBuilder<>(getApplicationInstanceData(), userRoleAssignment ->  userRoleAssignment.getRole().getTitle().getText() + " " + userRoleAssignment.getOrganizationUnit().getName().getText());
+		Table<UserRoleAssignment> roleMemberTable = userRoleAssignmentModelBuilder.createListTable(true);
+		roleMemberTable.setHideHeaders(true);
+		TemplateField<Role> roleTemplateField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.createRolePropertyProvider(getApplicationInstanceData()));
+		TemplateField<OrganizationUnit> organizationUnitTemplateField = UiUtils.createTemplateField(BaseTemplate.LIST_ITEM_MEDIUM_ICON_SINGLE_LINE, PropertyProviders.creatOrganizationUnitPropertyProvider(getApplicationInstanceData()));
+		roleMemberTable.addColumn(new TableColumn<>("role", roleTemplateField));
+		roleMemberTable.addColumn(new TableColumn<>("orgUnit", organizationUnitTemplateField));
+		roleMemberTable.setPropertyExtractor((userRoleAssignment, propertyName) -> switch (propertyName){
+			case "role" -> userRoleAssignment.getRole();
+			case "orgUnit" -> userRoleAssignment.getOrganizationUnit();
+			default -> null;
+		});
 
-		formLayout.addSection().setCollapsible(false).setDrawHeaderLine(false);
+		FormPanel roleMembersPanel = new FormPanel(getApplicationInstanceData());
+		roleMembersPanel.setTable(roleMemberTable, userRoleAssignmentModelBuilder, ApplicationIcons.USERS_THREE_RELATION, getLocalized("userRoleAssignment.allRolesOfTheUser"),  true, false, false);
+
+		formLayout.addSection(ApplicationIcons.USER, getLocalized("users.user"));
 		formLayout.addLabelAndField(null, getLocalized("users.profilePicture"), pictureChooser);
 		formLayout.addLabelAndField(null, getLocalized(Dictionary.FIRST_NAME), firstNameField);
 		formLayout.addLabelAndField(null, getLocalized(Dictionary.LAST_NAME), lastNameField);
@@ -175,12 +190,15 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 		formLayout.addLabelAndField(null, getLocalized(Dictionary.MOBILE_NUMBER), mobileField);
 		formLayout.addLabelAndField(null, getLocalized(Dictionary.USER_NAME), loginField);
 		formLayout.addLabelAndField(null, getLocalized("users.accountStatus"), accountStatusComboBox);
-		formLayout.addLabelAndField(null, getLocalized("users.roles"), userRoleAssignmentTagCombo);
 		formLayout.addLabelAndField(null, getLocalized("users.organizationUnit"), organizationUnitViewField);
 
 		AddressForm addressForm = new AddressForm(getApplicationInstanceData());
 		addressForm.createAddressSection(formLayout);
 		addressForm.addFields(formLayout);
+
+		formLayout.addSection(ApplicationIcons.USERS_THREE_RELATION, getLocalized("userRoleAssignment.allRolesOfTheUser")).setCollapsed(true);
+		formLayout.addLabelAndComponent(roleMembersPanel.getPanel());
+
 
 		formController.addNotBlank(firstNameField);
 		formController.addNotBlank(lastNameField);
@@ -240,9 +258,9 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 			loginField.setValue(user.getLogin());
 			passwordField.setValue(user.getPassword());
 			accountStatusComboBox.setValue(user.getUserAccountStatus());
-			userRoleAssignmentTagCombo.setValue(user.getRoleAssignments());
 			addressForm.setAddress(user.getAddress());
 			formController.clearMessages();
+			userRoleAssignmentModelBuilder.setRecords(user.getRoleAssignments());
 		});
 
 		Supplier<User> createNewEntitySupplier = () -> User.create().setAddress(Address.create()).setUserAccountStatus(UserAccountStatus.ACTIVE);
@@ -319,12 +337,6 @@ public class UsersPerspective extends AbstractManagedApplicationPerspective {
 
 	private ComboBox<UserAccountStatus> createAccountStatusComboBox() {
 		return ComboBoxUtils.createRecordComboBox(Arrays.asList(UserAccountStatus.values()), createAccountStatusPropertyProvider(), BaseTemplate.LIST_ITEM_SMALL_ICON_SINGLE_LINE);
-	}
-
-	private TagComboBox<UserRoleAssignment> createUserRoleAssignmentTagCombo() {
-		TagComboBox<UserRoleAssignment> tagComboBox = UiUtils.createTagComboBox(BaseTemplate.LIST_ITEM_MEDIUM_ICON_TWO_LINES, PropertyProviders.createUserRoleAssignmentPropertyProviderNoUserDisplay(userSessionData));
-		tagComboBox.setEditingMode(FieldEditingMode.READONLY);
-		return tagComboBox;
 	}
 
 	private PropertyProvider<UserAccountStatus> createAccountStatusPropertyProvider() {
