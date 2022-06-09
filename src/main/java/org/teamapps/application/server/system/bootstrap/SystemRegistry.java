@@ -41,6 +41,7 @@ import org.teamapps.application.server.system.machinetranslation.MachineTranslat
 import org.teamapps.application.server.system.machinetranslation.TranslationService;
 import org.teamapps.application.server.system.server.SessionRegistryHandler;
 import org.teamapps.application.ux.IconUtils;
+import org.teamapps.cluster.core.Cluster;
 import org.teamapps.model.controlcenter.*;
 import org.teamapps.reporting.convert.DocumentConverter;
 import org.teamapps.universaldb.UniversalDB;
@@ -74,6 +75,7 @@ public class SystemRegistry {
 	private DocumentConverter documentConverter;
 	private List<AuthenticationHandler> authenticationHandlers = new ArrayList<>();
 	private EntityUpdateEventHandler entityUpdateEventHandler;
+	private Cluster cluster;
 
 	public SystemRegistry(BootstrapSessionHandler bootstrapSessionHandler, UniversalDB universalDB, ApplicationConfig<SystemConfig> applicationConfig) {
 		SystemConfig systemConfig = applicationConfig.getConfig();
@@ -244,5 +246,13 @@ public class SystemRegistry {
 
 	public synchronized <ENTITY> void registerEntity(EntityBuilder<ENTITY> entityBuilder, int userId, Consumer<EntityUpdate<ENTITY>> listener) {
 		entityUpdateEventHandler.registerEntity(entityBuilder, userId, listener);
+	}
+
+	public Cluster getCluster() {
+		return cluster;
+	}
+
+	public void setCluster(Cluster cluster) {
+		this.cluster = cluster;
 	}
 }

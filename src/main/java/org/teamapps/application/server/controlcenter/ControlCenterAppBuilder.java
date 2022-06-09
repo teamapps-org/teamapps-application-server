@@ -36,6 +36,7 @@ import org.teamapps.application.server.controlcenter.applications.ApplicationPro
 import org.teamapps.application.server.controlcenter.applications.ApplicationUpdatesPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.applications.ApplicationsPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.applocal.AppLocalAdministrationPerspectiveBuilder;
+import org.teamapps.application.server.controlcenter.cluster.ClusterPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.database.DataBasePerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.monitoring.MonitoringPerspectiveBuilder;
 import org.teamapps.application.server.controlcenter.organization.OrganizationChartPerspectiveBuilder;
@@ -78,6 +79,7 @@ public class ControlCenterAppBuilder extends AbstractApplicationBuilder {
 				new ApplicationsPerspectiveBuilder(),
 				new TranslationsPerspectiveBuilder(),
 				new ApplicationConfigurationPerspectiveBuilder(),
+				new ClusterPerspectiveBuilder(),
 				new SystemLogPerspectiveBuilder(),
 				new MonitoringPerspectiveBuilder(),
 				new DataBasePerspectiveBuilder(),
@@ -95,7 +97,7 @@ public class ControlCenterAppBuilder extends AbstractApplicationBuilder {
 
 	@Override
 	public ApplicationVersion getApplicationVersion() {
-		return ApplicationVersion.create(0, 55);
+		return ApplicationVersion.create(0, 57);
 	}
 
 	@Override

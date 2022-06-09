@@ -47,6 +47,7 @@ public class ApplicationInstance implements PerspectiveByNameLauncher {
 	private final Map<PerspectiveSessionData, ApplicationPerspective> applicationPerspectiveByPerspectiveBuilder = new HashMap<>();
 	private View mobileApplicationMenu;
 	private List<PerspectiveSessionData> sortedPerspectives;
+	private Tree<PerspectiveSessionData> applicationMenuTree;
 
 	public ApplicationInstance(UserSessionData userSessionData, ApplicationData applicationData, Component applicationLauncher, MutableValue<ManagedApplicationPerspective> selectedPerspective) {
 		this.userSessionData = userSessionData;
@@ -96,7 +97,7 @@ public class ApplicationInstance implements PerspectiveByNameLauncher {
 				showPerspective(perspectiveSessionData);
 			});
 		} else {
-			Tree<PerspectiveSessionData> tree = createApplicationMenuTree(sortedPerspectives);
+			applicationMenuTree = createApplicationMenuTree(sortedPerspectives);
 			View applicationMenu = View.createView(StandardLayout.LEFT, ApplicationIcons.RADIO_BUTTON_GROUP, getLocalized(Dictionary.MENU), null);
 			responsiveApplication.addApplicationView(applicationMenu);
 			applicationMenu.getPanel().setBodyBackgroundColor(Color.WHITE.withAlpha(0.84f));
@@ -109,15 +110,15 @@ public class ApplicationInstance implements PerspectiveByNameLauncher {
 			backButton.setVisible(false);
 			buttonGroup.addButton(backButton);
 			verticalLayout.addComponent(toolbar);
-			mobileLayout.setContent(tree);
+			mobileLayout.setContent(applicationMenuTree);
 			verticalLayout.addComponentFillRemaining(mobileLayout);
 
 			backButton.onClick.addListener(() -> {
 				backButton.setVisible(false);
-				mobileLayout.setContent(tree, PageTransition.MOVE_TO_RIGHT_VS_MOVE_FROM_LEFT, 500);
+				mobileLayout.setContent(applicationMenuTree, PageTransition.MOVE_TO_RIGHT_VS_MOVE_FROM_LEFT, 500);
 			});
 
-			tree.onNodeSelected.addListener(this::showPerspective);
+			applicationMenuTree.onNodeSelected.addListener(this::showPerspective);
 		}
 
 		if (!sortedPerspectives.isEmpty()) {
@@ -185,7 +186,7 @@ public class ApplicationInstance implements PerspectiveByNameLauncher {
 			responsiveApplication.addPerspective(applicationPerspective.getPerspective());
 
 			if (applicationPerspective.getPerspectiveMenuPanel() != null) {
-				if (perspectiveSessionData.getManagedApplicationPerspective().getToolbarPerspectiveMenu()) {
+				if (perspectiveSessionData.getManagedApplicationPerspective().isToolbarPerspectiveMenu()) {
 					Component perspectiveMenuPanel = applicationPerspective.getPerspectiveMenuPanel();
 					perspectiveMenuPanel.setCssStyle("height","300px");
 					if (perspectiveMenuPanel instanceof Tree) {
@@ -202,6 +203,9 @@ public class ApplicationInstance implements PerspectiveByNameLauncher {
 			}
 		} else {
 			applicationPerspective.getOnPerspectiveRefreshRequested().fire();
+		}
+		if (applicationMenuTree != null && !perspectiveSessionData.equals(applicationMenuTree.getSelectedNode())) {
+			applicationMenuTree.setSelectedNode(perspectiveSessionData);
 		}
 		if (applicationPerspective.getPerspectiveMenuPanel() != null && perspectiveSessionData.getManagedApplicationPerspective().getToolbarPerspectiveMenu()) {
 			perspectiveSessionData.getManagedApplicationSessionData().setPerspectiveToolbarMenuComponent(applicationPerspective.getPerspectiveToolbarMenuPanel() != null ? applicationPerspective.getPerspectiveToolbarMenuPanel() : applicationPerspective.getPerspectiveMenuPanel());

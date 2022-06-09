@@ -34,6 +34,7 @@ import org.teamapps.application.server.system.server.SessionHandler;
 import org.teamapps.application.server.system.server.SessionManager;
 import org.teamapps.application.server.system.server.SessionRegistryHandler;
 import org.teamapps.application.server.system.template.Templates;
+import org.teamapps.cluster.core.Cluster;
 import org.teamapps.event.Event;
 import org.teamapps.icon.antu.AntuIcon;
 import org.teamapps.icon.flags.FlagIcon;
@@ -70,7 +71,7 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 	private UniversalDB universalDB;
 	private SystemRegistry systemRegistry;
 	private ControlCenterAppBuilder controlCenterAppBuilder;
-
+	private Cluster cluster;
 
 	public BootstrapSessionHandler() {
 		this(null);
@@ -93,6 +94,11 @@ public class BootstrapSessionHandler implements SessionHandler, LogoutHandler {
 		} catch (Exception e) {
 			LOGGER.error("Error initializing system:", e);
 		}
+	}
+
+	public void startCluster(Cluster cluster) {
+		this.cluster = cluster;
+		systemRegistry.setCluster(cluster);
 	}
 
 	private void startSystem() throws Exception {

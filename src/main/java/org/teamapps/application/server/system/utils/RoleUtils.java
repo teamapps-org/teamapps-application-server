@@ -19,11 +19,17 @@
  */
 package org.teamapps.application.server.system.utils;
 
+import org.teamapps.application.api.localization.ApplicationLocalizationProvider;
 import org.teamapps.application.api.privilege.ApplicationRole;
+import org.teamapps.application.server.system.privilege.MergedApplicationPrivileges;
+import org.teamapps.application.server.system.privilege.MergedPrivilegeGroup;
+import org.teamapps.application.api.privilege.Privilege;
 import org.teamapps.application.api.privilege.PrivilegeGroup;
 import org.teamapps.application.server.system.bootstrap.LoadedApplication;
 import org.teamapps.application.server.system.bootstrap.SystemRegistry;
 import org.teamapps.application.server.system.organization.OrganizationUtils;
+import org.teamapps.application.server.system.session.UserSessionData;
+import org.teamapps.application.ux.IconUtils;
 import org.teamapps.model.controlcenter.*;
 
 import java.util.*;
@@ -117,45 +123,43 @@ public class RoleUtils {
 		};
 	}
 
-	public static List<ApplicationPrivilegeGroup> calculateRolePrivileges(Role role, SystemRegistry systemRegistry) {
-		Map<String, ApplicationRole> applicationRoleMap = new HashMap<>();
-		for (LoadedApplication loadedApplication : systemRegistry.getLoadedApplications()) {
-			String name = loadedApplication.getApplication().getName();
-			List<ApplicationRole> applicationRoles = loadedApplication.getBaseApplicationBuilder().getApplicationRoles();
-			if (applicationRoles != null) {
-				for (ApplicationRole applicationRole : applicationRoles) {
-					applicationRoleMap.put(name + "." + applicationRole.getName(), applicationRole);
-				}
-			}
-		}
-		Map<String, ApplicationPrivilegeGroup> groupMap = new HashMap<>();
-		ApplicationPrivilegeGroup.getAll().forEach(group -> groupMap.put(group.getApplication().getName() + "." + group.getName(), group));
-
+	public static List<MergedApplicationPrivileges> calcPrivileges(Role role, UserSessionData userSessionData) {
+		SystemRegistry systemRegistry = userSessionData.getRegistry();
+		Map<String, MergedApplicationPrivileges> applicationPrivilegesMap = new HashMap<>();
 		Set<Role> privilegeRoles = getAllPrivilegeRoles(role);
 		for (Role privilegeRole : privilegeRoles) {
-			for (RoleApplicationRoleAssignment roleApplicationRoleAssignment : privilegeRole.getApplicationRoleAssignments()) {
-				String applicationRoleName = roleApplicationRoleAssignment.getApplicationRoleName();
-				String applicationName = roleApplicationRoleAssignment.getApplication().getName();
-				ApplicationRole applicationRole = applicationRoleMap.get(applicationName + "." + applicationRoleName);
+			for (RoleApplicationRoleAssignment applicationRoleAssignment : privilegeRole.getApplicationRoleAssignments()) {
+				Application application = applicationRoleAssignment.getApplication();
+				ApplicationLocalizationProvider localizationProvider = userSessionData.getApplicationLocalizationProvider(application);
+				MergedApplicationPrivileges mergedApplicationPrivileges = applicationPrivilegesMap.computeIfAbsent(application.getName(), s -> new MergedApplicationPrivileges(s, IconUtils.decodeIcon(application.getIcon()), localizationProvider.getLocalized(application.getTitleKey()), localizationProvider.getLocalized(application.getDescriptionKey())));
+				ApplicationRole applicationRole = getApplicationRole(application.getName(), applicationRoleAssignment.getApplicationRoleName(), systemRegistry);
 				if (applicationRole != null) {
 					for (PrivilegeGroup privilegeGroup : applicationRole.getPrivilegeGroups()) {
-						ApplicationPrivilegeGroup applicationPrivilegeGroup = groupMap.get(applicationName + "." + privilegeGroup.getName());
-
+						mergedApplicationPrivileges.addPrivilegeGroup(privilegeGroup, localizationProvider);
 					}
-
 				}
-				OrganizationField organizationField = roleApplicationRoleAssignment.getOrganizationFieldFilter();
-				OrganizationUnit organizationRoot = roleApplicationRoleAssignment.getFixedOrganizationRoot();
-				List<OrganizationUnitType> organizationUnitTypeFilter = roleApplicationRoleAssignment.getOrganizationUnitTypeFilter();
-
-				//calculatePrivilegesFromApplicationRoleAssignment(organizationUnit, roleApplicationRoleAssignment);
 			}
 
 			for (RolePrivilegeAssignment privilegeAssignment : privilegeRole.getPrivilegeAssignments()) {
-//				privilegeAssignment.get
-//				calculatePrivilegesFromRolePrivilegeAssignment(organizationUnit, privilegeAssignment);
+				Application application = privilegeAssignment.getApplication();
+				ApplicationLocalizationProvider localizationProvider = userSessionData.getApplicationLocalizationProvider(application);
+				ApplicationPrivilegeGroup privilegeGroup = privilegeAssignment.getPrivilegeGroup();
+				MergedApplicationPrivileges mergedApplicationPrivileges = applicationPrivilegesMap.computeIfAbsent(application.getName(), s -> new MergedApplicationPrivileges(s, IconUtils.decodeIcon(application.getIcon()), localizationProvider.getLocalized(application.getTitleKey()), localizationProvider.getLocalized(application.getDescriptionKey())));
+				mergedApplicationPrivileges.addPrivilegeGroup(privilegeGroup, localizationProvider);
 			}
 		}
-		return null;
+		return applicationPrivilegesMap.values().stream()
+				.sorted(Comparator.comparing(MergedApplicationPrivileges::getTitle))
+				.collect(Collectors.toList());
 	}
+
+	public static ApplicationRole getApplicationRole(String applicationName, String applicationRoleName, SystemRegistry systemRegistry) {
+		return systemRegistry.getLoadedApplications().stream()
+				.filter(app -> app.getApplication().getName().equals(applicationName))
+				.filter(app -> app.getBaseApplicationBuilder() != null)
+				.flatMap(app -> app.getBaseApplicationBuilder().getApplicationRoles().stream())
+				.filter(role -> role.getName().equals(applicationRoleName))
+				.findFirst().orElse(null);
+	}
+
 }

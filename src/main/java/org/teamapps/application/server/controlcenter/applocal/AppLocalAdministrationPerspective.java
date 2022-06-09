@@ -35,17 +35,14 @@ import org.teamapps.databinding.MutableValue;
 
 public class AppLocalAdministrationPerspective extends AbstractManagedApplicationPerspective {
 
-	private PerspectiveMenuPanel menuPanel;
-	private TranslationsPerspectiveBuilder translationsPerspectiveBuilder;
-
 	public AppLocalAdministrationPerspective(ApplicationInstanceData applicationInstanceData, MutableValue<String> perspectiveInfoBadgeValue) {
 		super(applicationInstanceData, perspectiveInfoBadgeValue);
 		createUi();
 	}
 
 	private void createUi() {
-		translationsPerspectiveBuilder = new TranslationsPerspectiveBuilder();
-		menuPanel = PerspectiveMenuPanel.createMenuPanel(getApplicationInstanceData(),
+		TranslationsPerspectiveBuilder translationsPerspectiveBuilder = new TranslationsPerspectiveBuilder();
+		PerspectiveMenuPanel menuPanel = PerspectiveMenuPanel.createMenuPanel(getApplicationInstanceData(),
 				translationsPerspectiveBuilder,
 				new UserRoleAssignmentPerspectiveBuilder(),
 				new RolesPerspectiveBuilder(),
