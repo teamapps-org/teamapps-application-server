@@ -62,6 +62,8 @@ public class Privileges {
 	public final static StandardPrivilegeGroup SYSTEM_LOG_PERSPECTIVE = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("systemLogPerspective", ApplicationIcons.CONSOLE, "systemLog.title", "systemLog.desc", READ);
 	public final static StandardPrivilegeGroup DATABASE_PERSPECTIVE = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("databasePerspective", ApplicationIcons.DATA_TABLE, "database.launch", "database.desc", READ, SHOW_RECYCLE_BIN);
 
+	public final static StandardPrivilegeGroup CLUSTER_PERSPECTIVE = PRIVILEGE_BUILDER.addStandardPrivilegeGroup("clusterPerspective", ApplicationIcons.RACK_SERVER_NETWORK, "cluster.launch", "cluster.desc", READ, CREATE, UPDATE, DELETE);
+
 	public final static OrganizationalPrivilegeGroup ORGANIZATION_CHART_PERSPECTIVE = PRIVILEGE_BUILDER.addOrganizationalPrivilegeGroup("organizationChartPerspective", ApplicationIcons.PIECES, "organizationChart.title", "organizationChart.desc",
 			OrganizationChartPerspective.SHOW_UPWARDS_LEADERS,
 			OrganizationChartPerspective.SHOW_UPWARDS_ALL_ROLES,
