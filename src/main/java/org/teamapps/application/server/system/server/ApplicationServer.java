@@ -38,12 +38,11 @@ import org.teamapps.model.controlcenter.User;
 import org.teamapps.model.controlcenter.UserAccountStatus;
 import org.teamapps.model.system.SystemStarts;
 import org.teamapps.model.system.Type;
-import org.teamapps.server.ServletRegistration;
 import org.teamapps.server.undertow.embedded.TeamAppsUndertowEmbeddedServer;
 import org.teamapps.universaldb.UniversalDB;
-import org.teamapps.ux.resource.ClassPathResourceProvider;
+import org.teamapps.ux.servlet.resourceprovider.ClassPathResourceProvider;
 import org.teamapps.ux.resource.FileResource;
-import org.teamapps.ux.resource.ResourceProviderServlet;
+import org.teamapps.ux.servlet.resourceprovider.ResourceProviderServlet;
 import org.teamapps.ux.session.SessionContext;
 import org.teamapps.webcontroller.WebController;
 

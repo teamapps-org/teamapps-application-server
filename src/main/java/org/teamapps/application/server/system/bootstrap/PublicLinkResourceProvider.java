@@ -24,7 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.ux.resource.Resource;
-import org.teamapps.ux.resource.ResourceProvider;
+import org.teamapps.ux.servlet.resourceprovider.ResourceProvider;
 
 import java.lang.invoke.MethodHandles;
 import java.time.Duration;

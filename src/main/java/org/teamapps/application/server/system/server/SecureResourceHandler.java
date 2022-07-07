@@ -21,7 +21,7 @@ package org.teamapps.application.server.system.server;
 
 
 import org.teamapps.ux.resource.Resource;
-import org.teamapps.ux.resource.ResourceProvider;
+import org.teamapps.ux.servlet.resourceprovider.ResourceProvider;
 
 import java.util.Map;
 import java.util.UUID;
