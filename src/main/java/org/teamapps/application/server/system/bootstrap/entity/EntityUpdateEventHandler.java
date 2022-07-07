@@ -20,6 +20,8 @@
 package org.teamapps.application.server.system.bootstrap.entity;
 
 import org.teamapps.application.api.application.entity.EntityUpdate;
+import org.teamapps.application.api.application.entity.EntityUpdateType;
+import org.teamapps.event.Event;
 import org.teamapps.universaldb.record.EntityBuilder;
 import org.teamapps.universaldb.update.RecordUpdateEvent;
 import org.teamapps.ux.session.SessionContext;
@@ -31,7 +33,7 @@ import java.util.function.Consumer;
 public class EntityUpdateEventHandler extends Thread {
 
 	private final ArrayBlockingQueue<RecordUpdateEvent> updateQueue;
-	private final ConcurrentHashMap<Integer, EntityEventBuilder> entityEventBuilderMap = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<Integer, TableEventHandler> tableEventHandlerByTableId = new ConcurrentHashMap<>();
 
 	public EntityUpdateEventHandler(ArrayBlockingQueue<RecordUpdateEvent> updateQueue) {
 		this.updateQueue = updateQueue;
@@ -44,9 +46,9 @@ public class EntityUpdateEventHandler extends Thread {
 		while (true) {
 			try {
 				RecordUpdateEvent updateEvent = updateQueue.take();
-				EntityEventBuilder entityEventBuilder = entityEventBuilderMap.get(updateEvent.getTableId());
-				if (entityEventBuilder != null) {
-					entityEventBuilder.fireEvent(updateEvent);
+				TableEventHandler tableEventHandler = tableEventHandlerByTableId.get(updateEvent.getTableId());
+				if (tableEventHandler != null) {
+					tableEventHandler.fireEvent(updateEvent);
 				}
 			} catch (InterruptedException ignore) { }
 		}
@@ -60,20 +62,42 @@ public class EntityUpdateEventHandler extends Thread {
 			throw new RuntimeException("Error: cannot register entity update listener without userId!");
 		}
 
-		Consumer<EntityUpdate<ENTITY>> consumer = entityEntityUpdate -> {
-			if (userId != entityEntityUpdate.getUserId()) {
+		Consumer<RecordUpdateEvent> recordUpdateEventConsumer = recordUpdateEvent -> {
+			if (userId != recordUpdateEvent.getUserId()) {
+				ENTITY entity = entityBuilder.build(recordUpdateEvent.getRecordId());
+				EntityUpdate<ENTITY> entityEntityUpdate = new EntityUpdate<>(entity, recordUpdateEvent.getUserId(), EntityUpdateType.create(recordUpdateEvent.getType()));
 				listener.accept(entityEntityUpdate);
 			}
 		};
 
-		EntityEventBuilder<ENTITY> entityEventBuilder = entityEventBuilderMap.get(entityBuilder.getTableId());
-		if (entityEventBuilder == null) {
-			entityEventBuilder = new EntityEventBuilder<>(entityBuilder);
-			entityEventBuilderMap.put(entityBuilder.getTableId(), entityEventBuilder);
-		} else {
-			//the builder might get replaced with an app update - so always keep a reference to a current builder
-			entityEventBuilder.updateBuilder(entityBuilder);
+		TableEventHandler tableEventHandler = tableEventHandlerByTableId.get(entityBuilder.getTableId());
+		if (tableEventHandler ==  null) {
+			tableEventHandler = new TableEventHandler(entityBuilder.getTableId());
+			tableEventHandlerByTableId.put(entityBuilder.getTableId(), tableEventHandler);
 		}
-		entityEventBuilder.getEvent().addListener(consumer);
+		tableEventHandler.addListener(recordUpdateEventConsumer);
 	}
+
+	public static class TableEventHandler {
+
+		private final int tableId;
+		private final Event<RecordUpdateEvent> event = new Event<>();
+
+		public TableEventHandler(int tableId) {
+			this.tableId = tableId;
+		}
+
+		public void fireEvent(RecordUpdateEvent recordUpdateEvent) {
+			event.fire(recordUpdateEvent);
+		}
+
+		public void addListener(Consumer<RecordUpdateEvent> consumer) {
+			event.addListener(consumer);
+		}
+
+		public int getTableId() {
+			return tableId;
+		}
+	}
+
 }
