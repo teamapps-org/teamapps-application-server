@@ -107,4 +107,9 @@ public class SessionUserImpl implements SessionUser {
 		return rankedLanguages;
 	}
 
+	@Override
+	public boolean isDarkTheme() {
+		return false;
+	}
+
 }
