@@ -17,24 +17,9 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
+package org.teamapps.application.server;
 
-import org.teamapps.universaldb.schema.*;
+public interface ByteArrayResourceProvider {
 
-import static org.teamapps.universaldb.schema.TableOption.*;
-
-public class Model implements SchemaInfoProvider {
-
-
-	@Override
-	public Schema getSchema() {
-		Schema schema = Schema.create("org.teamapps.model");
-		schema.setSchemaName("ApplicationServerSchema");
-		Database db = schema.addDatabase("system");
-		Table systemStarts = db.addTable("systemStarts");
-		systemStarts
-				.addTimestamp("timestamp")
-				.addEnum("type", "start", "stop")
-		;
-		return schema;
-	}
+	byte[] getResource(int id);
 }

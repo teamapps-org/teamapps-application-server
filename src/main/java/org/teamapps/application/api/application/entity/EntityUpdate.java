@@ -1,6 +1,6 @@
 /*-
  * ========================LICENSE_START=================================
- * TeamApps Application Server
+ * TeamApps Application API
  * ---
  * Copyright (C) 2020 - 2022 TeamApps.org
  * ---
@@ -17,24 +17,29 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
+package org.teamapps.application.api.application.entity;
 
-import org.teamapps.universaldb.schema.*;
+public class EntityUpdate<ENTITY> {
 
-import static org.teamapps.universaldb.schema.TableOption.*;
+	private final ENTITY entity;
+	private final int userId;
+	private final EntityUpdateType updateType;
 
-public class Model implements SchemaInfoProvider {
+	public EntityUpdate(ENTITY entity, int userId, EntityUpdateType updateType) {
+		this.entity = entity;
+		this.userId = userId;
+		this.updateType = updateType;
+	}
 
+	public ENTITY getEntity() {
+		return entity;
+	}
 
-	@Override
-	public Schema getSchema() {
-		Schema schema = Schema.create("org.teamapps.model");
-		schema.setSchemaName("ApplicationServerSchema");
-		Database db = schema.addDatabase("system");
-		Table systemStarts = db.addTable("systemStarts");
-		systemStarts
-				.addTimestamp("timestamp")
-				.addEnum("type", "start", "stop")
-		;
-		return schema;
+	public int getUserId() {
+		return userId;
+	}
+
+	public EntityUpdateType getUpdateType() {
+		return updateType;
 	}
 }

@@ -17,24 +17,24 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-
-import org.teamapps.universaldb.schema.*;
-
-import static org.teamapps.universaldb.schema.TableOption.*;
-
-public class Model implements SchemaInfoProvider {
+package org.teamapps.application.server;
 
 
-	@Override
-	public Schema getSchema() {
-		Schema schema = Schema.create("org.teamapps.model");
-		schema.setSchemaName("ApplicationServerSchema");
-		Database db = schema.addDatabase("system");
-		Table systemStarts = db.addTable("systemStarts");
-		systemStarts
-				.addTimestamp("timestamp")
-				.addEnum("type", "start", "stop")
-		;
-		return schema;
-	}
+import org.teamapps.universaldb.UniversalDB;
+import org.teamapps.ux.component.template.BaseTemplateRecord;
+import org.teamapps.ux.session.SessionContext;
+
+import java.util.List;
+
+public interface SessionHandler {
+
+	void init(SessionManager sessionManager, ServerRegistry serverRegistry);
+
+	void handleSessionStart(SessionContext context);
+
+	List<BaseTemplateRecord<Long>> getActiveUsers();
+
+	void shutDown();
+
+
 }

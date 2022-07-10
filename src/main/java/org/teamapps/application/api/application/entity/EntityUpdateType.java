@@ -1,6 +1,6 @@
 /*-
  * ========================LICENSE_START=================================
- * TeamApps Application Server
+ * TeamApps Application API
  * ---
  * Copyright (C) 2020 - 2022 TeamApps.org
  * ---
@@ -17,24 +17,24 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
+package org.teamapps.application.api.application.entity;
 
-import org.teamapps.universaldb.schema.*;
+import org.teamapps.universaldb.update.RecordUpdateType;
 
-import static org.teamapps.universaldb.schema.TableOption.*;
+public enum EntityUpdateType {
+	CREATE,
+	UPDATE,
+	DELETE,
+	RESTORE,
+	;
 
-public class Model implements SchemaInfoProvider {
-
-
-	@Override
-	public Schema getSchema() {
-		Schema schema = Schema.create("org.teamapps.model");
-		schema.setSchemaName("ApplicationServerSchema");
-		Database db = schema.addDatabase("system");
-		Table systemStarts = db.addTable("systemStarts");
-		systemStarts
-				.addTimestamp("timestamp")
-				.addEnum("type", "start", "stop")
-		;
-		return schema;
+	public static EntityUpdateType create(RecordUpdateType recordUpdateType) {
+		return switch (recordUpdateType) {
+			case CREATE -> CREATE;
+			case UPDATE -> UPDATE;
+			case DELETE -> DELETE;
+			case RESTORE -> RESTORE;
+		};
 	}
+
 }

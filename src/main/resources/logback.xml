@@ -6,7 +6,7 @@
         </encoder>
     </appender>
 
-    <appender name="SYSTEM" class="org.teamapps.application.server.system.logging.DatabaseLogAppender">
+    <appender name="SYSTEM" class="org.teamapps.application.server.DatabaseLogAppender">
     </appender>
 
     <root level="info">

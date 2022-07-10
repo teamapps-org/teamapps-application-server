@@ -17,24 +17,16 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
+package org.teamapps.application.server;
 
-import org.teamapps.universaldb.schema.*;
+import java.io.File;
+import java.util.Collection;
 
-import static org.teamapps.universaldb.schema.TableOption.*;
+public interface SessionManager {
 
-public class Model implements SchemaInfoProvider {
+	Collection<Long> getBootstrappedSystems();
 
+	void updateSessionHandler(SessionHandler sessionHandler);
 
-	@Override
-	public Schema getSchema() {
-		Schema schema = Schema.create("org.teamapps.model");
-		schema.setSchemaName("ApplicationServerSchema");
-		Database db = schema.addDatabase("system");
-		Table systemStarts = db.addTable("systemStarts");
-		systemStarts
-				.addTimestamp("timestamp")
-				.addEnum("type", "start", "stop")
-		;
-		return schema;
-	}
+	void updateSessionHandler(File jarFile) throws Exception;
 }
