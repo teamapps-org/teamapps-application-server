@@ -28,5 +28,5 @@ public interface SessionManager {
 
 	void updateSessionHandler(SessionHandler sessionHandler);
 
-	void updateSessionHandler(File jarFile) throws Exception;
+	SessionHandler updateSessionHandler(File jarFile) throws Exception;
 }

@@ -26,6 +26,7 @@ import io.github.classgraph.ClassInfoList;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
+import org.docx4j.wml.U;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.cluster.network.NodeAddress;
@@ -98,9 +99,15 @@ public class ApplicationServer implements WebController, SessionManager {
 		this.port = port;
 	}
 
-	public void updateSessionHandler(File jarFile) throws Exception {
+	public SessionHandler updateSessionHandler(File jarFile) throws Exception {
 		LOGGER.info("Loading new session handler:" + jarFile.getPath());
-		URLClassLoader classLoader = new URLClassLoader(new URL[]{jarFile.toURI().toURL()});
+		URL resource = jarFile.toURI().toURL();
+		return updateSessionHandler(resource);
+	}
+
+	public SessionHandler updateSessionHandler(URL resource) throws Exception {
+		LOGGER.info("Loading new session handler:" + resource.getPath());
+		URLClassLoader classLoader = new URLClassLoader(new URL[]{resource});
 		SessionHandler newSessionHandler = loadSessionHandler(classLoader);
 		if (newSessionHandler != null) {
 			weakStartDateBySessionHandler.put(newSessionHandler, System.currentTimeMillis());
@@ -111,6 +118,7 @@ public class ApplicationServer implements WebController, SessionManager {
 			System.gc();
 			LOGGER.info("Updated session handler:" + sessionHandler);
 		}
+		return newSessionHandler;
 	}
 
 	@Override
@@ -201,6 +209,8 @@ public class ApplicationServer implements WebController, SessionManager {
 	public void start() throws Exception {
 		File dbPath = new File(basePath, "database");
 		dbPath.mkdir();
+		File embeddedStore = new File(basePath, "embeddedStore");
+		embeddedStore.mkdir();
 		if (useCluster) {
 			if (leaderHost != null) {
 				universalDb = new UniversalDB(dbPath, new ApplicationServerSchema(), clusterSecret, localPort, new NodeAddress(leaderHost, leaderPort));
@@ -246,8 +256,9 @@ public class ApplicationServer implements WebController, SessionManager {
 			@Override
 			public void contextInitialized(ServletContextEvent sce) {
 				ServletContext servletContext = sce.getServletContext();
+				servletContext.addServlet("ta-embedded", new ResourceProviderServlet(new EmbeddedResourceStore(embeddedStore))).addMapping(EmbeddedResourceStore.RESOURCE_PREFIX + "*");
 				servletContext.addServlet("ta-sec-links", new ResourceProviderServlet((servletPath, relativeResourcePath, httpSessionId) -> SecureResourceHandler.getInstance().getResource(servletPath, relativeResourcePath, httpSessionId))).addMapping(SecureResourceHandler.HANDLER_PREFIX + "*");
-				servletContext.addServlet("public-link-servlet", new ResourceProviderServlet(PublicLinkResourceProvider.getInstance())).addMapping(PublicLinkResourceProvider.SERVLET_PATH_PREFIX + "*");
+				servletContext.addServlet("ta-public-link", new ResourceProviderServlet(PublicLinkResourceProvider.getInstance())).addMapping(PublicLinkResourceProvider.SERVLET_PATH_PREFIX + "*");
 			}
 		});
 
