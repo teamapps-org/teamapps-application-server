@@ -29,8 +29,8 @@
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <teamapps-version>0.9.153</teamapps-version>
-        <universal-db-version>0.5.24</universal-db-version>
+        <teamapps-version>0.9.154</teamapps-version>
+        <universal-db-version>0.5.26</universal-db-version>
     </properties>
 
     <distributionManagement>
@@ -75,24 +75,48 @@
             <groupId>org.teamapps</groupId>
             <artifactId>teamapps-material-icon-provider</artifactId>
             <version>${teamapps-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.teamapps</groupId>
             <artifactId>teamapps-flags-icon-provider</artifactId>
             <version>0.9.12</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.teamapps</groupId>
             <artifactId>teamapps-fontawesome-icon-provider</artifactId>
             <version>0.9.9</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.teamapps</groupId>
             <artifactId>teamapps-antu-icon-provider</artifactId>
             <version>1.1.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -152,7 +176,7 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-translate</artifactId>
-            <version>2.2.0</version>
+            <version>2.3.3</version>
         </dependency>
 
         <dependency>
@@ -164,7 +188,7 @@
         <dependency>
             <groupId>io.github.classgraph</groupId>
             <artifactId>classgraph</artifactId>
-            <version>4.8.147</version>
+            <version>4.8.149</version>
         </dependency>
 
         <dependency>
@@ -184,18 +208,12 @@
             <groupId>de.mkammerer</groupId>
             <artifactId>argon2-jvm</artifactId>
             <version>2.11</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jna</artifactId>
-                    <groupId>net.java.dev.jna</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>nl.basjes.parse.useragent</groupId>
             <artifactId>yauaa</artifactId>
-            <version>6.12</version>
+            <version>7.5.0</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-lang3</artifactId>
@@ -217,25 +235,25 @@
         <dependency>
             <groupId>com.googlecode.libphonenumber</groupId>
             <artifactId>libphonenumber</artifactId>
-            <version>8.12.47</version>
+            <version>8.12.54</version>
         </dependency>
 
         <dependency>
             <groupId>com.googlecode.libphonenumber</groupId>
             <artifactId>prefixmapper</artifactId>
-            <version>2.182</version>
+            <version>2.190</version>
         </dependency>
 
         <dependency>
             <groupId>com.googlecode.libphonenumber</groupId>
             <artifactId>carrier</artifactId>
-            <version>1.173</version>
+            <version>1.180</version>
         </dependency>
 
         <dependency>
             <groupId>com.googlecode.libphonenumber</groupId>
             <artifactId>geocoder</artifactId>
-            <version>2.183</version>
+            <version>2.190</version>
         </dependency>
 
 
@@ -248,7 +266,13 @@
         <dependency>
             <groupId>com.twilio.sdk</groupId>
             <artifactId>twilio</artifactId>
-            <version>8.29.1</version>
+            <version>8.35.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-io</artifactId>
+                    <groupId>commons-io</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
 
