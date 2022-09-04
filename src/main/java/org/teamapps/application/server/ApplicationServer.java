@@ -132,7 +132,7 @@ public class ApplicationServer implements WebController, SessionManager {
 		LOGGER.info("Updated session handler:" + sessionHandler);
 	}
 
-	private SessionHandler loadSessionHandler(URLClassLoader classLoader) throws InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException, NoSuchMethodException {
+	private SessionHandler loadSessionHandler(URLClassLoader classLoader) throws InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
 		ClassGraph classGraph = new ClassGraph();
 		if (classLoader != null) {
 			classGraph.overrideClassLoaders(classLoader);
@@ -168,7 +168,7 @@ public class ApplicationServer implements WebController, SessionManager {
 
 		if (bootableClassInfo != null) {
 			LOGGER.info("Booting class: " + bootableClassInfo.getName() + " with priority:" + getBootPriority(bootableClassInfo));
-			Class<?> builder = bootableClassInfo.loadClass();
+			Class<?> builder = classLoader.loadClass(bootableClassInfo.getName());
 			return (SessionHandler) builder.getDeclaredConstructor().newInstance();
 		} else {
 			LOGGER.error("Error: no matching class found!");
