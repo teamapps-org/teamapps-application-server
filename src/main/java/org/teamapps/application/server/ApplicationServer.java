@@ -37,6 +37,7 @@ import org.teamapps.model.system.Type;
 import org.teamapps.protocol.system.SystemLogEntry;
 import org.teamapps.server.undertow.embedded.TeamAppsUndertowEmbeddedServer;
 import org.teamapps.universaldb.UniversalDB;
+import org.teamapps.universaldb.index.log.ChunkedIndexMessageStore;
 import org.teamapps.universaldb.index.log.MessageStore;
 import org.teamapps.ux.resource.FileResource;
 import org.teamapps.ux.servlet.resourceprovider.ClassPathResourceProvider;
@@ -209,7 +210,7 @@ public class ApplicationServer implements WebController, SessionManager {
 	public void start() throws Exception {
 		File dbPath = new File(basePath, "database");
 		dbPath.mkdir();
-		File embeddedStore = new File(basePath, "embeddedStore");
+		File embeddedStore = new File(basePath, "embedded-store");
 		embeddedStore.mkdir();
 		if (useCluster) {
 			if (leaderHost != null) {
@@ -220,8 +221,8 @@ public class ApplicationServer implements WebController, SessionManager {
 		} else {
 			universalDb = UniversalDB.createStandalone(dbPath, new ApplicationServerSchema());
 		}
-		MessageStore<SystemLogEntry> logMessageStore = new MessageStore<>(basePath, "systemLog", SystemLogEntry.getMessageDecoder());
-		DatabaseLogAppender.startLogger();
+		ChunkedIndexMessageStore<SystemLogEntry> logMessageStore = new ChunkedIndexMessageStore<>(basePath, "log", 1000, false, false, SystemLogEntry.getMessageDecoder());
+		DatabaseLogAppender.startLogger(logMessageStore);
 		serverRegistry = new ServerRegistry(universalDb, logMessageStore, () -> weakStartDateBySessionHandler.keySet().stream().filter(Objects::nonNull).collect(Collectors.toList()));
 		sessionHandler.init(this, serverRegistry);
 		TeamAppsUndertowEmbeddedServer server = new TeamAppsUndertowEmbeddedServer(this, teamAppsConfiguration, port);

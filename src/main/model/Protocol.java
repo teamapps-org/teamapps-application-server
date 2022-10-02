@@ -38,8 +38,9 @@ public class Protocol implements ModelCollectionProvider {
 		logEntry.addStringProperty("applicationVersion", 7);
 		logEntry.addStringProperty("exceptionClass", 8);
 		logEntry.addStringProperty("threadName", 9);
-		logEntry.addStringProperty("message", 10);
-		logEntry.addStringProperty("stackTrace", 11);
+		logEntry.addStringProperty("title", 10);
+		logEntry.addStringProperty("message", 11);
+		logEntry.addStringProperty("stackTrace", 12);
 		return modelCollection;
 	}
 }

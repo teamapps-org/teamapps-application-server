@@ -25,6 +25,7 @@ import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import org.teamapps.protocol.system.SystemLogEntry;
 import org.teamapps.universaldb.UniversalDB;
+import org.teamapps.universaldb.index.log.ChunkedIndexMessageStore;
 
 
 public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
@@ -35,9 +36,11 @@ public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEven
 
 
 	private static boolean started = false;
+	private static ChunkedIndexMessageStore<SystemLogEntry> messageStore;
 
-	public static void startLogger() {
+	public static void startLogger(ChunkedIndexMessageStore<SystemLogEntry> store) {
 		started = true;
+		messageStore = store;
 	}
 
 	private int getManagedApplicationId() {
@@ -70,6 +73,7 @@ public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEven
 			stackTrace = ThrowableProxyUtil.asString(event.getThrowableProxy());
 		}
 		SystemLogEntry logEntry = new SystemLogEntry()
+				.setLogLevel(logLevel)
 				.setTimestamp(System.currentTimeMillis())
 				.setUserId(userId)
 				.setManagedApplicationId(managedApplicationId)
@@ -82,11 +86,20 @@ public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEven
 					.setExceptionClass(exceptionClass)
 					.setStackTrace(stackTrace);
 		}
-		//todo write to rotating log store
-
+		messageStore.addMessage(logEntry);
 	}
 
-	private int getLogLevel(ILoggingEvent event) {
+	public static int getLogLevel(org.slf4j.event.Level level) {
+		return switch (level) {
+			case ERROR -> 4;
+			case WARN -> 3;
+			case INFO -> 2;
+			case DEBUG -> 1;
+			case TRACE -> 0;
+		};
+	}
+
+	public static int getLogLevel(ILoggingEvent event) {
 		Level level = event.getLevel();
 		if (Level.DEBUG == level) {
 			return 1;
