@@ -223,7 +223,7 @@ public class ApplicationServer implements WebController, SessionManager {
 		}
 		ChunkedIndexMessageStore<SystemLogEntry> logMessageStore = new ChunkedIndexMessageStore<>(basePath, "log", 1000, false, false, SystemLogEntry.getMessageDecoder());
 		DatabaseLogAppender.startLogger(logMessageStore);
-		serverRegistry = new ServerRegistry(universalDb, logMessageStore, () -> weakStartDateBySessionHandler.keySet().stream().filter(Objects::nonNull).collect(Collectors.toList()));
+		serverRegistry = new ServerRegistry(basePath, universalDb, logMessageStore, () -> weakStartDateBySessionHandler.keySet().stream().filter(Objects::nonNull).collect(Collectors.toList()));
 		sessionHandler.init(this, serverRegistry);
 		TeamAppsUndertowEmbeddedServer server = new TeamAppsUndertowEmbeddedServer(this, teamAppsConfiguration, port);
 

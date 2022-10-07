@@ -22,25 +22,31 @@ package org.teamapps.application.server;
 import org.teamapps.protocol.system.SystemLogEntry;
 import org.teamapps.universaldb.UniversalDB;
 import org.teamapps.universaldb.index.log.ChunkedIndexMessageStore;
-import org.teamapps.universaldb.index.log.MessageStore;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public class ServerRegistry {
+	private File basePath;
 	private final UniversalDB universalDB;
 	private final ChunkedIndexMessageStore<SystemLogEntry> systemLogMessageStore;
 	private final Supplier<List<SessionHandler>> sessionHandlerSupplier;
 	private EntityUpdateEventHandler entityUpdateEventHandler;
 	private Map<String, Object> loadedApplications = new ConcurrentHashMap<>();
 
-	public ServerRegistry(UniversalDB universalDB, ChunkedIndexMessageStore<SystemLogEntry> systemLogMessageStore, Supplier<List<SessionHandler>> sessionHandlerSupplier) {
+	public ServerRegistry(File basePath, UniversalDB universalDB, ChunkedIndexMessageStore<SystemLogEntry> systemLogMessageStore, Supplier<List<SessionHandler>> sessionHandlerSupplier) {
+		this.basePath = basePath;
 		this.universalDB = universalDB;
 		entityUpdateEventHandler = new EntityUpdateEventHandler(universalDB.getUpdateEventQueue());
 		this.systemLogMessageStore = systemLogMessageStore;
 		this.sessionHandlerSupplier = sessionHandlerSupplier;
+	}
+
+	public File getBasePath() {
+		return basePath;
 	}
 
 	public UniversalDB getUniversalDB() {
