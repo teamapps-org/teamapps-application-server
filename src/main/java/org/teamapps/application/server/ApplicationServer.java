@@ -58,6 +58,7 @@ public class ApplicationServer implements WebController, SessionManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private File basePath;
+	private File fileStorePath;
 	private TeamAppsConfiguration teamAppsConfiguration;
 	private int port;
 	private UniversalDB universalDb;
@@ -210,6 +211,9 @@ public class ApplicationServer implements WebController, SessionManager {
 	public void start() throws Exception {
 		File dbPath = new File(basePath, "database");
 		dbPath.mkdir();
+		if (fileStorePath == null) {
+			fileStorePath = new File(dbPath, "file-store");
+		}
 		File embeddedStore = new File(basePath, "embedded-store");
 		embeddedStore.mkdir();
 		if (useCluster) {
@@ -219,7 +223,7 @@ public class ApplicationServer implements WebController, SessionManager {
 				universalDb = new UniversalDB(dbPath, new ApplicationServerSchema(), clusterSecret, localPort);
 			}
 		} else {
-			universalDb = UniversalDB.createStandalone(dbPath, new ApplicationServerSchema());
+			universalDb = UniversalDB.createStandalone(dbPath, fileStorePath, new ApplicationServerSchema());
 		}
 		ChunkedIndexMessageStore<SystemLogEntry> logMessageStore = new ChunkedIndexMessageStore<>(basePath, "log", 1000, false, false, SystemLogEntry.getMessageDecoder());
 		DatabaseLogAppender.startLogger(logMessageStore);
@@ -290,4 +294,11 @@ public class ApplicationServer implements WebController, SessionManager {
 		this.basePath = basePath;
 	}
 
+	public File getFileStorePath() {
+		return fileStorePath;
+	}
+
+	public void setFileStorePath(File fileStorePath) {
+		this.fileStorePath = fileStorePath;
+	}
 }
