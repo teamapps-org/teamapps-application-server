@@ -20,6 +20,7 @@
 package org.teamapps.application.server;
 
 
+import org.teamapps.core.TeamAppsCore;
 import org.teamapps.universaldb.UniversalDB;
 import org.teamapps.ux.component.template.BaseTemplateRecord;
 import org.teamapps.ux.session.SessionContext;

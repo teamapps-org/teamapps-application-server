@@ -26,18 +26,17 @@ import io.github.classgraph.ClassInfoList;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
-import org.docx4j.wml.U;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.cluster.network.NodeAddress;
 import org.teamapps.config.TeamAppsConfiguration;
+import org.teamapps.core.TeamAppsCore;
 import org.teamapps.model.ApplicationServerSchema;
 import org.teamapps.model.system.SystemStarts;
 import org.teamapps.model.system.Type;
 import org.teamapps.protocol.system.SystemLogEntry;
 import org.teamapps.server.undertow.embedded.TeamAppsUndertowEmbeddedServer;
 import org.teamapps.universaldb.UniversalDB;
-import org.teamapps.universaldb.index.log.ChunkedIndexMessageStore;
 import org.teamapps.universaldb.index.log.MessageStore;
 import org.teamapps.ux.resource.FileResource;
 import org.teamapps.ux.servlet.resourceprovider.ClassPathResourceProvider;
@@ -74,6 +73,7 @@ public class ApplicationServer implements WebController, SessionManager {
 	private int leaderPort;
 	private String leaderHost;
 	private int localPort;
+	private TeamAppsCore teamAppsCore;
 
 	public ApplicationServer() {
 		this(new File("./server-data"), new TeamAppsConfiguration(), 8080);
@@ -225,11 +225,12 @@ public class ApplicationServer implements WebController, SessionManager {
 		} else {
 			universalDb = UniversalDB.createStandalone(dbPath, fileStorePath, new ApplicationServerSchema());
 		}
-		ChunkedIndexMessageStore<SystemLogEntry> logMessageStore = new ChunkedIndexMessageStore<>(basePath, "log", 1000, false, false, SystemLogEntry.getMessageDecoder());
+		MessageStore<SystemLogEntry> logMessageStore = new MessageStore<>(basePath, "systemLogs", SystemLogEntry.getMessageDecoder(), SystemLogEntry::setLogId, SystemLogEntry::getLogId);
 		DatabaseLogAppender.startLogger(logMessageStore);
-		serverRegistry = new ServerRegistry(basePath, universalDb, logMessageStore, () -> weakStartDateBySessionHandler.keySet().stream().filter(Objects::nonNull).collect(Collectors.toList()));
-		sessionHandler.init(this, serverRegistry);
 		TeamAppsUndertowEmbeddedServer server = new TeamAppsUndertowEmbeddedServer(this, teamAppsConfiguration, port);
+		teamAppsCore = server.getTeamAppsCore();
+		serverRegistry = new ServerRegistry(basePath, universalDb, logMessageStore, () -> weakStartDateBySessionHandler.keySet().stream().filter(Objects::nonNull).collect(Collectors.toList()), teamAppsCore);
+		sessionHandler.init(this, serverRegistry);
 
 		addClassPathResourceProvider("org.teamapps.application.server.media", "/ta-media/");
 
@@ -300,5 +301,9 @@ public class ApplicationServer implements WebController, SessionManager {
 
 	public void setFileStorePath(File fileStorePath) {
 		this.fileStorePath = fileStorePath;
+	}
+
+	public TeamAppsCore getTeamAppsCore() {
+		return teamAppsCore;
 	}
 }

@@ -29,8 +29,8 @@
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <teamapps-version>0.9.158</teamapps-version>
-        <universal-db-version>0.5.27</universal-db-version>
+        <teamapps-version>0.9.159</teamapps-version>
+        <universal-db-version>0.5.28-SNAPSHOT</universal-db-version>
     </properties>
 
     <distributionManagement>
@@ -292,12 +292,7 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.teamapps</groupId>
-            <artifactId>universal-db</artifactId>
-            <version>0.5.27</version>
-            <scope>compile</scope>
-        </dependency>
+
 
 
     </dependencies>

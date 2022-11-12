@@ -25,7 +25,7 @@ import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import org.teamapps.protocol.system.SystemLogEntry;
 import org.teamapps.universaldb.UniversalDB;
-import org.teamapps.universaldb.index.log.ChunkedIndexMessageStore;
+import org.teamapps.universaldb.index.log.MessageStore;
 
 
 public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
@@ -36,9 +36,9 @@ public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEven
 
 
 	private static boolean started = false;
-	private static ChunkedIndexMessageStore<SystemLogEntry> messageStore;
+	private static MessageStore<SystemLogEntry> messageStore;
 
-	public static void startLogger(ChunkedIndexMessageStore<SystemLogEntry> store) {
+	public static void startLogger(MessageStore<SystemLogEntry> store) {
 		started = true;
 		messageStore = store;
 	}
