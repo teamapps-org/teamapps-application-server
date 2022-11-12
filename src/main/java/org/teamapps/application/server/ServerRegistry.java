@@ -19,9 +19,10 @@
  */
 package org.teamapps.application.server;
 
+import org.teamapps.core.TeamAppsCore;
 import org.teamapps.protocol.system.SystemLogEntry;
 import org.teamapps.universaldb.UniversalDB;
-import org.teamapps.universaldb.index.log.ChunkedIndexMessageStore;
+import org.teamapps.universaldb.index.log.MessageStore;
 
 import java.io.File;
 import java.util.List;
@@ -32,17 +33,19 @@ import java.util.function.Supplier;
 public class ServerRegistry {
 	private File basePath;
 	private final UniversalDB universalDB;
-	private final ChunkedIndexMessageStore<SystemLogEntry> systemLogMessageStore;
+	private final MessageStore<SystemLogEntry> systemLogMessageStore;
 	private final Supplier<List<SessionHandler>> sessionHandlerSupplier;
+	private final TeamAppsCore teamAppsCore;
 	private EntityUpdateEventHandler entityUpdateEventHandler;
 	private Map<String, Object> loadedApplications = new ConcurrentHashMap<>();
 
-	public ServerRegistry(File basePath, UniversalDB universalDB, ChunkedIndexMessageStore<SystemLogEntry> systemLogMessageStore, Supplier<List<SessionHandler>> sessionHandlerSupplier) {
+	public ServerRegistry(File basePath, UniversalDB universalDB, MessageStore<SystemLogEntry> systemLogMessageStore, Supplier<List<SessionHandler>> sessionHandlerSupplier, TeamAppsCore teamAppsCore) {
 		this.basePath = basePath;
 		this.universalDB = universalDB;
 		entityUpdateEventHandler = new EntityUpdateEventHandler(universalDB.getUpdateEventQueue());
 		this.systemLogMessageStore = systemLogMessageStore;
 		this.sessionHandlerSupplier = sessionHandlerSupplier;
+		this.teamAppsCore = teamAppsCore;
 	}
 
 	public File getBasePath() {
@@ -65,7 +68,11 @@ public class ServerRegistry {
 		return sessionHandlerSupplier.get();
 	}
 
-	public ChunkedIndexMessageStore<SystemLogEntry> getSystemLogMessageStore() {
+	public MessageStore<SystemLogEntry> getSystemLogMessageStore() {
 		return systemLogMessageStore;
+	}
+
+	public TeamAppsCore getTeamAppsCore() {
+		return teamAppsCore;
 	}
 }
