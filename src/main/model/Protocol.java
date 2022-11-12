@@ -29,18 +29,19 @@ public class Protocol implements ModelCollectionProvider {
 		MessageModelCollection modelCollection = new MessageModelCollection("ApplicationServerProtocol", "org.teamapps.protocol.system", 1);
 
 		ObjectPropertyDefinition logEntry = modelCollection.createModel("systemLogEntry", "#t.sle");
-		logEntry.addLongProperty("nodeId", 1);
-		logEntry.addIntProperty("userId", 2);
-		logEntry.addLongProperty("timestamp", 3);
-		logEntry.addIntProperty("logLevel", 4);
-		logEntry.addIntProperty("managedApplicationId", 5);
-		logEntry.addIntProperty("managedApplicationPerspectiveId", 6);
-		logEntry.addStringProperty("applicationVersion", 7);
-		logEntry.addStringProperty("exceptionClass", 8);
-		logEntry.addStringProperty("threadName", 9);
-		logEntry.addStringProperty("title", 10);
-		logEntry.addStringProperty("message", 11);
-		logEntry.addStringProperty("stackTrace", 12);
+		logEntry.addIntProperty("logId", 1);
+		logEntry.addLongProperty("nodeId", 2);
+		logEntry.addIntProperty("userId", 3);
+		logEntry.addLongProperty("timestamp", 4);
+		logEntry.addIntProperty("logLevel", 5);
+		logEntry.addIntProperty("managedApplicationId", 6);
+		logEntry.addIntProperty("managedApplicationPerspectiveId", 7);
+		logEntry.addStringProperty("applicationVersion", 8);
+		logEntry.addStringProperty("exceptionClass", 9);
+		logEntry.addStringProperty("threadName", 10);
+		logEntry.addStringProperty("title", 11);
+		logEntry.addStringProperty("message", 12);
+		logEntry.addStringProperty("stackTrace", 13);
 		return modelCollection;
 	}
 }
