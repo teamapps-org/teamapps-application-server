@@ -225,7 +225,7 @@ public class ApplicationServer implements WebController, SessionManager {
 		} else {
 			universalDb = UniversalDB.createStandalone(dbPath, fileStorePath, new ApplicationServerSchema());
 		}
-		MessageStore<SystemLogEntry> logMessageStore = new MessageStore<>(basePath, "systemLogs", SystemLogEntry.getMessageDecoder(), SystemLogEntry::setLogId, SystemLogEntry::getLogId);
+		MessageStore<SystemLogEntry> logMessageStore = new MessageStore<>(basePath, "systemLogs", false, SystemLogEntry.getMessageDecoder(), SystemLogEntry::setLogId, SystemLogEntry::getLogId);
 		DatabaseLogAppender.startLogger(logMessageStore);
 		TeamAppsUndertowEmbeddedServer server = new TeamAppsUndertowEmbeddedServer(this, teamAppsConfiguration, port);
 		teamAppsCore = server.getTeamAppsCore();
