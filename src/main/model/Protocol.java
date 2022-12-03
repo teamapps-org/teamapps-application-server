@@ -26,9 +26,9 @@ import org.teamapps.protocol.schema.ObjectPropertyDefinition;
 public class Protocol implements ModelCollectionProvider {
 	@Override
 	public ModelCollection getModelCollection() {
-		MessageModelCollection modelCollection = new MessageModelCollection("ApplicationServerProtocol", "org.teamapps.protocol.system", 1);
+		MessageModelCollection protocol = new MessageModelCollection("ApplicationServerProtocol", "org.teamapps.protocol.system", 1);
 
-		ObjectPropertyDefinition logEntry = modelCollection.createModel("systemLogEntry", "#t.sle");
+		ObjectPropertyDefinition logEntry = protocol.createModel("systemLogEntry", "#t.sle");
 		logEntry.addIntProperty("logId", 1);
 		logEntry.addLongProperty("nodeId", 2);
 		logEntry.addIntProperty("userId", 3);
@@ -39,9 +39,27 @@ public class Protocol implements ModelCollectionProvider {
 		logEntry.addStringProperty("applicationVersion", 8);
 		logEntry.addStringProperty("exceptionClass", 9);
 		logEntry.addStringProperty("threadName", 10);
-		logEntry.addStringProperty("title", 11);
 		logEntry.addStringProperty("message", 12);
 		logEntry.addStringProperty("stackTrace", 13);
-		return modelCollection;
+		logEntry.addStringProperty("marker", 14);
+
+		ObjectPropertyDefinition loginData = protocol.createModel("loginData", "#t.l");
+		loginData.addIntProperty("loginId",1);
+		loginData.addIntProperty("userId",2);
+		loginData.addStringProperty("ip",3);
+		loginData.addStringProperty("userAgent",4);
+		loginData.addBooleanProperty("mobileDevice",5);
+		loginData.addIntProperty("screenWidth",6);
+		loginData.addIntProperty("screenHeight",7);
+		loginData.addIntProperty("loginTimestamp",8);
+		loginData.addIntProperty("logoutTimestamp",9);
+		loginData.addIntProperty("openApplicationsCount",10);
+		loginData.addIntProperty("openPerspectivesCount",11);
+		loginData.addIntProperty("activityCount",12);
+		loginData.addLongProperty("sentBytesToClient",13);
+		loginData.addLongProperty("receivedBytesFromClient",14);
+
+
+		return protocol;
 	}
 }
