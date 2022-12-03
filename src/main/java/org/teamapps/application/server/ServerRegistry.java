@@ -20,6 +20,7 @@
 package org.teamapps.application.server;
 
 import org.teamapps.core.TeamAppsCore;
+import org.teamapps.protocol.system.LoginData;
 import org.teamapps.protocol.system.SystemLogEntry;
 import org.teamapps.universaldb.UniversalDB;
 import org.teamapps.universaldb.index.log.MessageStore;
@@ -34,16 +35,18 @@ public class ServerRegistry {
 	private File basePath;
 	private final UniversalDB universalDB;
 	private final MessageStore<SystemLogEntry> systemLogMessageStore;
+	private final MessageStore<LoginData> loginDataMessageStore;
 	private final Supplier<List<SessionHandler>> sessionHandlerSupplier;
 	private final TeamAppsCore teamAppsCore;
 	private EntityUpdateEventHandler entityUpdateEventHandler;
 	private Map<String, Object> loadedApplications = new ConcurrentHashMap<>();
 
-	public ServerRegistry(File basePath, UniversalDB universalDB, MessageStore<SystemLogEntry> systemLogMessageStore, Supplier<List<SessionHandler>> sessionHandlerSupplier, TeamAppsCore teamAppsCore) {
+	public ServerRegistry(File basePath, UniversalDB universalDB, MessageStore<SystemLogEntry> systemLogMessageStore, MessageStore<LoginData> loginDataMessageStore, Supplier<List<SessionHandler>> sessionHandlerSupplier, TeamAppsCore teamAppsCore) {
 		this.basePath = basePath;
 		this.universalDB = universalDB;
 		entityUpdateEventHandler = new EntityUpdateEventHandler(universalDB.getUpdateEventQueue());
 		this.systemLogMessageStore = systemLogMessageStore;
+		this.loginDataMessageStore = loginDataMessageStore;
 		this.sessionHandlerSupplier = sessionHandlerSupplier;
 		this.teamAppsCore = teamAppsCore;
 	}
@@ -70,6 +73,10 @@ public class ServerRegistry {
 
 	public MessageStore<SystemLogEntry> getSystemLogMessageStore() {
 		return systemLogMessageStore;
+	}
+
+	public MessageStore<LoginData> getLoginDataMessageStore() {
+		return loginDataMessageStore;
 	}
 
 	public TeamAppsCore getTeamAppsCore() {

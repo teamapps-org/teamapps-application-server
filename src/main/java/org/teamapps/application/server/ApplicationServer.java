@@ -34,6 +34,7 @@ import org.teamapps.core.TeamAppsCore;
 import org.teamapps.model.ApplicationServerSchema;
 import org.teamapps.model.system.SystemStarts;
 import org.teamapps.model.system.Type;
+import org.teamapps.protocol.system.LoginData;
 import org.teamapps.protocol.system.SystemLogEntry;
 import org.teamapps.server.undertow.embedded.TeamAppsUndertowEmbeddedServer;
 import org.teamapps.universaldb.UniversalDB;
@@ -56,10 +57,7 @@ public class ApplicationServer implements WebController, SessionManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private File basePath;
-	private File fileStorePath;
-	private TeamAppsConfiguration teamAppsConfiguration;
-	private int port;
+	private final ApplicationServerConfig serverConfig;
 	private UniversalDB universalDb;
 	private ServerRegistry serverRegistry;
 
@@ -67,38 +65,22 @@ public class ApplicationServer implements WebController, SessionManager {
 	private SessionHandler sessionHandler;
 
 	private WeakHashMap<SessionHandler, Long> weakStartDateBySessionHandler = new WeakHashMap<>();
-
-	private boolean useCluster;
-	private String clusterSecret;
-	private int leaderPort;
-	private String leaderHost;
-	private int localPort;
 	private TeamAppsCore teamAppsCore;
 
-	public ApplicationServer() {
-		this(new File("./server-data"), new TeamAppsConfiguration(), 8080);
+	public ApplicationServer(ApplicationServerConfig serverConfig) {
+		this.serverConfig = serverConfig;
 	}
 
-	public ApplicationServer(boolean useCluster, String clusterSecret, int localPort, String leaderHost, int leaderPort) {
-		this.basePath = new File("./server-data");
-		this.teamAppsConfiguration = new TeamAppsConfiguration();
-		this.port = 8080;
-
-		this.useCluster = useCluster;
-		this.clusterSecret = clusterSecret;
-		this.leaderPort = leaderPort;
-		this.leaderHost = leaderHost;
-		this.localPort = localPort;
+	public ApplicationServer() {
+		this.serverConfig = ApplicationServerConfig.create();
 	}
 
 	public ApplicationServer(File basePath) {
-		this(basePath, new TeamAppsConfiguration(), 8080);
+		this.serverConfig = ApplicationServerConfig.create(basePath);
 	}
 
 	public ApplicationServer(File basePath, TeamAppsConfiguration teamAppsConfiguration, int port) {
-		this.basePath = basePath;
-		this.teamAppsConfiguration = teamAppsConfiguration;
-		this.port = port;
+		this.serverConfig = ApplicationServerConfig.create(basePath, teamAppsConfiguration, port);
 	}
 
 	public SessionHandler updateSessionHandler(File jarFile) throws Exception {
@@ -209,36 +191,21 @@ public class ApplicationServer implements WebController, SessionManager {
 	}
 
 	public void start() throws Exception {
-		File dbPath = new File(basePath, "database");
-		dbPath.mkdir();
-		if (fileStorePath == null) {
-			fileStorePath = new File(dbPath, "file-store");
-		}
-		File embeddedStore = new File(basePath, "embedded-store");
-		embeddedStore.mkdir();
-		if (useCluster) {
-			if (leaderHost != null) {
-				universalDb = new UniversalDB(dbPath, new ApplicationServerSchema(), clusterSecret, localPort, new NodeAddress(leaderHost, leaderPort));
-			} else {
-				universalDb = new UniversalDB(dbPath, new ApplicationServerSchema(), clusterSecret, localPort);
-			}
-		} else {
-			universalDb = UniversalDB.createStandalone(dbPath, fileStorePath, new ApplicationServerSchema());
-		}
-		MessageStore<SystemLogEntry> logMessageStore = new MessageStore<>(basePath, "systemLogs", false, SystemLogEntry.getMessageDecoder(), SystemLogEntry::setLogId, SystemLogEntry::getLogId);
+		LOGGER.info("Start application server with base-path:{}, db-path:{}, file-store:{}, port:{}", serverConfig.getBasePath().toPath(), serverConfig.getDateBasePath().toPath(), serverConfig.getFileStorePath().toPath(), serverConfig.getPort());
+		universalDb = UniversalDB.createStandalone(serverConfig.getDateBasePath(), serverConfig.getFileStorePath(), new ApplicationServerSchema());
+		MessageStore<SystemLogEntry> logMessageStore = new MessageStore<>(serverConfig.getLogStorePath(), "system-logs", false, SystemLogEntry.getMessageDecoder(), SystemLogEntry::setLogId, SystemLogEntry::getLogId);
 		DatabaseLogAppender.startLogger(logMessageStore);
-		TeamAppsUndertowEmbeddedServer server = new TeamAppsUndertowEmbeddedServer(this, teamAppsConfiguration, port);
+		MessageStore<LoginData> loginDataMessageStore = new MessageStore<>(serverConfig.getLogStorePath(), "login-logs", false, LoginData.getMessageDecoder(), LoginData::setLoginId, LoginData::getLoginId);
+
+		TeamAppsUndertowEmbeddedServer server = new TeamAppsUndertowEmbeddedServer(this, serverConfig.getTeamAppsConfiguration(), serverConfig.getPort());
 		teamAppsCore = server.getTeamAppsCore();
-		serverRegistry = new ServerRegistry(basePath, universalDb, logMessageStore, () -> weakStartDateBySessionHandler.keySet().stream().filter(Objects::nonNull).collect(Collectors.toList()), teamAppsCore);
+		serverRegistry = new ServerRegistry(serverConfig.getBasePath(), universalDb, logMessageStore, loginDataMessageStore, () -> weakStartDateBySessionHandler.keySet().stream().filter(Objects::nonNull).collect(Collectors.toList()), teamAppsCore);
 		sessionHandler.init(this, serverRegistry);
 
 		addClassPathResourceProvider("org.teamapps.application.server.media", "/ta-media/");
 
-		File staticResourcesPath = new File(basePath, "static");
-		staticResourcesPath.mkdir();
-
 		addServletRegistration(new ServletRegistration(new ResourceProviderServlet((servletPath, relativeResourcePath, httpSessionId) -> {
-			File file = new File(staticResourcesPath, relativeResourcePath);
+			File file = new File(serverConfig.getWebserverStaticFilesPath(), relativeResourcePath);
 			if (file.exists() && !file.isDirectory()) {
 				return new FileResource(file);
 			}
@@ -262,7 +229,7 @@ public class ApplicationServer implements WebController, SessionManager {
 			@Override
 			public void contextInitialized(ServletContextEvent sce) {
 				ServletContext servletContext = sce.getServletContext();
-				servletContext.addServlet("ta-embedded", new ResourceProviderServlet(new EmbeddedResourceStore(embeddedStore))).addMapping(EmbeddedResourceStore.RESOURCE_PREFIX + "*");
+				servletContext.addServlet("ta-embedded", new ResourceProviderServlet(new EmbeddedResourceStore(serverConfig.getEmbeddedContentStorePath()))).addMapping(EmbeddedResourceStore.RESOURCE_PREFIX + "*");
 				servletContext.addServlet("ta-sec-links", new ResourceProviderServlet((servletPath, relativeResourcePath, httpSessionId) -> SecureResourceHandler.getInstance().getResource(servletPath, relativeResourcePath, httpSessionId))).addMapping(SecureResourceHandler.HANDLER_PREFIX + "*");
 				servletContext.addServlet("ta-public-link", new ResourceProviderServlet(PublicLinkResourceProvider.getInstance())).addMapping(PublicLinkResourceProvider.SERVLET_PATH_PREFIX + "*");
 			}
@@ -281,26 +248,6 @@ public class ApplicationServer implements WebController, SessionManager {
 
 	public void addServletRegistration(ServletRegistration servletRegistration) {
 		this.servletRegistrations.add(servletRegistration);
-	}
-
-	public void setTeamAppsConfiguration(TeamAppsConfiguration teamAppsConfiguration) {
-		this.teamAppsConfiguration = teamAppsConfiguration;
-	}
-
-	public void setPort(int port) {
-		this.port = port;
-	}
-
-	public void setBasePath(File basePath) {
-		this.basePath = basePath;
-	}
-
-	public File getFileStorePath() {
-		return fileStorePath;
-	}
-
-	public void setFileStorePath(File fileStorePath) {
-		this.fileStorePath = fileStorePath;
 	}
 
 	public TeamAppsCore getTeamAppsCore() {

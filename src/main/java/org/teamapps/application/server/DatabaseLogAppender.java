@@ -23,9 +23,12 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
+import org.slf4j.Marker;
 import org.teamapps.protocol.system.SystemLogEntry;
 import org.teamapps.universaldb.UniversalDB;
 import org.teamapps.universaldb.index.log.MessageStore;
+
+import java.util.List;
 
 
 public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
@@ -57,7 +60,9 @@ public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEven
 	protected void append(ILoggingEvent event) {
 		int logLevel = getLogLevel(event);
 		if (!started || logLevel == 0) return;
-		if (event.getMarker() != null && UniversalDB.SKIP_DB_LOGGING.getName().equals(event.getMarker().getName())) {
+
+		String marker = getMarker(event);
+		if (marker != null && UniversalDB.SKIP_DB_LOGGING.getName().equals(marker)) {
 			return;
 		}
 		int userId = UniversalDB.getUserId();
@@ -81,12 +86,24 @@ public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEven
 				.setApplicationVersion(applicationVersion)
 				.setThreadName(threadName)
 				.setMessage(message);
+		if (marker != null) {
+			logEntry.setMarker(marker);
+		}
 		if (stackTrace != null) {
 			logEntry
 					.setExceptionClass(exceptionClass)
 					.setStackTrace(stackTrace);
 		}
 		messageStore.addMessage(logEntry);
+	}
+
+	private String getMarker(ILoggingEvent event) {
+		List<Marker> markerList = event.getMarkerList();
+		if (markerList != null && !markerList.isEmpty()) {
+			return markerList.get(0).getName();
+		} else {
+			return null;
+		}
 	}
 
 	public static int getLogLevel(org.slf4j.event.Level level) {
