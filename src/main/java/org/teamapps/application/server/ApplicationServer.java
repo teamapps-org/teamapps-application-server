@@ -28,7 +28,6 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.teamapps.cluster.network.NodeAddress;
 import org.teamapps.config.TeamAppsConfiguration;
 import org.teamapps.core.TeamAppsCore;
 import org.teamapps.model.ApplicationServerSchema;
@@ -38,7 +37,7 @@ import org.teamapps.protocol.system.LoginData;
 import org.teamapps.protocol.system.SystemLogEntry;
 import org.teamapps.server.undertow.embedded.TeamAppsUndertowEmbeddedServer;
 import org.teamapps.universaldb.UniversalDB;
-import org.teamapps.universaldb.index.log.MessageStore;
+import org.teamapps.universaldb.message.MessageStore;
 import org.teamapps.ux.resource.FileResource;
 import org.teamapps.ux.servlet.resourceprovider.ClassPathResourceProvider;
 import org.teamapps.ux.servlet.resourceprovider.ResourceProviderServlet;
@@ -193,9 +192,9 @@ public class ApplicationServer implements WebController, SessionManager {
 	public void start() throws Exception {
 		LOGGER.info("Start application server with base-path:{}, db-path:{}, file-store:{}, port:{}", serverConfig.getBasePath().toPath(), serverConfig.getDateBasePath().toPath(), serverConfig.getFileStorePath().toPath(), serverConfig.getPort());
 		universalDb = UniversalDB.createStandalone(serverConfig.getDateBasePath(), serverConfig.getFileStorePath(), new ApplicationServerSchema());
-		MessageStore<SystemLogEntry> logMessageStore = new MessageStore<>(serverConfig.getLogStorePath(), "system-logs", false, SystemLogEntry.getMessageDecoder(), SystemLogEntry::setLogId, SystemLogEntry::getLogId);
+		MessageStore<SystemLogEntry> logMessageStore = MessageStore.create(serverConfig.getLogStorePath(), "system-logs", SystemLogEntry.getMessageDecoder());
 		DatabaseLogAppender.startLogger(logMessageStore);
-		MessageStore<LoginData> loginDataMessageStore = new MessageStore<>(serverConfig.getLogStorePath(), "login-logs", false, LoginData.getMessageDecoder(), LoginData::setLoginId, LoginData::getLoginId);
+		MessageStore<LoginData> loginDataMessageStore = MessageStore.create(serverConfig.getLogStorePath(), "login-logs", LoginData.getMessageDecoder());
 
 		TeamAppsUndertowEmbeddedServer server = new TeamAppsUndertowEmbeddedServer(this, serverConfig.getTeamAppsConfiguration(), serverConfig.getPort());
 		teamAppsCore = server.getTeamAppsCore();

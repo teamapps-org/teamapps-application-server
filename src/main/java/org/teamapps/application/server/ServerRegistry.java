@@ -23,7 +23,7 @@ import org.teamapps.core.TeamAppsCore;
 import org.teamapps.protocol.system.LoginData;
 import org.teamapps.protocol.system.SystemLogEntry;
 import org.teamapps.universaldb.UniversalDB;
-import org.teamapps.universaldb.index.log.MessageStore;
+import org.teamapps.universaldb.message.MessageStore;
 
 import java.io.File;
 import java.util.List;
@@ -33,6 +33,7 @@ import java.util.function.Supplier;
 
 public class ServerRegistry {
 	private File basePath;
+	private File appsBasePath;
 	private final UniversalDB universalDB;
 	private final MessageStore<SystemLogEntry> systemLogMessageStore;
 	private final MessageStore<LoginData> loginDataMessageStore;
@@ -49,10 +50,16 @@ public class ServerRegistry {
 		this.loginDataMessageStore = loginDataMessageStore;
 		this.sessionHandlerSupplier = sessionHandlerSupplier;
 		this.teamAppsCore = teamAppsCore;
+		this.appsBasePath = new File(basePath, "apps");
+		this.appsBasePath.mkdir();
 	}
 
 	public File getBasePath() {
 		return basePath;
+	}
+
+	public File getAppsBasePath() {
+		return appsBasePath;
 	}
 
 	public UniversalDB getUniversalDB() {

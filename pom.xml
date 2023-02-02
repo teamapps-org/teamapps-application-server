@@ -29,18 +29,18 @@
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <teamapps-version>0.9.159</teamapps-version>
-        <universal-db-version>0.5.28</universal-db-version>
+        <teamapps-version>0.9.166</teamapps-version>
+        <universal-db-version>0.5.29</universal-db-version>
     </properties>
 
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
             <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
 
@@ -57,6 +57,16 @@
             <groupId>org.teamapps</groupId>
             <artifactId>teamapps-server-undertow-embedded</artifactId>
             <version>${teamapps-version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-over-slf4j</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -68,7 +78,7 @@
         <dependency>
             <groupId>org.teamapps</groupId>
             <artifactId>teamapps-media</artifactId>
-            <version>1.5</version>
+            <version>1.6</version>
         </dependency>
 
         <dependency>
@@ -168,7 +178,29 @@
                     <artifactId>fontbox</artifactId>
                     <groupId>org.apache.pdfbox</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>2.0.5</version>
         </dependency>
 
         <dependency>
@@ -227,6 +259,10 @@
                     <artifactId>commons-collections4</artifactId>
                     <groupId>org.apache.commons</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -276,6 +312,10 @@
                     <artifactId>commons-io</artifactId>
                     <groupId>commons-io</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -301,13 +341,13 @@
         <plugins>
             <plugin>
                 <groupId>org.teamapps</groupId>
-                <artifactId>teamapps-protocol-schema-maven-plugin</artifactId>
-                <version>0.3</version>
+                <artifactId>teamapps-message-protocol-maven-plugin</artifactId>
+                <version>0.4</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
                         <goals>
-                            <goal>generate-protocol-api</goal>
+                            <goal>generate-message-protocol-api</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -353,11 +393,11 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.8</version>
+                        <version>1.6.13</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
                             <autoReleaseAfterClose>false</autoReleaseAfterClose>
                         </configuration>
                     </plugin>

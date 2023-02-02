@@ -26,8 +26,9 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import org.slf4j.Marker;
 import org.teamapps.protocol.system.SystemLogEntry;
 import org.teamapps.universaldb.UniversalDB;
-import org.teamapps.universaldb.index.log.MessageStore;
+import org.teamapps.universaldb.message.MessageStore;
 
+import java.io.IOException;
 import java.util.List;
 
 
@@ -94,7 +95,11 @@ public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEven
 					.setExceptionClass(exceptionClass)
 					.setStackTrace(stackTrace);
 		}
-		messageStore.addMessage(logEntry);
+		try {
+			messageStore.save(logEntry);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private String getMarker(ILoggingEvent event) {
