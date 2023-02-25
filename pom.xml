@@ -26,11 +26,11 @@
     </developers>
 
     <properties>
-        <maven.compiler.source>19</maven.compiler.source>
-        <maven.compiler.target>19</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <teamapps-version>0.9.166</teamapps-version>
-        <universal-db-version>0.5.30-SNAPSHOT</universal-db-version>
+        <universal-db-version>0.5.30</universal-db-version>
     </properties>
 
     <distributionManagement>
