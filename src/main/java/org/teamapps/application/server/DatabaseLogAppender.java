@@ -97,7 +97,7 @@ public class DatabaseLogAppender extends UnsynchronizedAppenderBase<ILoggingEven
 		}
 		try {
 			messageStore.save(logEntry);
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
