@@ -19,7 +19,6 @@
  */
 package org.teamapps.application.server;
 
-import org.teamapps.cluster.crypto.ShaHash;
 import org.teamapps.universaldb.index.file.FileUtil;
 import org.teamapps.ux.resource.FileResource;
 import org.teamapps.ux.resource.Resource;
@@ -27,7 +26,11 @@ import org.teamapps.ux.servlet.resourceprovider.ResourceProvider;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -98,7 +101,7 @@ public class EmbeddedResourceStore implements ResourceProvider {
 		if (conversionMap.containsKey(name)) {
 			return conversionMap.get(name);
 		} else {
-			String hash = ShaHash.createHash(name).substring(0, 16);
+			String hash = createHash(name).substring(0, 16);
 			conversionMap.put(hash, name);
 			conversionMap.put(name, hash);
 			return hash;
@@ -112,6 +115,23 @@ public class EmbeddedResourceStore implements ResourceProvider {
 			return false;
 		}
 	}
+
+	public static String createHash(String data) {
+		final MessageDigest digest;
+		try {
+			digest = MessageDigest.getInstance("SHA3-256");
+			return bytesToHex(digest.digest(data.getBytes(StandardCharsets.UTF_8)));
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static String bytesToHex(byte[] bytes) {
+		return HexFormat.of().formatHex(bytes);
+	}
+
+
 
 
 
