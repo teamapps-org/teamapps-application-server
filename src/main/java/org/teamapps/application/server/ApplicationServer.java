@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,13 +30,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.config.TeamAppsConfiguration;
 import org.teamapps.core.TeamAppsCore;
-import org.teamapps.model.ApplicationServerSchema;
-import org.teamapps.model.system.SystemStarts;
-import org.teamapps.model.system.Type;
 import org.teamapps.protocol.system.LoginData;
 import org.teamapps.protocol.system.SystemLogEntry;
 import org.teamapps.server.undertow.embedded.TeamAppsUndertowEmbeddedServer;
-import org.teamapps.universaldb.UniversalDB;
+import org.teamapps.universaldb.DatabaseManager;
 import org.teamapps.universaldb.message.MessageStore;
 import org.teamapps.ux.resource.FileResource;
 import org.teamapps.ux.servlet.resourceprovider.ClassPathResourceProvider;
@@ -48,7 +45,6 @@ import java.io.File;
 import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,11 +53,11 @@ public class ApplicationServer implements WebController, SessionManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private final ApplicationServerConfig serverConfig;
-	private UniversalDB universalDb;
 	private ServerRegistry serverRegistry;
 
 	private List<ServletRegistration> servletRegistrations = new ArrayList<>();
 	private SessionHandler sessionHandler;
+	private DatabaseManager databaseManager;
 
 	private WeakHashMap<SessionHandler, Long> weakStartDateBySessionHandler = new WeakHashMap<>();
 	private TeamAppsCore teamAppsCore;
@@ -190,15 +186,15 @@ public class ApplicationServer implements WebController, SessionManager {
 	}
 
 	public void start() throws Exception {
-		LOGGER.info("Start application server with base-path:{}, db-path:{}, file-store:{}, port:{}", serverConfig.getBasePath().toPath(), serverConfig.getDateBasePath().toPath(), serverConfig.getFileStorePath().toPath(), serverConfig.getPort());
-		universalDb = UniversalDB.createStandalone(serverConfig.getDateBasePath(), serverConfig.getFileStorePath(), new ApplicationServerSchema());
+		LOGGER.info("Start application server with base-path:{}, index-path:{}, file-store:{}, port:{}", serverConfig.getIndexPath().toPath(), serverConfig.getIndexPath().toPath(), serverConfig.getFileStorePath().toPath(), serverConfig.getPort());
+		databaseManager = new DatabaseManager();
 		MessageStore<SystemLogEntry> logMessageStore = MessageStore.create(serverConfig.getLogStorePath(), "system-logs", SystemLogEntry.getMessageDecoder());
 		DatabaseLogAppender.startLogger(logMessageStore);
 		MessageStore<LoginData> loginDataMessageStore = MessageStore.create(serverConfig.getLogStorePath(), "login-logs", LoginData.getMessageDecoder());
 
 		TeamAppsUndertowEmbeddedServer server = new TeamAppsUndertowEmbeddedServer(this, serverConfig.getTeamAppsConfiguration(), serverConfig.getPort());
 		teamAppsCore = server.getTeamAppsCore();
-		serverRegistry = new ServerRegistry(serverConfig.getBasePath(), universalDb, logMessageStore, loginDataMessageStore, () -> weakStartDateBySessionHandler.keySet().stream().filter(Objects::nonNull).collect(Collectors.toList()), teamAppsCore);
+		serverRegistry = new ServerRegistry(serverConfig, databaseManager, logMessageStore, loginDataMessageStore, () -> weakStartDateBySessionHandler.keySet().stream().filter(Objects::nonNull).collect(Collectors.toList()), teamAppsCore);
 		sessionHandler.init(this, serverRegistry);
 
 		addClassPathResourceProvider("org.teamapps.application.server.media", "/ta-media/");
@@ -235,7 +231,6 @@ public class ApplicationServer implements WebController, SessionManager {
 		});
 
 		server.start();
-		SystemStarts.create().setTimestamp(Instant.now()).setType(Type.START).save();
 	}
 
 	public void addClassPathResourceProvider(String basePackage, String prefix) {

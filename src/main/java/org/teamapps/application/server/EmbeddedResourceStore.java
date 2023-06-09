@@ -19,7 +19,7 @@
  */
 package org.teamapps.application.server;
 
-import org.teamapps.universaldb.index.file.FileUtil;
+import org.teamapps.universaldb.index.filelegacy.FileUtil;
 import org.teamapps.ux.resource.FileResource;
 import org.teamapps.ux.resource.Resource;
 import org.teamapps.ux.servlet.resourceprovider.ResourceProvider;
@@ -56,7 +56,7 @@ public class EmbeddedResourceStore implements ResourceProvider {
 		}
 		String appKey = mapName(application);
 		String bucketKey = mapName(bucket);
-		String fileHash = FileUtil.createFileHash(file);
+		String fileHash = FileUtil.createFileHash(file); //todo use different util class
 		File storeFile = new File(basePath, application + "/" + bucket + "/" + fileHash);
 		if (!storeFile.exists()) {
 			File path = storeFile.getParentFile();

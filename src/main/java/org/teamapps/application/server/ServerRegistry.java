@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,7 @@ package org.teamapps.application.server;
 import org.teamapps.core.TeamAppsCore;
 import org.teamapps.protocol.system.LoginData;
 import org.teamapps.protocol.system.SystemLogEntry;
-import org.teamapps.universaldb.UniversalDB;
+import org.teamapps.universaldb.DatabaseManager;
 import org.teamapps.universaldb.message.MessageStore;
 
 import java.io.File;
@@ -32,42 +32,42 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public class ServerRegistry {
-	private File basePath;
-	private File appsBasePath;
-	private final UniversalDB universalDB;
+	private final ApplicationServerConfig serverConfig;
+	private final DatabaseManager databaseManager;
 	private final MessageStore<SystemLogEntry> systemLogMessageStore;
 	private final MessageStore<LoginData> loginDataMessageStore;
 	private final Supplier<List<SessionHandler>> sessionHandlerSupplier;
 	private final TeamAppsCore teamAppsCore;
-	private EntityUpdateEventHandler entityUpdateEventHandler;
+	private final Map<String, EntityUpdateEventHandler> databaseEventHandlerMap;
 	private Map<String, Object> loadedApplications = new ConcurrentHashMap<>();
 
-	public ServerRegistry(File basePath, UniversalDB universalDB, MessageStore<SystemLogEntry> systemLogMessageStore, MessageStore<LoginData> loginDataMessageStore, Supplier<List<SessionHandler>> sessionHandlerSupplier, TeamAppsCore teamAppsCore) {
-		this.basePath = basePath;
-		this.universalDB = universalDB;
-		entityUpdateEventHandler = new EntityUpdateEventHandler(universalDB.getUpdateEventQueue());
+	public ServerRegistry(ApplicationServerConfig serverConfig, DatabaseManager databaseManager, MessageStore<SystemLogEntry> systemLogMessageStore, MessageStore<LoginData> loginDataMessageStore, Supplier<List<SessionHandler>> sessionHandlerSupplier, TeamAppsCore teamAppsCore) {
+		this.serverConfig = serverConfig;
+		this.databaseManager = databaseManager;
+		this.databaseEventHandlerMap = new ConcurrentHashMap<>();
 		this.systemLogMessageStore = systemLogMessageStore;
 		this.loginDataMessageStore = loginDataMessageStore;
 		this.sessionHandlerSupplier = sessionHandlerSupplier;
 		this.teamAppsCore = teamAppsCore;
-		this.appsBasePath = new File(basePath, "apps");
-		this.appsBasePath.mkdir();
+		databaseManager.addDatabaseHandler(universalDB -> {
+			databaseEventHandlerMap.put(universalDB.getName(), new EntityUpdateEventHandler(universalDB.getUpdateEventQueue()));
+		});
 	}
 
-	public File getBasePath() {
-		return basePath;
+	public ApplicationServerConfig getServerConfig() {
+		return serverConfig;
 	}
 
 	public File getAppsBasePath() {
-		return appsBasePath;
+		return serverConfig.getAppDataPath();
 	}
 
-	public UniversalDB getUniversalDB() {
-		return universalDB;
+	public DatabaseManager getDatabaseManager() {
+		return databaseManager;
 	}
 
-	public EntityUpdateEventHandler getEntityUpdateEventHandler() {
-		return entityUpdateEventHandler;
+	public EntityUpdateEventHandler getEntityUpdateEventHandler(String name) {
+		return databaseEventHandlerMap.get(name);
 	}
 
 	public Map<String, Object> getLoadedApplications() {

@@ -25,11 +25,12 @@ import java.io.File;
 
 public class ApplicationServerConfig {
 
-	private final File basePath;
-	private final File dateBasePath;
+	private final File indexPath;
+	private final File fullTextIndexPath;
+	private final File transactionLogPath;
 	private final File fileStorePath;
-	private final File messageStorePath;
 	private final File logStorePath;
+	private final File appDataPath;
 	private final File embeddedContentStorePath;
 	private final File webserverStaticFilesPath;
 	private final TeamAppsConfiguration teamAppsConfiguration;
@@ -38,8 +39,7 @@ public class ApplicationServerConfig {
 	public static ApplicationServerConfig create() {
 		TeamAppsConfiguration teamAppsConfiguration = new TeamAppsConfiguration();
 		int port = 8080;
-		File basePath = new File("./server-data");
-		basePath.mkdir();
+		File basePath = createPath(new File("./"), "server-data");
 		return createPaths(teamAppsConfiguration, port, basePath);
 	}
 
@@ -54,32 +54,31 @@ public class ApplicationServerConfig {
 		return createPaths(teamAppsConfiguration, port, basePath);
 	}
 
-
-	public static ApplicationServerConfig create(File basePath, File dateBasePath, File fileStorePath, File messageStorePath, File logStorePath, File embeddedContentStorePath, File webserverStaticFilesPath, TeamAppsConfiguration teamAppsConfiguration, int port) {
-		return new ApplicationServerConfig(basePath, dateBasePath, fileStorePath, messageStorePath, logStorePath, embeddedContentStorePath, webserverStaticFilesPath, teamAppsConfiguration, port);
-	}
-
 	private static ApplicationServerConfig createPaths(TeamAppsConfiguration teamAppsConfiguration, int port, File basePath) {
-		File dateBasePath = createPath(basePath, "database");
-		File fileStorePath = createPath(basePath, "file-store");
-		File messageStorePath = createPath(basePath, "message-store");
-		File logStorePath = createPath(basePath, "log-store");
-		File embeddedContentStorePath = createPath(basePath, "embedded-content-store");
-		File webserverStaticFilesPath = createPath(basePath, "static-files");
-		return new ApplicationServerConfig(basePath, dateBasePath, fileStorePath, messageStorePath, logStorePath, embeddedContentStorePath, webserverStaticFilesPath, teamAppsConfiguration, port);
+		File indexPath = createPath(basePath, "index");
+		File fullTextIndexPath = createPath(basePath, "text");
+		File transactionLogPath = createPath(basePath, "transactions");
+		File fileStorePath = createPath(basePath, "files");
+		File logStorePath = createPath(basePath, "logs");
+		File appDataPath = createPath(basePath, "apps");
+		File embeddedContentStorePath = createPath(basePath, "embedded");
+		File webserverStaticFilesPath = createPath(basePath, "static");
+		return new ApplicationServerConfig(indexPath, fullTextIndexPath, transactionLogPath, fileStorePath, logStorePath, appDataPath, embeddedContentStorePath, webserverStaticFilesPath, teamAppsConfiguration, port);
 	}
 
-	private ApplicationServerConfig(File basePath, File dateBasePath, File fileStorePath, File messageStorePath, File logStorePath, File embeddedContentStorePath, File webserverStaticFilesPath, TeamAppsConfiguration teamAppsConfiguration, int port) {
-		this.basePath = basePath;
-		this.dateBasePath = dateBasePath;
+	public ApplicationServerConfig(File indexPath, File fullTextIndexPath, File transactionLogPath, File fileStorePath, File logStorePath, File appDataPath, File embeddedContentStorePath, File webserverStaticFilesPath, TeamAppsConfiguration teamAppsConfiguration, int port) {
+		this.indexPath = indexPath;
+		this.fullTextIndexPath = fullTextIndexPath;
+		this.transactionLogPath = transactionLogPath;
 		this.fileStorePath = fileStorePath;
-		this.messageStorePath = messageStorePath;
 		this.logStorePath = logStorePath;
+		this.appDataPath = appDataPath;
 		this.embeddedContentStorePath = embeddedContentStorePath;
 		this.webserverStaticFilesPath = webserverStaticFilesPath;
 		this.teamAppsConfiguration = teamAppsConfiguration;
 		this.port = port;
 	}
+
 
 	private static File createPath(File basePath, String name) {
 		File path = new File(basePath, name);
@@ -87,20 +86,24 @@ public class ApplicationServerConfig {
 		return path;
 	}
 
-	public File getBasePath() {
-		return basePath;
+	public File getIndexPath() {
+		return indexPath;
 	}
 
-	public File getDateBasePath() {
-		return dateBasePath;
+	public File getFullTextIndexPath() {
+		return fullTextIndexPath;
+	}
+
+	public File getTransactionLogPath() {
+		return transactionLogPath;
+	}
+
+	public File getAppDataPath() {
+		return appDataPath;
 	}
 
 	public File getFileStorePath() {
 		return fileStorePath;
-	}
-
-	public File getMessageStorePath() {
-		return messageStorePath;
 	}
 
 	public File getLogStorePath() {
