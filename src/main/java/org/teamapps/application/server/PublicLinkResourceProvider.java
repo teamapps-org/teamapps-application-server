@@ -57,15 +57,36 @@ public class PublicLinkResourceProvider implements ResourceProvider {
 		return resourceByUuid.get(relativeResourcePath.replace("/", ""));
 	}
 
+	public String createStaticResource(String resourceName, Resource resource) {
+		String suffix = FilenameUtils.getExtension(resource.getName());
+		String linkName = resourceName + (StringUtils.isNotBlank(suffix) ? "." + suffix : "");
+		String link = SERVLET_PATH_PREFIX + linkName;
+		if (!resourceByUuid.containsKey(linkName)) {
+			resourceByUuid.put(linkName, resource);
+			LOGGER.info("Generating static link for resource {} --> {}, map-size: {}", resource.getName(), link, resourceByUuid.size());
+		}
+		return link;
+	}
+
+
+	public String createStaticResource(Resource resource) {
+		String suffix = FilenameUtils.getExtension(resource.getName());
+		String linkName = UUID.randomUUID() + (StringUtils.isNotBlank(suffix) ? "." + suffix : "");
+		resourceByUuid.put(linkName, resource);
+		String link = SERVLET_PATH_PREFIX + linkName;
+		LOGGER.info("Generating link for resource {} --> {}, map-size: {}", resource.getName(), link, resourceByUuid.size());
+		return link;
+	}
+
 	public String createLinkForResource(Resource resource, Duration availabilityDuration) {
 		String suffix = FilenameUtils.getExtension(resource.getName());
-		String linkName = UUID.randomUUID().toString() + (StringUtils.isNotBlank(suffix) ? "." + suffix : "");
+		String linkName = UUID.randomUUID() + (StringUtils.isNotBlank(suffix) ? "." + suffix : "");
 		resourceByUuid.put(linkName, resource);
 		SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
 			resourceByUuid.remove(linkName);
 		}, availabilityDuration.toSeconds(), TimeUnit.SECONDS);
 		String link = SERVLET_PATH_PREFIX + linkName;
-		LOGGER.info("Generating link for resource {} --> {}", resource.getName(), link);
+		LOGGER.info("Generating link for resource {} --> {}, map-size: {}", resource.getName(), link, resourceByUuid.size());
 		return link;
 	}
 }
