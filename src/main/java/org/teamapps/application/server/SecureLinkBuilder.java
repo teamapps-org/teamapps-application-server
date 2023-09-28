@@ -33,8 +33,8 @@ public class SecureLinkBuilder {
 	private final String fileSuffix;
 	private final ByteArrayResourceProvider byteArrayResourceProvider;
 	private final LastModifiedProvider lastModifiedProvider;
-	private final Map<String, Integer> idByKey = new ConcurrentHashMap<>();
-	private final Map<Integer, String> keyById = new ConcurrentHashMap<>();
+	private final Map<String, Long> idByKey = new ConcurrentHashMap<>();
+	private final Map<Long, String> keyById = new ConcurrentHashMap<>();
 
 	public SecureLinkBuilder(String linkPrefix, String fileSuffix, ByteArrayResourceProvider byteArrayResourceProvider, LastModifiedProvider lastModifiedProvider) {
 		this.linkPrefix = linkPrefix;
@@ -43,12 +43,14 @@ public class SecureLinkBuilder {
 		this.lastModifiedProvider = lastModifiedProvider;
 	}
 
-	public String createLink(int id) {
+	public String createLink(int entityId) {
+		long id = entityId + ((lastModifiedProvider.getLastModified(entityId) / 1000) * 100_000_000);
+
 		String key = keyById.get(id);
 		if (key != null) {
 			return linkPrefix + "/" + key;
 		} else {
-			if (byteArrayResourceProvider.getResource(id) == null) {
+			if (byteArrayResourceProvider.getResource(entityId) == null) {
 				return null;
 			} else {
 				String uuid = UUID.randomUUID().toString();
@@ -60,12 +62,15 @@ public class SecureLinkBuilder {
 	}
 
 	public Resource getResource(String key) {
-		Integer id = idByKey.get(key);
-		return id != null ?
-				new ByteArrayResource(byteArrayResourceProvider.getResource(id), key + "." + fileSuffix)
-						.lastModified(new Date(lastModifiedProvider.getLastModified(id)))
-						.expiring(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 90))
-				: null;
+		if (idByKey.containsKey(key)) {
+			long value = idByKey.get(key);
+			int id = (int) (value % 100_000_000);
+			return new ByteArrayResource(byteArrayResourceProvider.getResource(id), key + "." + fileSuffix)
+					.lastModified(new Date(lastModifiedProvider.getLastModified(id)))
+					.expiring(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 90));
+		} else {
+			return null;
+		}
 	}
 
 }
