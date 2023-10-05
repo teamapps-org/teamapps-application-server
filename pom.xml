@@ -4,7 +4,7 @@
 
     <groupId>org.teamapps</groupId>
     <artifactId>teamapps-application-server</artifactId>
-    <version>0.49</version>
+    <version>0.50-SNAPSHOT</version>
 
     <name>TeamApps Application Server</name>
     <description>Convenience application server for TeamApps applications</description>
@@ -48,7 +48,7 @@
         <url>https://github.com/teamapps-org/teamapps-application-server</url>
         <connection>scm:git:git@github.com:teamapps-org/teamapps-application-server.git</connection>
         <developerConnection>scm:git:git@github.com:teamapps-org/teamapps-application-server.git</developerConnection>
-        <tag>v0.49</tag>
+        <tag>HEAD</tag>
     </scm>
 
 
