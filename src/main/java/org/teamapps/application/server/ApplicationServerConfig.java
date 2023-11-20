@@ -59,6 +59,13 @@ public class ApplicationServerConfig {
 		return createPaths(teamAppsConfiguration, port, basePath, fileStorePath);
 	}
 
+	public static ApplicationServerConfig create(File basePath, File fileStorePath, int port) {
+		TeamAppsConfiguration teamAppsConfiguration = new TeamAppsConfiguration();
+		teamAppsConfiguration.setCommandBufferTotalSize(30_000_000);
+		teamAppsConfiguration.setCommandBufferLength(50_000);
+		return createPaths(teamAppsConfiguration, port, basePath, fileStorePath);
+	}
+
 
 	public static ApplicationServerConfig create(File basePath, TeamAppsConfiguration teamAppsConfiguration, int port) {
 		return createPaths(teamAppsConfiguration, port, basePath);
