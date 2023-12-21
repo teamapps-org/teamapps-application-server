@@ -30,7 +30,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <teamapps-version>0.9.183</teamapps-version>
-        <universal-db-version>0.6.15</universal-db-version>
+        <universal-db-version>0.6.16</universal-db-version>
     </properties>
 
     <distributionManagement>
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>org.teamapps</groupId>
             <artifactId>teamapps-media</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
 
         <dependency>
