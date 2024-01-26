@@ -30,7 +30,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <teamapps-version>0.9.184</teamapps-version>
-        <universal-db-version>0.6.16</universal-db-version>
+        <universal-db-version>0.6.17</universal-db-version>
     </properties>
 
     <distributionManagement>
@@ -535,6 +535,11 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>dev.samstevens.totp</groupId>
+            <artifactId>totp</artifactId>
+            <version>1.7.1</version>
+        </dependency>
 
     </dependencies>
 
