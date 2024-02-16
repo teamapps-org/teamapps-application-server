@@ -150,6 +150,10 @@
                     <artifactId>jakarta.xml.bind-api</artifactId>
                     <groupId>jakarta.xml.bind</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+                    <groupId>com.fasterxml.jackson.module</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -216,7 +220,7 @@
         <dependency>
             <groupId>org.teamapps</groupId>
             <artifactId>teamapps-reporting</artifactId>
-            <version>1.11</version>
+            <version>1.12-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -480,12 +484,6 @@
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-jaxb-annotations</artifactId>
             <version>2.16.1</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jakarta.xml.bind-api</artifactId>
-                    <groupId>jakarta.xml.bind</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -508,6 +506,13 @@
             <artifactId>jaxb-api</artifactId>
             <version>2.3.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+            <version>2.16.1</version>
+        </dependency>
+
 
         <dependency>
             <groupId>io.micrometer</groupId>
