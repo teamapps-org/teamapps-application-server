@@ -29,7 +29,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <teamapps-version>0.9.184</teamapps-version>
+        <teamapps-version>0.9.187</teamapps-version>
         <universal-db-version>0.6.18</universal-db-version>
     </properties>
 
@@ -142,7 +142,7 @@
         <dependency>
             <groupId>org.teamapps</groupId>
             <artifactId>teamapps-media</artifactId>
-            <version>1.10-SNAPSHOT</version>
+            <version>1.10</version>
             <exclusions>
                 <exclusion>
                     <artifactId>jackson-annotations</artifactId>
@@ -230,7 +230,7 @@
         <dependency>
             <groupId>org.teamapps</groupId>
             <artifactId>teamapps-reporting</artifactId>
-            <version>1.13-SNAPSHOT</version>
+            <version>1.13</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
