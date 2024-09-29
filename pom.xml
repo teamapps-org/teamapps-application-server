@@ -229,6 +229,18 @@
 
         <dependency>
             <groupId>org.teamapps</groupId>
+            <artifactId>teamapps-file-type-icons</artifactId>
+            <version>1.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.teamapps</groupId>
             <artifactId>teamapps-reporting</artifactId>
             <version>1.13</version>
             <exclusions>
