@@ -23,9 +23,8 @@ import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletContextEvent;
-import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.config.TeamAppsConfiguration;
@@ -227,6 +226,7 @@ public class ApplicationServer implements WebController, SessionManager {
 				servletContext.addServlet("ta-embedded", new ResourceProviderServlet(new EmbeddedResourceStore(serverConfig.getEmbeddedContentStorePath()))).addMapping(EmbeddedResourceStore.RESOURCE_PREFIX + "*");
 				servletContext.addServlet("ta-sec-links", new ResourceProviderServlet((servletPath, relativeResourcePath, httpSessionId) -> SecureResourceHandler.getInstance().getResource(servletPath, relativeResourcePath, httpSessionId))).addMapping(SecureResourceHandler.HANDLER_PREFIX + "*");
 				servletContext.addServlet("ta-public-link", new ResourceProviderServlet(PublicLinkResourceProvider.getInstance())).addMapping(PublicLinkResourceProvider.SERVLET_PATH_PREFIX + "*");
+				servletContext.addServlet("ta-api-servlet", ApiServlet.getInstance()).addMapping("/api/*");
 			}
 		});
 
