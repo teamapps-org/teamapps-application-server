@@ -10,6 +10,6 @@ import java.util.Map;
 
 public interface ApiHandler {
 
-	void handleApiRequest(List<String> apiPath, Map<String, String> parameterMap, HttpServletRequest request, HttpServletResponse response, boolean postRequest) throws ServletException, IOException;
+	void handleApiRequest(List<String> apiPath, Map<String, String> parameterMap, HttpServletRequest request, HttpServletResponse response, boolean postRequest, String contentType, byte[] bodyData) throws ServletException, IOException;
 
 }

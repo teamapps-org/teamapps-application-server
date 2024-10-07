@@ -4,6 +4,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -14,15 +15,15 @@ public class ApiServlet extends HttpServlet {
 
 	private Map<String, ApiHandler> handlerMap = new HashMap<>();
 
+	private ApiServlet() {
+	}
+
 	public static ApiServlet getInstance() {
 		return INSTANCE;
 	}
 
-	private ApiServlet() {
-	}
-
 	public void addHandler(String app, ApiHandler handler) {
-		handlerMap.put( app, handler);
+		handlerMap.put(app, handler);
 	}
 
 	@Override
@@ -50,9 +51,16 @@ public class ApiServlet extends HttpServlet {
 		req.getParameterNames().asIterator().forEachRemaining(name -> {
 			parameterMap.put(name, req.getParameter(name));
 		});
+
+		byte[] bodyData = null;
+		if (req.getHeader("transfer-encoding") != null || req.getHeader("content-length") != null) {
+			bodyData = IOUtils.toByteArray(req.getInputStream());
+		}
+		String contentType = req.getHeader("content-type");
+
 		ApiHandler apiHandler = handlerMap.get(appName);
 		if (apiHandler != null) {
-			apiHandler.handleApiRequest(apiPath, parameterMap, req, resp, post);
+			apiHandler.handleApiRequest(apiPath, parameterMap, req, resp, post, contentType, bodyData);
 		}
 	}
 }
