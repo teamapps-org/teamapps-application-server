@@ -23,8 +23,9 @@ import io.github.classgraph.AnnotationInfo;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
-import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamapps.config.TeamAppsConfiguration;
@@ -69,12 +70,12 @@ public class ApplicationServer implements WebController, SessionManager {
 		this.serverConfig = ApplicationServerConfig.create();
 	}
 
-	public ApplicationServer(File basePath) {
-		this.serverConfig = ApplicationServerConfig.create(basePath);
+	public ApplicationServer(ServerMode serverMode, File basePath) {
+		this.serverConfig = ApplicationServerConfig.create(serverMode, basePath);
 	}
 
-	public ApplicationServer(File basePath, TeamAppsConfiguration teamAppsConfiguration, int port) {
-		this.serverConfig = ApplicationServerConfig.create(basePath, teamAppsConfiguration, port);
+	public ApplicationServer(ServerMode serverMode, File basePath, TeamAppsConfiguration teamAppsConfiguration, int port) {
+		this.serverConfig = ApplicationServerConfig.create(serverMode, basePath, teamAppsConfiguration, port);
 	}
 
 	public SessionHandler updateSessionHandler(File jarFile) throws Exception {
@@ -185,7 +186,12 @@ public class ApplicationServer implements WebController, SessionManager {
 	}
 
 	public void start() throws Exception {
-		LOGGER.info("Start application server with base-path:{}, index-path:{}, file-store:{}, port:{}", serverConfig.getIndexPath().toPath(), serverConfig.getIndexPath().toPath(), serverConfig.getFileStorePath().toPath(), serverConfig.getPort());
+		LOGGER.info("START TEAMAPPS.ORG APPLICATION SERVER with: \nport: {}, \nserver-mode: {}, \npaths: \n\tindex-path: {}, \n\tfull-text-path: {}, \n\ttransaction-log-path: {}, \n\tfile-store-path: {}, \n\tapp-data-path: {}, \n\tembedded-content-path: {}, \n\twebserver-path: {}, \n\ttemp-path: {}",
+				serverConfig.getPort(), serverConfig.getServerMode(),
+				serverConfig.getIndexPath().toPath(), serverConfig.getFullTextIndexPath().toPath(), serverConfig.getTransactionLogPath().toPath(),
+				serverConfig.getFileStorePath().toPath(), serverConfig.getAppDataPath().toPath(), serverConfig.getEmbeddedContentStorePath().toPath(),
+				serverConfig.getWebserverStaticFilesPath().toPath(), serverConfig.getTempPath().toPath());
+
 		databaseManager = new DatabaseManager();
 		MessageStore<SystemLogEntry> logMessageStore = MessageStore.create(serverConfig.getLogStorePath(), "system-logs", SystemLogEntry.getMessageDecoder());
 		DatabaseLogAppender.startLogger(logMessageStore);

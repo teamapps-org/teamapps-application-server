@@ -19,12 +19,17 @@
  */
 package org.teamapps.application.server;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teamapps.config.TeamAppsConfiguration;
 
 import java.io.File;
+import java.lang.invoke.MethodHandles;
 
 public class ApplicationServerConfig {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+	private final ServerMode serverMode;
 	private final File indexPath;
 	private final File fullTextIndexPath;
 	private final File transactionLogPath;
@@ -33,45 +38,47 @@ public class ApplicationServerConfig {
 	private final File appDataPath;
 	private final File embeddedContentStorePath;
 	private final File webserverStaticFilesPath;
+	private final File tempPath;
 	private final TeamAppsConfiguration teamAppsConfiguration;
 	private final int port;
 
 	public static ApplicationServerConfig create() {
 		TeamAppsConfiguration teamAppsConfiguration = new TeamAppsConfiguration();
 		int port = 8080;
+		ServerMode serverMode = ServerMode.DEVELOPMENT;
 		File basePath = createPath(new File("./"), "server-data");
-		return createPaths(teamAppsConfiguration, port, basePath);
+		return createPaths(serverMode, teamAppsConfiguration, port, basePath);
 	}
 
-	public static ApplicationServerConfig create(File basePath) {
+	public static ApplicationServerConfig create(ServerMode serverMode, File basePath) {
 		TeamAppsConfiguration teamAppsConfiguration = new TeamAppsConfiguration();
 		teamAppsConfiguration.setCommandBufferTotalSize(30_000_000);
 		teamAppsConfiguration.setCommandBufferLength(50_000);
 		int port = 8080;
-		return createPaths(teamAppsConfiguration, port, basePath);
+		return createPaths(serverMode, teamAppsConfiguration, port, basePath);
 	}
 
-	public static ApplicationServerConfig create(File basePath, File fileStorePath) {
+	public static ApplicationServerConfig create(ServerMode serverMode, File basePath, File fileStorePath) {
 		TeamAppsConfiguration teamAppsConfiguration = new TeamAppsConfiguration();
 		teamAppsConfiguration.setCommandBufferTotalSize(30_000_000);
 		teamAppsConfiguration.setCommandBufferLength(50_000);
 		int port = 8080;
-		return createPaths(teamAppsConfiguration, port, basePath, fileStorePath);
+		return createPaths(serverMode, teamAppsConfiguration, port, basePath, fileStorePath);
 	}
 
-	public static ApplicationServerConfig create(File basePath, File fileStorePath, int port) {
+	public static ApplicationServerConfig create(ServerMode serverMode, File basePath, File fileStorePath, int port) {
 		TeamAppsConfiguration teamAppsConfiguration = new TeamAppsConfiguration();
 		teamAppsConfiguration.setCommandBufferTotalSize(30_000_000);
 		teamAppsConfiguration.setCommandBufferLength(50_000);
-		return createPaths(teamAppsConfiguration, port, basePath, fileStorePath);
+		return createPaths(serverMode, teamAppsConfiguration, port, basePath, fileStorePath);
 	}
 
 
-	public static ApplicationServerConfig create(File basePath, TeamAppsConfiguration teamAppsConfiguration, int port) {
-		return createPaths(teamAppsConfiguration, port, basePath);
+	public static ApplicationServerConfig create(ServerMode serverMode, File basePath, TeamAppsConfiguration teamAppsConfiguration, int port) {
+		return createPaths(serverMode, teamAppsConfiguration, port, basePath);
 	}
 
-	private static ApplicationServerConfig createPaths(TeamAppsConfiguration teamAppsConfiguration, int port, File basePath) {
+	private static ApplicationServerConfig createPaths(ServerMode serverMode, TeamAppsConfiguration teamAppsConfiguration, int port, File basePath) {
 		File indexPath = createPath(basePath, "index");
 		File fullTextIndexPath = createPath(basePath, "text");
 		File transactionLogPath = createPath(basePath, "transactions");
@@ -80,10 +87,11 @@ public class ApplicationServerConfig {
 		File appDataPath = createPath(basePath, "apps");
 		File embeddedContentStorePath = createPath(basePath, "embedded");
 		File webserverStaticFilesPath = createPath(basePath, "static");
-		return new ApplicationServerConfig(indexPath, fullTextIndexPath, transactionLogPath, fileStorePath, logStorePath, appDataPath, embeddedContentStorePath, webserverStaticFilesPath, teamAppsConfiguration, port);
+		File temp = createPath(basePath, "temp");
+		return new ApplicationServerConfig(serverMode, indexPath, fullTextIndexPath, transactionLogPath, fileStorePath, logStorePath, appDataPath, embeddedContentStorePath, webserverStaticFilesPath, temp, teamAppsConfiguration, port);
 	}
 
-	private static ApplicationServerConfig createPaths(TeamAppsConfiguration teamAppsConfiguration, int port, File basePath, File fileStorePath) {
+	private static ApplicationServerConfig createPaths(ServerMode serverMode, TeamAppsConfiguration teamAppsConfiguration, int port, File basePath, File fileStorePath) {
 		File indexPath = createPath(basePath, "index");
 		File fullTextIndexPath = createPath(basePath, "text");
 		File transactionLogPath = createPath(basePath, "transactions");
@@ -91,10 +99,12 @@ public class ApplicationServerConfig {
 		File appDataPath = createPath(basePath, "apps");
 		File embeddedContentStorePath = createPath(basePath, "embedded");
 		File webserverStaticFilesPath = createPath(basePath, "static");
-		return new ApplicationServerConfig(indexPath, fullTextIndexPath, transactionLogPath, fileStorePath, logStorePath, appDataPath, embeddedContentStorePath, webserverStaticFilesPath, teamAppsConfiguration, port);
+		File temp = createPath(basePath, "temp");
+		return new ApplicationServerConfig(serverMode, indexPath, fullTextIndexPath, transactionLogPath, fileStorePath, logStorePath, appDataPath, embeddedContentStorePath, webserverStaticFilesPath, temp, teamAppsConfiguration, port);
 	}
 
-	public ApplicationServerConfig(File indexPath, File fullTextIndexPath, File transactionLogPath, File fileStorePath, File logStorePath, File appDataPath, File embeddedContentStorePath, File webserverStaticFilesPath, TeamAppsConfiguration teamAppsConfiguration, int port) {
+	public ApplicationServerConfig(ServerMode serverMode, File indexPath, File fullTextIndexPath, File transactionLogPath, File fileStorePath, File logStorePath, File appDataPath, File embeddedContentStorePath, File webserverStaticFilesPath, File tempPath, TeamAppsConfiguration teamAppsConfiguration, int port) {
+		this.serverMode = serverMode;
 		this.indexPath = indexPath;
 		this.fullTextIndexPath = fullTextIndexPath;
 		this.transactionLogPath = transactionLogPath;
@@ -103,6 +113,7 @@ public class ApplicationServerConfig {
 		this.appDataPath = appDataPath;
 		this.embeddedContentStorePath = embeddedContentStorePath;
 		this.webserverStaticFilesPath = webserverStaticFilesPath;
+		this.tempPath = tempPath;
 		this.teamAppsConfiguration = teamAppsConfiguration;
 		this.port = port;
 	}
@@ -112,6 +123,10 @@ public class ApplicationServerConfig {
 		File path = new File(basePath, name);
 		path.mkdir();
 		return path;
+	}
+
+	public ServerMode getServerMode() {
+		return serverMode;
 	}
 
 	public File getIndexPath() {
@@ -144,6 +159,10 @@ public class ApplicationServerConfig {
 
 	public File getWebserverStaticFilesPath() {
 		return webserverStaticFilesPath;
+	}
+
+	public File getTempPath() {
+		return tempPath;
 	}
 
 	public TeamAppsConfiguration getTeamAppsConfiguration() {
