@@ -253,4 +253,8 @@ public class ApplicationServer implements WebController, SessionManager {
 	public TeamAppsCore getTeamAppsCore() {
 		return teamAppsCore;
 	}
+
+	public ApplicationServerConfig getServerConfig() {
+		return serverConfig;
+	}
 }
