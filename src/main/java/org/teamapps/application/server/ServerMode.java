@@ -26,6 +26,7 @@ public enum ServerMode {
 	TRAINING,
 	TEST,
 	DEVELOPMENT,
+	TRAINING_DATA_EXPORT,
 
 	;
 }
