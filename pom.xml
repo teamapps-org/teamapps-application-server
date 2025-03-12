@@ -29,7 +29,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <teamapps-version>0.9.196</teamapps-version>
+        <teamapps-version>0.9.197</teamapps-version>
         <universal-db-version>0.7.4</universal-db-version>
     </properties>
 
