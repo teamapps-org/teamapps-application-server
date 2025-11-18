@@ -29,7 +29,7 @@
         <maven.compiler.release>23</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <teamapps-version>0.9.202</teamapps-version>
-        <universal-db-version>0.7.4</universal-db-version>
+        <universal-db-version>0.7.5</universal-db-version>
     </properties>
 
     <scm>
@@ -650,7 +650,7 @@
             <plugin>
                 <groupId>org.teamapps</groupId>
                 <artifactId>teamapps-message-protocol-maven-plugin</artifactId>
-                <version>0.5</version>
+                <version>0.6</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
