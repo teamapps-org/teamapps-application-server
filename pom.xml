@@ -26,23 +26,11 @@
     </developers>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>23</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <teamapps-version>0.9.202</teamapps-version>
         <universal-db-version>0.7.4</universal-db-version>
     </properties>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
 
     <scm>
         <url>https://github.com/teamapps-org/teamapps-application-server</url>
@@ -152,7 +140,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.27.1</version>
+            <version>1.28.0</version>
         </dependency>
 
         <dependency>
@@ -345,19 +333,19 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-to-slf4j</artifactId>
-            <version>2.24.3</version>
+            <version>2.25.2</version>
         </dependency>
 
         <dependency>
             <groupId>pl.allegro.finance</groupId>
             <artifactId>tradukisto</artifactId>
-            <version>3.5.0</version>
+            <version>4.1.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-translate</artifactId>
-            <version>2.60.0</version>
+            <version>2.80.0</version>
             <exclusions>
                 <exclusion>
                     <artifactId>jackson-core</artifactId>
@@ -394,7 +382,7 @@
         <dependency>
             <groupId>nl.basjes.parse.useragent</groupId>
             <artifactId>yauaa</artifactId>
-            <version>7.30.0</version>
+            <version>7.32.0</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-lang3</artifactId>
@@ -422,31 +410,31 @@
         <dependency>
             <groupId>com.maxmind.db</groupId>
             <artifactId>maxmind-db</artifactId>
-            <version>3.1.1</version>
+            <version>4.0.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.googlecode.libphonenumber</groupId>
             <artifactId>libphonenumber</artifactId>
-            <version>9.0.2</version>
+            <version>9.0.18</version>
         </dependency>
 
         <dependency>
             <groupId>com.googlecode.libphonenumber</groupId>
             <artifactId>prefixmapper</artifactId>
-            <version>3.2</version>
+            <version>3.18</version>
         </dependency>
 
         <dependency>
             <groupId>com.googlecode.libphonenumber</groupId>
             <artifactId>carrier</artifactId>
-            <version>2.2</version>
+            <version>2.18</version>
         </dependency>
 
         <dependency>
             <groupId>com.googlecode.libphonenumber</groupId>
             <artifactId>geocoder</artifactId>
-            <version>3.2</version>
+            <version>3.18</version>
         </dependency>
 
 
@@ -459,7 +447,7 @@
         <dependency>
             <groupId>com.twilio.sdk</groupId>
             <artifactId>twilio</artifactId>
-            <version>10.7.1</version>
+            <version>11.0.3</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-io</artifactId>
@@ -507,7 +495,7 @@
         <dependency>
             <groupId>com.deepl.api</groupId>
             <artifactId>deepl-java</artifactId>
-            <version>1.9.0</version>
+            <version>1.12.0</version>
             <exclusions>
                 <exclusion>
                     <artifactId>gson</artifactId>
@@ -662,7 +650,7 @@
             <plugin>
                 <groupId>org.teamapps</groupId>
                 <artifactId>teamapps-message-protocol-maven-plugin</artifactId>
-                <version>0.4</version>
+                <version>0.5</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
@@ -672,9 +660,22 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <mavenExecutorId>forked-path</mavenExecutorId>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <tagNameFormat>v@{version}</tagNameFormat>
+                    <releaseProfiles>release</releaseProfiles>
+                    <pushChanges>true</pushChanges>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
-
 
 
     <profiles>
@@ -683,34 +684,21 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-release-plugin</artifactId>
-                        <version>2.5.3</version>
-                        <configuration>
-                            <!-- see https://docs.sonatype.org/display/Repository/How+To+Generate+PGP+Signatures+With+Maven -->
-                            <mavenExecutorId>forked-path</mavenExecutorId>
-                            <useReleaseProfile>false</useReleaseProfile>
-                            <!--<arguments>-Psonatype-oss-release -D${gpg.arguments}</arguments>-->
-                            <autoVersionSubmodules>true</autoVersionSubmodules>
-                            <tagNameFormat>v@{version}</tagNameFormat>
-                            <releaseProfiles>javadoc-jar,sources-jar,license-handling</releaseProfiles>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.13</version>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.9.0</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                            <deploymentName>${project.name} ${project.version}</deploymentName>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
                         </configuration>
                     </plugin>
+
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>3.2.8</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -721,50 +709,43 @@
                             </execution>
                         </executions>
                     </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.3.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.12.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <doclint>none</doclint>
+                            <quiet>true</quiet>
+                        </configuration>
+                    </plugin>
+
                 </plugins>
             </build>
         </profile>
 
-        <profile>
-            <id>javadoc-jar</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.0.1</version>
-                        <executions>
-                            <execution>
-                                <id>generate-javadoc-jar</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>sources-jar</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>3.0.1</version>
-                        <executions>
-                            <execution>
-                                <id>generate-sources-jar</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <profile>
             <id>license-handling</id>
             <build>
@@ -772,7 +753,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>license-maven-plugin</artifactId>
-                        <version>1.19</version>
+                        <version>2.7.0</version>
                         <executions>
                             <execution>
                                 <id>download-licenses</id>
@@ -795,14 +776,12 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <projectName>TeamApps Application Server</projectName>
+                            <projectName>${project.name}</projectName>
                             <organizationName>TeamApps.org</organizationName>
                             <inceptionYear>2020</inceptionYear>
                             <licenseName>apache_v2</licenseName>
-                            <processStartTag>========================LICENSE_START=================================
-                            </processStartTag>
-                            <processEndTag>=========================LICENSE_END==================================
-                            </processEndTag>
+                            <processStartTag>========================LICENSE_START=================================</processStartTag>
+                            <processEndTag>=========================LICENSE_END==================================</processEndTag>
                             <sectionDelimiter>---</sectionDelimiter>
                             <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
                             <canUpdateCopyright>true</canUpdateCopyright>
