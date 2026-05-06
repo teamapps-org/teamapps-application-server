@@ -62,6 +62,17 @@ public class ApiServlet extends HttpServlet {
 		}
 		String[] parts = pathInfo.split("/");
 		String appName = parts[1];
+		if (parts.length > 2 && "webhook".equals(parts[2])) {
+			ApiHandler apiHandler = handlerMap.get(appName);
+			if (apiHandler != null) {
+				if (post) {
+					apiHandler.webhookPost(req, resp);
+				} else {
+					apiHandler.webhookGet(req, resp);
+				}
+			}
+			return;
+		}
 		List<String> apiPath = new ArrayList<>();
 		if (parts.length > 2) {
 			apiPath.addAll(Arrays.asList(parts).subList(2, parts.length));

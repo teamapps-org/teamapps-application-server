@@ -28,8 +28,8 @@
     <properties>
         <maven.compiler.release>23</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <teamapps-version>0.9.202</teamapps-version>
-        <universal-db-version>0.7.5</universal-db-version>
+        <teamapps-version>0.9.208</teamapps-version>
+        <universal-db-version>0.7.6-SNAPSHOT</universal-db-version>
     </properties>
 
     <scm>
@@ -133,6 +133,22 @@
                 <exclusion>
                     <artifactId>pdfbox-tools</artifactId>
                     <groupId>org.apache.pdfbox</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>kotlin-reflect</artifactId>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>kotlin-stdlib</artifactId>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>kotlin-stdlib-jdk8</artifactId>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>okio</artifactId>
+                    <groupId>com.squareup.okio</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -489,6 +505,10 @@
                     <artifactId>httpcore</artifactId>
                     <groupId>org.apache.httpcomponents</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>gson</artifactId>
+                    <groupId>com.google.code.gson</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -654,6 +674,14 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>com.openai</groupId>
+            <artifactId>openai-java</artifactId>
+            <version>4.6.1</version>
+        </dependency>
+
+
 
     </dependencies>
 

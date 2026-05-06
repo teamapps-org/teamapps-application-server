@@ -31,4 +31,11 @@ public interface ApiHandler {
 
 	void handleApiRequest(List<String> apiPath, Map<String, String> parameterMap, HttpServletRequest request, HttpServletResponse response, boolean postRequest, String contentType, byte[] bodyData) throws ServletException, IOException;
 
+	default void webhookGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+	}
+
+	default void webhookPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+	}
 }
