@@ -28,7 +28,7 @@
     <properties>
         <maven.compiler.release>23</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <teamapps-version>0.9.208</teamapps-version>
+        <teamapps-version>0.9.208-SNAPSHOT</teamapps-version>
         <universal-db-version>0.7.6-SNAPSHOT</universal-db-version>
     </properties>
 
